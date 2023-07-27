@@ -1,0 +1,19 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ *
+ * SPDX-License-Identifier: Unlicense
+ */
+
+// pub(crate) const              SYMBOLIC: &str = "@APP@-@RANDOM@-symbolic";
+   pub(crate) const APPLICATIONS_GRAPHICS: &str = "applications-graphics-@RANDOM@-symbolic";
+   pub(crate) const         BRUSH_MONITOR: &str = "brush-monitor-@RANDOM@-symbolic";
+   pub(crate) const           DOCK_BOTTOM: &str = "dock-bottom-@RANDOM@-symbolic";
+// pub(crate) const         DOCUMENT_EDIT: &str = "document-edit-@RANDOM@-symbolic";
+   pub(crate) const               GO_NEXT: &str = "go-next-@RANDOM@-symbolic";
+   pub(crate) const           GO_PREVIOUS: &str = "go-previous-@RANDOM@-symbolic";
+   pub(crate) const              LIST_ADD: &str = "list-add-@RANDOM@-symbolic";
+   pub(crate) const         OBJECT_SELECT: &str = "object-select-@RANDOM@-symbolic";
+   pub(crate) const             OPEN_BOOK: &str = "open-book-@RANDOM@-symbolic";
+   pub(crate) const             OPEN_MENU: &str = "open-menu-@RANDOM@-symbolic";
+   pub(crate) const              SETTINGS: &str = "settings-@RANDOM@-symbolic";
+   pub(crate) const            USER_TRASH: &str = "user-trash-@RANDOM@-symbolic";

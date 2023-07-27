@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Sidebery'
+ type = 'text-files'
+about = """
+A JSON file that configures the extension <a href='https://github.com/mbnuqw/sidebery'>Sidebery</a>.
+
+You can import it from the extension, but be careful about \
+overwriting your current preferences with the ones in this map.
+
+The options are hard coded to my preferences, so you might not like it. \
+If Aquarelle comes to support enumerated options, I could map them accordingly. \
+If you want other options you can fork this map into your own namespace.
+"""
+
+displaying = '`${arrangement} – ${scheme("main")}`'
+    naming = '`${arrangement} – ${scheme("main")}`'
+ extension = '.json'
+
+[schemes]
+main = { name = 'Main Color Scheme' }
+
+[options]
+accent = { default.set = 'any', name = 'Accent Color Set' }
+
+[suggested-paths]
+default = { default = 'sidebery' }

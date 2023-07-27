@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Wine'
+ type = 'text-files'
+about = 'A registry file for the classic colors of <a href="https://www.winehq.org">Wine</a>.'
+
+   naming = '`${arrangement} – ${scheme("main")}`'
+extension = '.reg'
+
+[schemes]
+main = { name = 'Main Color Scheme' }
+
+[options]
+accent = { default.set = 'any', name = 'Accent Color Set' }
+
+[options.shadows]
+   name = 'Use shadows instead of borders (dark theme only)'
+default = false
+
+[suggested-paths]
+default = { default = 'wine' }

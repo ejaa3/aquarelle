@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Firefox GNOME Theme'
+ type = 'text-file'
+about = 'Style sheet that remaps <a href="https://github.com/rafaelmardojai/firefox-gnome-theme">Firefox GNOME theme</a> colors.'
+
+[schemes]
+main = { name = 'Main Color Scheme' }
+
+[options]
+ accent = { default.set = 'any', name = 'Accent Color Set' }
+private = { default.set = 'magenta', name = 'Private Color Set' }
+
+[options.dim-header]
+   name = 'Inactive header bar colors'
+  about = 'Use another color for the header bar when the window is out of focus'
+default = true
+
+[suggested-paths]
+default = { default = 'firefox/customChrome.css' }
+flatpak = { home = '.var/app/org.mozilla.firefox/.mozilla/aquarelle/customChrome.css' }
+user    = { home = '.mozilla/aquarelle/customChrome.css' }

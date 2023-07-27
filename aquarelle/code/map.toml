@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Visual Studio Code'
+ type = 'directories'
+about = 'A theme for the source code editor <a href="https://code.visualstudio.com">Visual Studio Code</a>.'
+
+displaying = '`${arrangement} – ${scheme("main")}`'
+
+naming = '''
+	let scheme = "";
+	
+	for word in `${scheme("main")}`.split()
+	{ scheme += `${word.to_lower()}-` }
+	
+	if scheme.pop() == () { arrangement_id }
+	else { `${arrangement_id}.${scheme}` }
+'''
+
+subdirectories = ['.vscode']
+
+[options]
+accent   = { default.set = 'any' , name = 'Accent Color Set' }
+emphasis = { default.set = 'cyan', name = 'Emphasis Color Set' }
+devel    = { default     = false , name = 'Development Mode' }
+
+# TODO [options.contrast-border]
+#    name = "TODO"
+#   about = "TODO"
+# default = -2.0
+
+[options.dim-border]
+   name = 'Inactive border color'
+  about = 'Use another color for the window border when it is out of focus'
+default = true
+
+[options.dim-header]
+   name = 'Inactive title bar color'
+  about = 'Use another color for the title bar when the window is out of focus'
+default = true
+
+[options.semantic-highlighting]
+   name = 'Semantic Highlighting'
+default = true
+
+[options.terminal-bold]
+   name = 'Swaps the roles “like” and “area” for terminal emphasis colors'
+  about = 'It is better if the bold text uses intense colors'
+default = true
+
+[schemes]
+common = { name = 'Common', fallback = 'main' }
+main   = { name = 'Main' }
+
+activity-bar = { fallback = 'main', name = 'Activity Bar' }
+menu         = { fallback = 'main', name = 'Menu' }
+status-bar   = { fallback = 'main', name = 'Status Bar' }
+terminal     = { fallback = 'main', name = 'Terminal' }
+
+breadcrumb = { fallback = 'common', name = 'Breacrumb' }
+editor     = { fallback = 'common', name = 'Editor' }
+side-bar   = { fallback = 'common', name = 'Side Bar' }
+tab-bar    = { fallback = 'common', name = 'Tab Bar' }
+title-bar  = { fallback = 'common', name = 'Title Bar' }
+
+notification = { fallback = 'editor', name = 'Notification' }
+welcome-page = { fallback = 'editor', name = 'Welcome Page' }
+
+[suggested-paths]
+vscode-oss       = { home = '.vscode-oss/extensions' }
+vscodium-flatpak = { home = '.var/app/com.vscodium.codium/data/codium/extensions' }
+
+[files]
+manifest = { type = 'text', name = 'package.json' }
+theme    = { type = 'text', name = 'color-theme.json' }
+launch   = { type = 'text', name = 'launch.json', at = 1 }

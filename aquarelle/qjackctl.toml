@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'QjackCtl'
+ type = 'text-files'
+about = '''
+An INI file that provides a color scheme for <a href='https://qjackctl.sourceforge.io'>QjackCtl</a>.
+'''
+
+displaying = '`${arrangement} – ${scheme("main")}`'
+    naming = '`${arrangement} – ${scheme("main")}`'
+ extension = '.conf'
+
+[schemes]
+main = { name = 'Main Color Scheme' }
+
+[options]
+accent = { default.set = 'any', name = 'Accent Color Set' }
+
+[suggested-paths]
+default = { default = 'qjackctl' }

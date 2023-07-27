@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Unlicense
+
+# Based on https://ethanschoonover.com/solarized/
+
+ name = 'Solarized'
+about = 'Precision colors for machines and people'
+
+[schemes.dark]
+   name = 'Solarized Dark'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0x002B36FF, area = 0x002B36FF, text = 0x839496FF }
+  upper = { like = 0x073642FF, area = 0x073642FF, text = 0x93A1A1FF }
+    red = { like = 0xCB4B16FF, area = 0xCB4B16FF, text = 0x002B36FF }
+ yellow = { like = 0xB58900FF, area = 0xB58900FF, text = 0x002B36FF }
+  green = { like = 0x859900FF, area = 0x859900FF, text = 0x002B36FF }
+   cyan = { like = 0x2AA198FF, area = 0x2AA198FF, text = 0x002B36FF }
+   blue = { like = 0x268BD2FF, area = 0x268BD2FF, text = 0x002B36FF }
+magenta = { like = 0xD33682FF, area = 0xD33682FF, text = 0x002B36FF }
+    any = { like = 0x6C71C4FF, area = 0x6C71C4FF, text = 0x002B36FF }
+
+[schemes.light]
+   name = 'Solarized Light'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0xEEE8D5FF, area = 0xFDF6E3FF, text = 0x586E75FF }
+  upper = { like = 0xFDF6E3FF, area = 0xEEE8D5FF, text = 0x657B83FF }
+    red = { like = 0xCB4B16FF, area = 0xCB4B16FF, text = 0xFDF6E3FF }
+ yellow = { like = 0xB58900FF, area = 0xB58900FF, text = 0xFDF6E3FF }
+  green = { like = 0x859900FF, area = 0x859900FF, text = 0xFDF6E3FF }
+   cyan = { like = 0x2AA198FF, area = 0x2AA198FF, text = 0xFDF6E3FF }
+   blue = { like = 0x268BD2FF, area = 0x268BD2FF, text = 0xFDF6E3FF }
+magenta = { like = 0xD33682FF, area = 0xD33682FF, text = 0xFDF6E3FF }
+    any = { like = 0x6C71C4FF, area = 0x6C71C4FF, text = 0xFDF6E3FF }
+
+# NOTE red (0xDC322FFF) not used

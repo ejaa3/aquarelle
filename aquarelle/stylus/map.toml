@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Stylus'
+ type = 'text-files'
+about = """
+An experimental LESS file for the <a href='https://add0n.com/stylus.html'>Stylus</a> \
+extension designed for some websites.
+"""
+
+displaying = '`${arrangement} – ${scheme("main")}`'
+    naming = '`${arrangement} – ${scheme("main")}`'
+ extension = '.less'
+
+[schemes]
+main = { name = 'Main Color Scheme' }
+
+[options]
+accent = { name = 'Accent Color Set', default.set = 'any' }
+
+[suggested-paths]
+default = { default = 'stylus' }

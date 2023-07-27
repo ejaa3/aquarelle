@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Unlicense
+
+ name = 'Neon Cake Examples'
+about = 'Theme to exemplify Neon Cake dynamic scheme'
+
+[schemes]
+     dark.request = { scheme = 'neon-cake' }
+    light.request = { scheme = 'neon-cake' }
+light-old.request = { scheme = 'neon-cake' }
+   purple.request = { scheme = 'neon-cake' }
+
+[schemes.dark.options]
+name = 'Neon Cake Dark'
+
+[schemes.purple.options]
+    hue = 300.0
+   name = 'Neon Cake Dark Purple'
+ rotate = 30.0
+shading = 12.0
+surface-chroma    = 16.0
+surface-luminance = 12.0
+   text-chroma    = 32.0
+
+[schemes.light.options]
+name = 'Neon Cake Light'
+surface-luminance = 82.5
+   text-luminance = 35.0
+overall-chroma    = 64.0
+overall-luminance = 42.5
+
+[schemes.light-old.options]
+name = 'Neon Cake Light (Old)'
+surface-luminance = 82.5
+   text-luminance = 35.0
+overall-luminance = 35.0

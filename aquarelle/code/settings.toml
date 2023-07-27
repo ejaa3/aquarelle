@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Visual Studio Code Settings'
+ type = 'text-file'
+about = """
+A JSON piece that configures the following extensions for \
+<a href='https://code.visualstudio.com'>Visual Studio Code</a>:
+
+– <a href='https://github.com/StarlaneStudios/vscode-comment-anchors'>Comment Anchors</a>
+– <a href='https://github.com/James-Yu/LaTeX-Workshop'>LaTeX Workshop</a>
+"""
+
+[schemes]
+editor = { name = 'Editor Color Scheme' }
+
+[suggested-paths]
+  default = {   default = 'vscode-settings.json' }
+temporary = { temporary = 'vscode-settings.json' }

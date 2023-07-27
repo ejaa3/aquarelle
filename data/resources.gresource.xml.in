@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+	
+	SPDX-License-Identifier: Unlicense
+-->
+<gresources>
+	<gresource prefix="/@APP_PATH@/">
+		<file compressed="true" preprocess="xml-stripblanks" alias="gtk/help-overlay.ui">shortcuts-window.ui</file>
+		<file>style.css</file>
+	</gresource>
+	<gresource prefix="/@APP_PATH@/icons/scalable/apps/">
+		<file preprocess="xml-stripblanks" alias="@APP@-@RANDOM@-symbolic.svg">icons/app/io.github.ejaa3.Aquarelle-symbolic.svg</file>
+	</gresource>
+	<gresource prefix="/@APP_PATH@/icons/scalable/actions/">
+		<file preprocess="xml-stripblanks" alias="applications-graphics-@RANDOM@-symbolic.svg">icons/applications-graphics-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="brush-monitor-@RANDOM@-symbolic.svg">icons/brush-monitor-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="dock-bottom-@RANDOM@-symbolic.svg">icons/dock-bottom-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="document-edit-@RANDOM@-symbolic.svg">icons/document-edit-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="go-next-@RANDOM@-symbolic-rtl.svg">icons/go-previous-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="go-next-@RANDOM@-symbolic.svg">icons/go-next-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="go-previous-@RANDOM@-symbolic-rtl.svg">icons/go-next-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="go-previous-@RANDOM@-symbolic.svg">icons/go-previous-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="list-add-@RANDOM@-symbolic.svg">icons/list-add-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="object-select-@RANDOM@-symbolic.svg">icons/object-select-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="open-book-@RANDOM@-symbolic.svg">icons/open-book-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="open-menu-@RANDOM@-symbolic.svg">icons/open-menu-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="settings-@RANDOM@-symbolic.svg">icons/settings-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="user-trash-@RANDOM@-symbolic.svg">icons/user-trash-symbolic.svg</file>
+	</gresource>
+</gresources>

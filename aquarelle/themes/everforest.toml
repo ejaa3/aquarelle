@@ -1,0 +1,107 @@
+# SPDX-FileCopyrightText: 2019 sainnhe <i@sainnhe.dev>
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
+# Based on https://github.com/sainnhe/everforest
+
+ name = 'Everforest'
+about = 'A green but warm-toned theme for low contrast'
+
+#     4        5     visual    red      green    blue    yellow
+# 0x4C555B 0x53605C 0x503946 0x4E3E43 0x404D44 0x394F5A 0x4A4940 hard
+# 0x525C62 0x596763 0x573E4C 0x544247 0x445349 0x3B5360 0x504F45 medium
+# 0x576268 0x5F6D67 0x5D4251 0x59454B 0x48584D 0x3D5665 0x55544A soft
+
+[schemes.hard-dark]
+   name = 'Everforest Dark (Hard)'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0x323C41FF, area = 0x2B3339FF, text = 0x9DA9A0FF }
+  upper = { like = 0x445055FF, area = 0x3A454AFF, text = 0xD3C6AAFF }
+    red = { like = 0xE67E80FF, area = 0xE67E80FF, text = 0x2B3339FF }
+    any = { like = 0xE69875FF, area = 0xE69875FF, text = 0x2B3339FF }
+ yellow = { like = 0xDBBC7FFF, area = 0xDBBC7FFF, text = 0x2B3339FF }
+  green = { like = 0xA7C080FF, area = 0xA7C080FF, text = 0x2B3339FF }
+   cyan = { like = 0x83C092FF, area = 0x83C092FF, text = 0x2B3339FF }
+   blue = { like = 0x7FBBB3FF, area = 0x7FBBB3FF, text = 0x2B3339FF }
+magenta = { like = 0xD699B6FF, area = 0xD699B6FF, text = 0x2B3339FF }
+
+[schemes.medium-dark]
+   name = 'Everforest Dark (Medium)'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0x374247FF, area = 0x2F383EFF, text = 0x9DA9A0FF }
+  upper = { like = 0x4A555BFF, area = 0x404C51FF, text = 0xD3C6AAFF }
+    red = { like = 0xE67E80FF, area = 0xE67E80FF, text = 0x2F383EFF }
+    any = { like = 0xE69875FF, area = 0xE69875FF, text = 0x2F383EFF }
+ yellow = { like = 0xDBBC7FFF, area = 0xDBBC7FFF, text = 0x2F383EFF }
+  green = { like = 0xA7C080FF, area = 0xA7C080FF, text = 0x2F383EFF }
+   cyan = { like = 0x83C092FF, area = 0x83C092FF, text = 0x2F383EFF }
+   blue = { like = 0x7FBBB3FF, area = 0x7FBBB3FF, text = 0x2F383EFF }
+magenta = { like = 0xD699B6FF, area = 0xD699B6FF, text = 0x2F383EFF }
+
+[schemes.soft-dark]
+   name = 'Everforest Dark (Soft)'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0x3C474DFF, area = 0x323D43FF, text = 0x9DA9A0FF }
+  upper = { like = 0x505A60FF, area = 0x465258FF, text = 0xD3C6AAFF }
+    red = { like = 0xE67E80FF, area = 0xE67E80FF, text = 0x323D43FF }
+    any = { like = 0xE69875FF, area = 0xE69875FF, text = 0x323D43FF }
+ yellow = { like = 0xDBBC7FFF, area = 0xDBBC7FFF, text = 0x323D43FF }
+  green = { like = 0xA7C080FF, area = 0xA7C080FF, text = 0x323D43FF }
+   cyan = { like = 0x83C092FF, area = 0x83C092FF, text = 0x323D43FF }
+   blue = { like = 0x7FBBB3FF, area = 0x7FBBB3FF, text = 0x323D43FF }
+magenta = { like = 0xD699B6FF, area = 0xD699B6FF, text = 0x323D43FF }
+
+#     3        4        5     visual    red      green    blue    yellow
+# 0xE9E8D2 0xE1DDCB 0xBEC5B2 0xEDF0CD 0xFCE5DC 0xF1F3D4 0xEAF2EB 0xFBEFD0 hard
+# 0xE4E1CD 0xDFDBC8 0xBDC3AF 0xEAEDC8 0xFBE3DA 0xF0F1D2 0xE9F0E9 0xFAEDCD medium
+# 0xE1DDC9 0xDCD8C4 0xB9C0AB 0xE6E9C4 0xF9E0D4 0xEDEECE 0xE7EDE5 0xF6E9C9 soft
+
+[schemes.hard-light]
+   name = 'Everforest Light (Hard)'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0xF7F4E0FF, area = 0xFFF9E8FF, text = 0x829181FF }
+  upper = { like = 0xFFF9E8FF, area = 0xF0EED9FF, text = 0x5C6A72FF }
+    red = { like = 0xF85552FF, area = 0xF85552FF, text = 0xFFF9E8FF }
+    any = { like = 0xF57D26FF, area = 0xF57D26FF, text = 0xFFF9E8FF }
+ yellow = { like = 0xDFA000FF, area = 0xDFA000FF, text = 0xFFF9E8FF }
+  green = { like = 0x8DA101FF, area = 0x8DA101FF, text = 0xFFF9E8FF }
+   cyan = { like = 0x35A77CFF, area = 0x35A77CFF, text = 0xFFF9E8FF }
+   blue = { like = 0x3A94C5FF, area = 0x3A94C5FF, text = 0xFFF9E8FF }
+magenta = { like = 0xDF69BAFF, area = 0xDF69BAFF, text = 0xFFF9E8FF }
+
+[schemes.medium-light]
+   name = 'Everforest Light (Medium)'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0xF3EFDAFF, area = 0xFDF6E3FF, text = 0x829181FF }
+  upper = { like = 0xFDF6E3FF, area = 0xEDEAD5FF, text = 0x5C6A72FF }
+    red = { like = 0xF85552FF, area = 0xF85552FF, text = 0xFDF6E3FF }
+    any = { like = 0xF57D26FF, area = 0xF57D26FF, text = 0xFDF6E3FF }
+ yellow = { like = 0xDFA000FF, area = 0xDFA000FF, text = 0xFDF6E3FF }
+  green = { like = 0x8DA101FF, area = 0x8DA101FF, text = 0xFDF6E3FF }
+   cyan = { like = 0x35A77CFF, area = 0x35A77CFF, text = 0xFDF6E3FF }
+   blue = { like = 0x3A94C5FF, area = 0x3A94C5FF, text = 0xFDF6E3FF }
+magenta = { like = 0xDF69BAFF, area = 0xDF69BAFF, text = 0xFDF6E3FF }
+
+[schemes.soft-light]
+   name = 'Everforest Light (Soft)'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0xEFEAD4FF, area = 0xF8F0DCFF, text = 0x829181FF }
+  upper = { like = 0xF8F0DCFF, area = 0xE9E5CFFF, text = 0x5C6A72FF }
+    red = { like = 0xF85552FF, area = 0xF85552FF, text = 0xF8F0DCFF }
+    any = { like = 0xF57D26FF, area = 0xF57D26FF, text = 0xF8F0DCFF }
+ yellow = { like = 0xDFA000FF, area = 0xDFA000FF, text = 0xF8F0DCFF }
+  green = { like = 0x8DA101FF, area = 0x8DA101FF, text = 0xF8F0DCFF }
+   cyan = { like = 0x35A77CFF, area = 0x35A77CFF, text = 0xF8F0DCFF }
+   blue = { like = 0x3A94C5FF, area = 0x3A94C5FF, text = 0xF8F0DCFF }
+magenta = { like = 0xDF69BAFF, area = 0xDF69BAFF, text = 0xF8F0DCFF }
+
+#   grey0    grey1  [   statuslines{1,2,3}   ] (: grey2 :)
+# 0x7A8478 0x859289 0xA7C080 0xD3C6AA 0xE67E80 dark
+# 0xA6B0A0 0x939F91 0x93B259 0x708089 0xE66868 light

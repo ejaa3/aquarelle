@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Unlicense
+
+.cargo/
+.vscode/
+data/resources.gresource.xml
+examples/
+po/aquarelle.pot
+src/bin/gui/icons.rs
+src/config.rs

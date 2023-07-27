@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: CC-BY-SA-4.0
+
+[book]
+title = 'Theming with Aquarelle'
+authors = ['Eduardo Javier Alvarado Aarón']
+description = 'The Aquarelle Book'
+multilingual = false
+language = 'en'
+src = 'book'
+
+[build]
+build-dir = 'build/book'

@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'KDE Syntax Highlighting'
+ type = 'text-files'
+about = """
+A JSON file that provides a \
+<a href='https://docs.kde.org/trunk5/en/kate/katepart/color-themes.html'>color theme</a> for KDE's \
+<a href='https://api.kde.org/frameworks/syntax-highlighting/html/index.html'>Syntax Highlighting</a> \
+framework, used by applications such as KWrite, Kate, and KDevelop.
+"""
+
+displaying = 'arrangement'
+    naming = 'arrangement_id'
+ extension = '.theme'
+
+[schemes]
+main = { name = 'Main Color Scheme' }
+
+[suggested-paths]
+default = { default = 'syntax_highlighting' }
+ user-1 = { data = 'org.kde.syntax-highlighting/themes' }
+ user-2 = { home = '.local/share/org.kde.syntax-highlighting/themes' }

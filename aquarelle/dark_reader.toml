@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Dark Reader'
+ type = 'text-files'
+about = """
+A JSON file that configures the extension \
+<a href='https://github.com/darkreader/darkreader'>Dark Reader</a>.
+
+You can import it from the extension, but be careful about
+overwriting your current preferences with the ones in this map.
+"""
+
+displaying = '`${arrangement} – ${scheme("main")}`'
+    naming = '`${arrangement} – ${scheme("main")}`'
+ extension = '.json'
+
+[schemes]
+main = { name = 'Main Color Scheme' }
+
+[options]
+accent = { default.set = 'any', name = 'Accent Color Set' }
+
+detection  = { default = false, name = 'Detect Dark Theme' }
+menus      = { default = false, name = 'Enable Context Menus' }
+sync       = { default = true , name = 'Sync Settings' }
+sync-fixed = { default = false, name = 'Sync Fixed Sites' }
+theme      = { default = false, name = 'Change Browser Theme' }
+
+[options.exclusions]
+   name = 'Site exclusion list (domains in quotes separated by commas)'
+  about = 'No comma at end, e.g. "web.whatsapp.com", "www.google.com"'
+default = '"web.whatsapp.com"'
+
+[options.inclusions]
+   name = 'Site inclusion list (like the exclusions)'
+  about = 'For sites disabled by default, e.g. "vscodethemes.com"'
+default = ''
+
+[options.listed-only]
+   name = 'Apply to listed only'
+  about = 'The exclusion list becomes a white list'
+default = false
+
+[suggested-paths]
+default = { default = 'dark_reader' }

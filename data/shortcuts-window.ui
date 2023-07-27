@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+	
+	SPDX-License-Identifier: Unlicense
+-->
+<interface>
+	<object class="GtkShortcutsWindow" id="help_overlay">
+		<property name="modal">True</property>
+		<child>
+			<object class="GtkShortcutsSection">
+				<property name="section-name">shortcuts</property>
+				<property name="max-height">10</property>
+				<child>
+					<object class="GtkShortcutsGroup">
+						<property name="title" translatable="yes">General</property>
+						<child>
+							<object class="GtkShortcutsShortcut">
+								<property name="accelerator">&lt;Alt&gt;</property>
+								<property name="title" translatable="yes">Show mnemonics</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkShortcutsShortcut">
+								<property name="accelerator">F10</property>
+								<property name="title" translatable="yes">Show menu</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkShortcutsShortcut">
+								<property name="action-name">win.show-log</property>
+								<property name="title" translatable="yes">Show log</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkShortcutsShortcut">
+								<property name="action-name">win.clear-log</property>
+								<property name="title" translatable="yes">Clear log</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkShortcutsShortcut">
+								<property name="action-name">window.close</property>
+								<property name="title" translatable="yes">Close window</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkShortcutsGroup">
+								<property name="title" translatable="yes">Show</property>
+								<property name="view">themes</property>
+								<child>
+									<object class="GtkShortcutsShortcut">
+										<property name="action-name">win.show-schemes::All</property>
+										<property name="title" translatable="yes">All schemes</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkShortcutsShortcut">
+										<property name="action-name">win.show-schemes::Light</property>
+										<property name="title" translatable="yes">Light schemes</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkShortcutsShortcut">
+										<property name="action-name">win.show-schemes::Dark</property>
+										<property name="title" translatable="yes">Dark schemes</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkShortcutsGroup">
+								<property name="title" translatable="yes">Appearance</property>
+								<property name="view">themes</property>
+								<child>
+									<object class="GtkShortcutsShortcut">
+										<property name="action-name">win.appearance::Default</property>
+										<property name="title" translatable="yes">All schemes</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkShortcutsShortcut">
+										<property name="action-name">win.appearance::Selected</property>
+										<property name="title" translatable="yes">Selected scheme</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkShortcutsShortcut">
+										<property name="action-name">win.appearance::NoChange</property>
+										<property name="title" translatable="yes">Do not change</property>
+									</object>
+								</child>
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+		</child>
+	</object>
+</interface>

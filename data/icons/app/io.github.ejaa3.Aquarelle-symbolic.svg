@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+	
+	SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
+	<path fill="#2e3434" d="M3 1A2 2 0 0 0 1 3L1 5L3 5L13 5L15 5L15 3A2 2 0 0 0 13 1L3 1zM13 2.25A0.75 0.75 0 0 1 13.75 3A0.75 0.75 0 0 1 13 3.75A0.75 0.75 0 0 1 12.25 3A0.75 0.75 0 0 1 13 2.25zM1 13A2 2 0 0 0 3 15L13 15A2 2 0 0 0 15 13L11 13L5 13L1 13z"/>
+	<rect fill="#2e3434" fill-opacity="0.9" width="6" height="2" x="5" y="8"/>
+	<rect fill="#2e3434" fill-opacity="0.8" width="4" height="3" x="1" y="7"/>
+	<rect fill="#2e3434" fill-opacity="0.7" width="5" height="3" x="1" y="10"/>
+	<rect fill="#2e3434" fill-opacity="0.6" width="5" height="3" x="6" y="10"/>
+	<rect fill="#2e3434" fill-opacity="0.5" width="4" height="2" x="11" y="11"/>
+	<rect fill="#2e3434" fill-opacity="0.4" width="4" height="3" x="11" y="8"/>
+	<rect fill="#2e3434" fill-opacity="0.3" width="5" height="3" x="10" y="5"/>
+	<rect fill="#2e3434" fill-opacity="0.2" width="5" height="3" x="5" y="5"/>
+	<rect fill="#2e3434" fill-opacity="0.1" width="4" height="2" x="1" y="5"/>
+</svg>

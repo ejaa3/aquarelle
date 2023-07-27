@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2017 Pavel Pertsev <morhetz@gmail.com>
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
+# Based on https://github.com/morhetz/gruvbox
+
+ name = 'Gruvbox'
+about = 'Retro groove color scheme for Vim'
+
+[schemes.dark]
+   name = 'Gruvbox Dark'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0x282828FF, area = 0x1D2021FF, text = 0xD5C4A1FF }
+  upper = { like = 0x3C3836FF, area = 0x32302FFF, text = 0xEBDBB2FF }
+    red = { like = 0xFB4934FF, area = 0xCC241DFF, text = 0x282828FF }
+ yellow = { like = 0xFABD2FFF, area = 0xD79921FF, text = 0x282828FF }
+  green = { like = 0xB8BB26FF, area = 0x98971AFF, text = 0x282828FF }
+   cyan = { like = 0x8EC07CFF, area = 0x689D6AFF, text = 0x282828FF }
+   blue = { like = 0x83A598FF, area = 0x458588FF, text = 0x282828FF }
+magenta = { like = 0xD3869BFF, area = 0xB16286FF, text = 0x282828FF }
+    any = { like = 0xFE8019FF, area = 0xD65D0EFF, text = 0x282828FF }
+
+[schemes.light]
+   name = 'Gruvbox Light'
+ border = 0.2
+    dim = 0.6
+  lower = { like = 0xF2E5BCFF, area = 0xFBF1C7FF, text = 0x3C3836FF }
+  upper = { like = 0xFBF1C7FF, area = 0xEBDBB2FF, text = 0x504945FF }
+    red = { like = 0x9D0006FF, area = 0xCC241DFF, text = 0xF2E5BCFF }
+ yellow = { like = 0xB57614FF, area = 0xD79921FF, text = 0xF2E5BCFF }
+  green = { like = 0x79740EFF, area = 0x98971AFF, text = 0xF2E5BCFF }
+   cyan = { like = 0x427B58FF, area = 0x689D6AFF, text = 0xF2E5BCFF }
+   blue = { like = 0x076678FF, area = 0x458588FF, text = 0xF2E5BCFF }
+magenta = { like = 0x8F3F71FF, area = 0xB16286FF, text = 0xF2E5BCFF }
+    any = { like = 0xAF3A03FF, area = 0xD65D0EFF, text = 0xF2E5BCFF }

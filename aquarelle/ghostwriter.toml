@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'ghostwriter'
+ type = 'text-files'
+about = """
+A JSON file that defines a color theme for the \
+<a href='https://github.com/KDE/ghostwriter'>ghostwriter</a> text editor.
+"""
+
+   naming = '`${arrangement} – ${scheme("main")}`'
+extension = '.json'
+
+[schemes]
+light = { name = 'Light Color Scheme' }
+ dark = { name = 'Dark Color Scheme' }
+
+[suggested-paths]
+default = { default = 'ghostwriter' }
+flatpak = { home = '.var/app/io.github.wereturtle.ghostwriter/config/ghostwriter/themes' }
+ user-1 = { config = 'ghostwriter/themes' }
+ user-2 = { home = '.config/ghostwriter/themes' }

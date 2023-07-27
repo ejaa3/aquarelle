@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Kvantum'
+ type = 'directory'
+about = """
+An experimental theme for <a href='https://github.com/tsujan/Kvantum'>Kvantum</a>, \
+a SVG-based theme engine for Qt and KDE.
+"""
+
+displaying = '`${arrangement} – ${scheme("main")}`'
+
+[options]
+accent = { default.set = 'any', name = 'Accent Color Set' }
+
+[schemes]
+main = { name = 'Main Color Scheme' }
+
+[suggested-paths]
+default = { default = 'kvantum' }
+user-1  = { config = 'Kvantum/Aquarelle' }
+user-2  = { home = '.config/Kvantum/Aquarelle' }
+
+[options.reduce-window-opacity]
+   name = 'Reduce window opacity'
+  value = 'Percentage value between 0 (opaque) and 90 (translucent)'
+default = 50
+
+[options.header-opacity]
+   name = 'Header opacity'
+  value = 'Value between 0.0 (transparent) and 1.0 (opaque)'
+default = 0.5
+
+[options.group-toolbar-buttons]
+   name = 'Group toolbar buttons'
+default = true
+
+[files]
+config = { type = 'text', name = 'Aquarelle.kvconfig' }
+svg = { type = 'text', name = 'Aquarelle.svg' }

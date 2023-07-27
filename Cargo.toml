@@ -1,0 +1,82 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Unlicense
+
+[workspace]
+
+[package]
+name = 'aquarelle'
+version = '0.1.0'
+description = 'Color scheme processor focused on theme maintainability'
+authors = ['Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>']
+license = 'AGPL-3.0-only'
+keywords = ['cli', 'color', 'palette', 'scheme', 'theme']
+edition = '2021'
+default-run = 'aquarelle'
+
+[dependencies]
+compact_str = { version = '0.7' , default-features = false, features = ['serde'] }
+dirs        = { version = '5'   , default-features = false }
+itertools   = { version = '0.11', default-features = false }
+palette     = { version = '0.7' , default-features = false, features = ['std'] }
+regex       = { version = '1'   }
+smallvec    = { version = '1'   , default-features = false }
+smartstring = { version = '1'   , default-features = false }
+zip         = { version = '0.6' , default-features = false }
+
+serde     = { version = '1'   , features = ['derive', 'rc'] }
+toml_edit = { version = '0.19', features = ['serde'] }
+
+png              = { version = '0.17', default-features = false }
+resvg            = { version = '0.35' }
+usvg             = { version = '0.35', default-features = false }
+usvg-text-layout = { version = '0.35' }
+
+# CLI:
+clap     = { version = '4'  , optional = true, features = ['derive'] }
+exitcode = { version = '1'  , optional = true }
+time     = { version = '0.3', optional = true, default-features = false, features = ['formatting', 'macros'] }
+
+[dependencies.gtk]
+default-features = false
+features = ['gnome_44']
+optional = true
+package = 'gtk4'
+version = '0'
+
+[dependencies.adw]
+default-features = false
+features = ['v1_3']
+optional = true
+package = 'libadwaita'
+version = '0'
+
+[dependencies.gettext-rs]
+version = '0.7'
+optional = true
+default-features = false
+features = ['gettext-system']
+
+[dependencies.declarative]
+features = ['gtk-rs']
+optional = true
+version = '0.5'
+
+[dependencies.rhai] # 1.15.1 is bugged
+features = ['only_i32', 'f32_float', 'no_custom_syntax', 'serde']
+git = 'https://github.com/rhaiscript/rhai'
+
+[build-dependencies]
+glib-build-tools = { git = 'https://github.com/gtk-rs/gtk-rs-core', optional = true }
+
+[features]
+cli = ['clap', 'exitcode', 'time']
+gui = ['adw', 'declarative', 'gettext-rs', 'glib-build-tools', 'gtk']
+
+[[bin]]
+name = 'aquarelle'
+required-features = ['cli']
+
+[[bin]]
+name = 'gui'
+required-features = ['gui']

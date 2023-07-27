@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Firefox'
+ type = 'text-file'
+about = 'Style sheet for <a href="https://www.mozilla.org/en-US/firefox">Firefox</a> Web Browser.'
+
+[schemes]
+main = { name = 'Main Color Scheme' }
+
+[options]
+ accent = { default.set = 'any', name = 'Accent Color Set' }
+
+[suggested-paths]
+default = { default = 'firefox/userContent.css' }
+flatpak = { home = '.var/app/org.mozilla.firefox/.mozilla/aquarelle/userContent.css' }
+user    = { home = '.mozilla/aquarelle/userContent.css' }

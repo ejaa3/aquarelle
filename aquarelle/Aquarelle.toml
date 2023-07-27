@@ -1,0 +1,96 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+ name = 'Aquarelle'
+about = 'The original namespace of the application'
+
+[maps.ableton-live]
+rhai = 'ableton_live.rhai'
+toml = 'ableton_live.toml'
+
+[maps.adwaita]
+rhai = 'adwaita.rhai'
+toml = 'adwaita.toml'
+
+[maps.blackbox-and-tilix]
+rhai = 'blackbox_and_tilix.rhai'
+toml = 'blackbox_and_tilix.toml'
+
+[maps.code]
+rhai = 'code/map.rhai'
+toml = 'code/map.toml'
+
+[maps.code-settings]
+rhai = 'code/settings.rhai'
+toml = 'code/settings.toml'
+
+[maps.dark-reader]
+rhai = 'dark_reader.rhai'
+toml = 'dark_reader.toml'
+
+[maps.firefox]
+rhai = 'firefox/map.rhai'
+toml = 'firefox/map.toml'
+
+[maps.firefox-gnome-theme]
+rhai = 'firefox/gnome_theme.rhai'
+toml = 'firefox/gnome_theme.toml'
+
+[maps.ghostwriter]
+rhai = 'ghostwriter.rhai'
+toml = 'ghostwriter.toml'
+
+[maps.gimp-palette]
+rhai = 'gimp_palette.rhai'
+toml = 'gimp_palette.toml'
+
+[maps.konsole]
+rhai = 'konsole.rhai'
+toml = 'konsole.toml'
+
+[maps.kvantum]
+rhai = 'kvantum.rhai'
+toml = 'kvantum.toml'
+
+[maps.plasma-scheme]
+rhai = 'plasma_scheme.rhai'
+toml = 'plasma_scheme.toml'
+
+[maps.qjackctl]
+rhai = 'qjackctl.rhai'
+toml = 'qjackctl.toml'
+
+[maps.sidebery]
+rhai = 'sidebery.rhai'
+toml = 'sidebery.toml'
+
+[maps.reaper]
+rhai = 'reaper/map.rhai'
+toml = 'reaper/map.toml'
+
+[maps.telegram-desktop]
+rhai = 'telegram_desktop.rhai'
+toml = 'telegram_desktop.toml'
+
+[maps.stylus]
+rhai = 'stylus/map.rhai'
+toml = 'stylus/map.toml'
+
+[maps.syntax-highlighting]
+rhai = 'syntax_highlighting.rhai'
+toml = 'syntax_highlighting.toml'
+
+[maps.wine]
+rhai = 'wine.rhai'
+toml = 'wine.toml'
+
+[schemes.neon-cake]
+rhai = 'schemes/neon_cake.rhai'
+toml = 'schemes/neon_cake.toml'
+
+[themes]
+everforest = 'themes/everforest.toml'
+   gruvbox = 'themes/gruvbox.toml'
+ neon-cake = 'themes/neon_cake.toml'
+ solarized = 'themes/solarized.toml'

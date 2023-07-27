@@ -1,0 +1,64 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ *
+ * SPDX-License-Identifier: Unlicense
+ */
+
+/* .tag {
+	background: alpha(currentColor, 0.1);
+	border-radius: 6px;
+	padding: 3px 7px;
+	margin: 0 3px;
+} */
+
+#handle {
+	border: 1px solid @borders;
+	border-left: none;
+	border-right: none;
+}
+
+#thumbnail-grid,
+#thumbnail-grid child {
+	background: none;
+	padding: 18px;
+	outline: none;
+}
+
+#thumbnail-grid :focus-visible box > .card {
+	outline: 2px solid alpha(@accent_bg_color, 0.5);
+	outline-offset: 1px;
+}
+
+#thumbnail-grid :focus-visible:hover box > .card,
+#thumbnail-grid :focus-visible:selected box > .card {
+	outline-offset: 3px;
+}
+
+#thumbnail-grid .card .card {
+	box-shadow: inset 0 -2px rgba(0, 0, 0, 0.3);
+	outline: 2px solid transparent;
+	outline-offset: 1px;
+	transition: none;
+}
+
+#thumbnail-grid :hover .card .card {
+	outline-color: alpha(@accent_bg_color, 0.5);
+}
+
+#thumbnail-grid :selected .card .card {
+	outline-color: @accent_bg_color;
+}
+
+#thumbnail-grid image {
+	color: @accent_fg_color;
+	background: @accent_bg_color;
+	border-radius: 50%;
+	margin: 6px;
+	padding: 2px;
+	opacity: 0;
+	/* transition: 200ms; */
+}
+
+#thumbnail-grid :selected image {
+	opacity: 1;
+}

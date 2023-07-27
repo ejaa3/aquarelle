@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+	
+	SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+	<linearGradient id="gradient" x1="16" y1="278" x2="112" y2="278" gradientUnits="userSpaceOnUse">
+		<stop stop-color="#9a9996" offset="0"/>
+		<stop stop-color="#deddda" offset="0.04166111"/>
+		<stop stop-color="#9a9996" offset="0.08333334"/>
+		<stop stop-color="#9a9996" offset="0.91666669"/>
+		<stop stop-color="#deddda" offset="0.95833331"/>
+		<stop stop-color="#9a9996" offset="1"/>
+	</linearGradient>
+	<rect fill="url(#gradient)" width="96" height="22" x="16" y="96" rx="8" ry="8"/>
+	<rect fill="#77767b" width="96" height="92" x="16" y="20" rx="8" ry="8"/>
+	<path fill="#c0bfbc" d="M24 10A8 8 0 0 0 16 18L16 28L24 28L104 28L112 28L112 18A8 8 0 0 0 104 10L24 10z"/>
+	<circle fill="#77767b" cx="103" cy="19" r="4"/>
+	<rect fill="#33d17a" width="32" height="40" x="16" y="30"/>
+	<rect fill="#8ff0a4" width="16" height="16" x="16" y="30"/>
+	<rect fill="#57e389" width="16" height="16" x="32" y="38"/>
+	<rect fill="#2ec27e" width="16" height="16" x="16" y="46"/>
+	<rect fill="#26a269" width="16" height="16" x="32" y="54"/>
+	<rect fill="#3584e4" width="32" height="40" x="48" y="30"/>
+	<rect fill="#99c1f1" width="16" height="16" x="64" y="30"/>
+	<rect fill="#62a0ea" width="16" height="16" x="48" y="38"/>
+	<rect fill="#1c71d8" width="16" height="16" x="64" y="46"/>
+	<rect fill="#1a5fb4" width="16" height="16" x="48" y="54"/>
+	<rect fill="#9141ac" width="32" height="40" x="80" y="30"/>
+	<rect fill="#dc8add" width="16" height="16" x="80" y="30"/>
+	<rect fill="#c061cb" width="16" height="16" x="96" y="38"/>
+	<rect fill="#613583" width="16" height="16" x="80" y="46"/>
+	<rect fill="#813d9c" width="16" height="16" x="96" y="54"/>
+	<rect fill="#ffd300" width="32" height="40" x="16" y="70" ry="8" rx="8"/>
+	<rect fill="#ffd300" width="8" height="8" x="16" y="70"/>
+	<rect fill="#ffd300" width="8" height="8" x="40" y="102"/>
+	<rect fill="#e5a50a" width="16" height="16" x="32" y="70"/>
+	<rect fill="#f5c211" width="16" height="16" x="16" y="78"/>
+	<rect fill="#f8e45c" width="16" height="16" x="32" y="86"/>
+	<circle fill="#f9f06b" cx="24" cy="102" r="8"/>
+	<rect fill="#f9f06b" width="16" height="8" x="16" y="94"/>
+	<rect fill="#f9f06b" width="8" height="8" x="24" y="102"/>
+	<rect fill="#ff7800" width="32" height="40" x="48" y="70"/>
+	<rect fill="#c64600" width="16" height="16" x="48" y="70"/>
+	<rect fill="#e66100" width="16" height="16" x="64" y="78"/>
+	<rect fill="#ffa348" width="16" height="16" x="48" y="86"/>
+	<rect fill="#ffbe6f" width="16" height="16" x="64" y="94"/>
+	<rect fill="#e01b24" width="32" height="40" x="80" y="70" rx="8" ry="8"/>
+	<rect fill="#e01b24" width="8" height="8" x="80" y="70"/>
+	<rect fill="#a51d2d" width="16" height="16" x="96" y="70"/>
+	<rect fill="#c01c28" width="16" height="16" x="80" y="78"/>
+	<rect fill="#ed333b" width="16" height="16" x="96" y="86"/>
+	<rect fill="#f66151" width="16" height="16" x="80" y="94"/>
+</svg>

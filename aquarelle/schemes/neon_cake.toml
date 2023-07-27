@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name = 'Neon Cake'
+
+[options]
+  name = { default = 'Neon Cake', name = 'Scheme name' }
+border = { default = 0.2, name = 'Scheme bordering' }
+   dim = { default = 0.6, name = 'Scheme text dimming' }
+   hue = { default = 240.0, name = 'Main hue', about = 'Value in degrees' }
+ 
+[options.rotate]
+default = 60.0
+   name = 'Main hue rotate'
+  about = 'Value in degrees to rotate the shade of each surface'
+
+[options.shading]
+   name = 'Surface shading'
+  about = 'This value differentiates the surface luminance'
+default = 8.0
+
+[options.surface-luminance]
+   name = 'Surface luminance'
+  about = 'Between 0.0 for pure black and 100.0 for pure white'
+default = 17.5
+
+[options.surface-chroma]
+   name = 'Surface chroma'
+  about = 'Between 0.0 for gray scale colors and 128.0 to 181.0 for saturated colors'
+default = 4.0
+
+[options.text-chroma]
+   name = 'Colorless text chroma'
+  about = 'Between 0.0 for gray scale colors and 128.0 to 181.0 for saturated colors'
+default = 24.0
+
+[options.text-luminance]
+   name = 'Colorless text luminance'
+  about = 'Between 0.0 for pure black and 100.0 for pure white'
+default = 65.0
+
+[options.overall-chroma]
+   name = 'Overall chroma'
+  about = 'Between 0.0 for gray scale colors and 128.0 to 181.0 for saturated colors'
+default = 48.0
+
+[options.overall-luminance]
+   name = 'Overall luminance'
+  about = 'Between 0.0 for pure black and 100.0 for pure white'
+default = 65.0

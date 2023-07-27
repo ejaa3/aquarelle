@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+	
+	SPDX-License-Identifier: Unlicense
+-->
+<component type="desktop-application">
+	<id>@APP_ID@</id>
+	<metadata_license>Unlicense</metadata_license>
+	<name>Aquarelle</name>
+	<summary>Color scheme application software</summary>
+	<icon type="stock">@APP_ID@</icon>
+	<description>
+		<p>An experimental color scheme processor focused on theme maintainability.</p>
+		<p>Features:</p>
+		<ul>
+			<li>Generate color schemes quickly (dynamic schemes).</li>
+			<li>Design schemes slowly, color by color (static schemes).</li>
+			<li>Dynamic schemes of the same theme can share options.</li>
+			<li>Arrangements allow reproducing the application of schemes between systems.</li>
+			<li>Maps allow schemes to be adapted to any format.</li>
+			<li>If possible, different schemes can be applied on the same target map.</li>
+			<li>Maps can suggest paths to export to.</li>
+			<li>Paths cannot collide.</li>
+			<li>Logs unimaginable errors.</li>
+			<li>Among other features.</li>
+		</ul>
+	</description>
+	<categories>
+		<category>Utility</category>
+		<category>GNOME</category>
+		<category>GTK</category>
+	</categories>
+	<keywords>
+		<keyword>GTK</keyword>
+		<keyword>GNOME</keyword>
+		<keyword>colors</keyword>
+		<keyword>palettes</keyword>
+		<keyword>themes</keyword>
+	</keywords>
+	<url type="bugtracker">https://github.com/ejaa3/aquarelle/issues</url>
+	<url type="contact">http://t.me/ejaa3</url>
+	<url type="vcs-browser">https://github.com/ejaa3/aquarelle</url>
+	<launchable type="desktop-id">@APP_ID@.desktop</launchable>
+	<provides>
+		<binary>@APP@</binary>
+		<binary>@APP@-gui</binary>
+	</provides>
+	<requires>
+		<display_length compare="ge">xsmall</display_length>
+	</requires>
+	<recommends>
+		<display_length compare="ge">small</display_length>
+		<memory compare="ge">1024</memory>
+	</recommends>
+	<supports>
+		<control>console</control>
+		<control>keyboard</control>
+		<control>pointing</control>
+		<control>touch</control>
+	</supports>
+	<project_license>@LICENSE@</project_license>
+	<developer_name translatable="no">Eduardo Javier Alvarado Aarón</developer_name>
+	<translation type="gettext">@APP@</translation>
+	<content_rating type="oars-1.1"/>
+	<update_contact>eduardo.javier.alvarado.aaron_AT_gmail.com</update_contact>
+	<branding>
+		<color type="primary">#1A5FB4</color>
+	</branding>
+	<custom>
+		<value key="Purism::form_factor">workstation</value>
+		<value key="Purism::form_factor">mobile</value>
+	</custom>
+	<kudos>
+		<kudo>HiDpiIcon</kudo>
+		<kudo>ModernToolkit</kudo>
+	</kudos>
+</component>

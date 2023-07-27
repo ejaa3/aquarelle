@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+	SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+	
+	SPDX-License-Identifier: Unlicense
+-->
+<schemalist gettext-domain='@APP@'>
+	<schema id='@APP_ID@' path='/@APP_PATH@/'>
+		<key name='window-width' type='i'>
+			<default>600</default>
+			<summary>Window width</summary>
+			<description>Width in pixels of the window when the application was closed and will be used next time.</description>
+		</key>
+		<key name='window-height' type='i'>
+			<default>400</default>
+			<summary>Window height</summary>
+			<description>Height in pixels of the window when the application was closed and will be used next time.</description>
+		</key>
+		<key name='window-maximized' type='b'>
+			<default>false</default>
+			<summary>Window maximization state</summary>
+		</key>
+		<key name='show-log' type='b'>
+			<default>false</default>
+			<summary>Show log pane</summary>
+		</key>
+		<key name='log-height' type='i'>
+			<default>70</default>
+			<summary>Log pane height</summary>
+			<description>Height in pixels of the log pane when the application was closed and will be used next time.</description>
+		</key>
+		<key name='last-view' type='s'>
+			<choices>
+				<choice value='arrangements'/>
+				<choice value='themes'/>
+				<choice value='settings'/>
+			</choices>
+			<default>'arrangements'</default>
+			<summary>Last open view</summary>
+		</key>
+		<key name='show-maps' type='b'>
+			<default>true</default>
+			<summary>Show maps pane</summary>
+		</key>
+		<key name='show-themes' type='b'>
+			<default>true</default>
+			<summary>Show themes pane</summary>
+		</key>
+		<key name='show-schemes' type='s'>
+			<choices>
+				<choice value='All'/>
+				<choice value='Light'/>
+				<choice value='Dark'/>
+			</choices>
+			<default>'All'</default>
+			<summary>Filter color schemes by lightness</summary>
+		</key>
+		<key name='appearance' type='s'>
+			<choices>
+				<choice value='Default'/>
+				<choice value='Selected'/>
+				<choice value='NoChange'/>
+			</choices>
+			<default>'Default'</default>
+			<summary>Appearance policy</summary>
+		</key>
+		<key name='scheme' type='(sss)'>
+			<default>('aquarelle','everforest','hard-dark')</default>
+			<summary>Appearance</summary>
+			<description>Tuple of three identifier strings to locate the color scheme to use (namespace, theme and scheme).</description>
+		</key>
+	</schema>
+</schemalist>

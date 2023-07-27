@@ -1,0 +1,92 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+const editor = cfg::scheme("editor");
+
+const dark = editor.lower.text.luma() > editor.lower.like.luma();
+
+fn out() { `"#${this.to_hex_rgb(true)}"` }
+
+fn shadow() {
+	const x = this.luma();
+	`"#${0xFF.fade(2 ** -x + 0.2 * x - 0.6).to_hex_rgba(true)}"`
+}
+
+`{
+	"commentAnchors.tags.anchors": {
+		"ANCHOR:": {
+			"iconColor": ${editor.lower.text.out()},
+			"highlightColor": ${editor.lower.text.out()},
+			"isItalic": false,
+			"scope": "file"
+		},
+		"REMOVE": {
+			"iconColor": ${editor.red.like.out()},
+			"highlightColor": ${editor.red.like.out()},
+			"isItalic": false,
+			"scope": "workspace"
+		},
+		"BUG": {
+			"iconColor": ${editor.red.like.out()},
+			"highlightColor": ${editor.red.like.out()},
+			"isItalic": false,
+			"scope": "workspace"
+		},
+		"WARNING": {
+			"iconColor": ${editor.yellow.like.out()},
+			"highlightColor": ${editor.yellow.like.out()},
+			"isItalic": false,
+			"scope": "workspace"
+		},
+		"WATCH": {
+			"iconColor": ${editor.green.like.out()},
+			"highlightColor": ${editor.green.like.out()},
+			"isItalic": false,
+			"scope": "workspace",
+			"behavior": "link"
+		},
+		"TODO": {
+			"iconColor": ${editor.cyan.like.out()},
+			"highlightColor": ${editor.cyan.like.out()},
+			"isItalic": false,
+			"scope": "workspace"
+		},
+		"FIXME": {
+			"iconColor": ${editor.yellow.like.out()},
+			"highlightColor": ${editor.yellow.like.out()},
+			"isItalic": false,
+			"scope": "workspace"
+		},
+		"HACK": {
+			"iconColor": ${editor.magenta.like.out()},
+			"highlightColor": ${editor.magenta.like.out()},
+			"isItalic": false,
+			"scope": "workspace"
+		},
+		"NOTE": {
+			"iconColor": ${editor.blue.like.out()},
+			"highlightColor": ${editor.blue.like.out()},
+			"isItalic": false,
+			"scope": "file"
+		},
+		"SECTION": {
+			"iconColor": ${editor.any.text.out()},
+			"highlightColor": ${editor.any.text.out()},
+			"isItalic": false,
+			"scope": "workspace",
+			"behavior": "region"
+		}
+	},
+	
+	"latex-workshop.view.pdf.color.dark.backgroundColor": ${editor.lower.like.out()},
+	"latex-workshop.view.pdf.color.dark.pageBorderColor": ${editor.lower.like.shadow()},
+	"latex-workshop.view.pdf.color.dark.pageColorsBackground": ${editor.upper.like.out()},
+	"latex-workshop.view.pdf.color.dark.pageColorsForeground": ${editor.upper.text.out()},
+	"latex-workshop.view.pdf.color.light.backgroundColor": ${editor.lower.like.out()},
+	"latex-workshop.view.pdf.color.light.pageBorderColor": ${editor.lower.like.shadow()},
+	"latex-workshop.view.pdf.color.light.pageColorsBackground": ${editor.lower.area.out()},
+	"latex-workshop.view.pdf.color.light.pageColorsForeground": ${editor.lower.text.out()}
+}`
