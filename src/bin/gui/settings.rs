@@ -149,7 +149,7 @@ fn rhai_max_value(row: &adw::ActionRow, value: f64, upper: f64) {
 
 pub fn start(tags: utils::Tags) -> gtk::ScrolledWindow {
 	enum ShowErrors { Scan, Cache, Namespace, Rhai, Scheme, Theme, Listing }
-	let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+	let (tx, rx) = glib::MainContext::channel(glib::Priority::DEFAULT);
 	
 	expand_view_here! { }
 	
@@ -187,6 +187,6 @@ pub fn start(tags: utils::Tags) -> gtk::ScrolledWindow {
 		}
 	};
 	
-	rx.attach(None, move |show| { show_errors(show); glib::Continue(true) });
+	rx.attach(None, move |show| { show_errors(show); glib::ControlFlow::Continue });
 	root
 }

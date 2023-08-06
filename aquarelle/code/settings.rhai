@@ -11,8 +11,8 @@ const dark = editor.lower.text.luma() > editor.lower.like.luma();
 fn out() { `"#${this.to_hex_rgb(true)}"` }
 
 fn shadow() {
-	const x = this.luma();
-	`"#${0xFF.fade(2 ** -x + 0.2 * x - 0.6).to_hex_rgba(true)}"`
+	const L = this.luma();
+	`"#${0xFF.fade(2 ** -L + 0.2 * L - 0.6).to_hex_rgba(true)}"`
 }
 
 `{

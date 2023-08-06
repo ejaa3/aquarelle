@@ -15,6 +15,7 @@ main = { name = 'Main Color Scheme' }
 
 [options]
 accent = { default.set = 'any', name = 'Accent Color Set' }
+custom-css = { default = '', name = 'Custom CSS' }
 
 [options.dim-header]
    name = 'Inactive header bar color'

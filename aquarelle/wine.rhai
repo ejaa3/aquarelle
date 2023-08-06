@@ -14,8 +14,8 @@ fn out() {
 }
 
 fn shadow(alpha) {
-	const x = this.luma();
-	lab::mix(this, 0, (2 ** -x + 0.2 * x - 0.6) * alpha).out()
+	const L = this.luma();
+	lab::mix(this, 0, (2 ** -L + 0.2 * L - 0.6) * alpha).out()
 }
 
 `

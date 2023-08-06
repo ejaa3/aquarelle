@@ -18,7 +18,7 @@ const dark = main.lower.text.luma() > main.upper.area.luma();
 const view = if !dark || main.lower.area.luma() < main.lower.like.luma()
 	{ main.lower.area } else { main.upper.area }; // HACK better solarized
 
-fn shadow() { const x = this.luma(); 2 ** -x + 0.2 * x - 0.6 }
+fn shadow() { const L = this.luma(); 2 ** -L + 0.2 * L - 0.6 }
 
 fn out() { '#' + this.to_hex_rgb(true) }
 
@@ -74,4 +74,6 @@ fn out() { '#' + this.to_hex_rgb(true) }
 @define-color scrollbar_outline_color ${
 	if dark { "alpha(black, 0.5)" } else { "#FFFFFF" } // FIXME
 };
+
+${cfg::option("custom-css")}
 `

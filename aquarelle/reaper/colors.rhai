@@ -13,8 +13,8 @@ private fn out() {
 }
 
 private fn shadow(factor) {
-	const x = this.luma();
-	lab::mix(this, 0, (2 ** -x + 0.2 * x - 0.6) * factor).out()
+	const L = this.luma();
+	lab::mix(this, 0, (2 ** -L + 0.2 * L - 0.6) * factor).out()
 }
 
 const pane = main.raise("lower", "like", 0.03);
@@ -207,10 +207,10 @@ mcp_sends_muted = ${main.red.like.out() /* Sends text: muted */}
 mcp_send_midihw = ${main.cyan.like.out() /* Sends text: MIDI hardware */}
 mcp_sends_levels = ${main[accent].area.out() /* Sends level */}
 mcp_fx_normal = ${main.lower.text.out() /* FX insert text: normal */}
-mcp_fx_bypassed = ${main.yellow.like.out() /* FX insert text: bypassed */}
+mcp_fx_bypassed = ${lab::mix(main.lower.like, main.lower.text, 2.0 / 3).out() /* FX insert text: bypassed */}
 mcp_fx_offlined = ${main.red.like.out() /* FX insert text: offline */}
 mcp_fxparm_normal = ${main.lower.text.out() /* FX parameter text: normal */}
-mcp_fxparm_bypassed = ${main.yellow.like.out() /* FX parameter text: bypassed */}
+mcp_fxparm_bypassed = ${main.lower.text.out() /* FX parameter text: bypassed */}
 mcp_fxparm_offlined = ${main.red.like.out() /* FX parameter text: offline */}
 tcp_list_scrollbar = 0
 tcp_list_scrollbar_mode = 144128

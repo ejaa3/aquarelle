@@ -158,7 +158,7 @@ impl Schemes<'_> {
 		}
 		connect_close_request: clone![tx; move |_| {
 			send!(Msg::Shutdown => tx);
-			glib::signal::Inhibit(false)
+			glib::Propagation::Proceed
 		}]
 		settings.create_action(appearance::SETTING) #add_action(&#) {
 			connect_state_notify: clone![tx; move |this|
@@ -173,7 +173,7 @@ impl Schemes<'_> {
 }]
 
 pub fn start(Schemes { cache, scheme, selection, settings, tags, themes, window }: Schemes) -> Template {
-	let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+	let (tx, rx) = glib::MainContext::channel(glib::Priority::DEFAULT);
 	
 	expand_view_here! { }
 	
@@ -226,7 +226,7 @@ pub fn start(Schemes { cache, scheme, selection, settings, tags, themes, window 
 	
 	rx.attach(None, move |msg| {
 		update_state(msg);
-		glib::Continue(match msg { Msg::Shutdown => false, _ => true })
+		match msg { Msg::Shutdown => glib::ControlFlow::Break, _ => glib::ControlFlow::Continue }
 	});
 	
 	Template { root, tx }
@@ -282,7 +282,7 @@ fn set_appearance(
 }
 
 fn get_schemes(cache: &cache::Cache, tags: &utils::Tags, display: &gdk::Display) -> gio::ListStore {
-	let mut list = gio::ListStore::new(scheme::Object::static_type());
+	let mut list = gio::ListStore::new::<scheme::Object>();
 	
 	list.extend(cache.namespaces.iter().filter_map(move |(at, bin)| {
 		let namespace = bin.get(at).log(|error| match **error {

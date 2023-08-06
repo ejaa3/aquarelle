@@ -4,7 +4,7 @@
 	SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 
-<img align="left" src="data/icons/app/io.github.ejaa3.Aquarelle.svg"/>
+<img align="left" src="data/app-icons/io.github.ejaa3.Aquarelle.svg"/>
 
 # Aquarelle
 
@@ -44,8 +44,8 @@ The following commands are assumed to be executed with bash in the project direc
   ~~~ bash
   mkdir -p ~/.local/share/glib-2.0/schemas/
   ln -s $(pwd)/build/data/io.github.ejaa3.Aquarelle.Devel.gschema.xml \
-        ~/.local/share/glib-2.0/schemas/ && \
-  	glib-compile-schemas ~/.local/share/glib-2.0/schemas/
+          ~/.local/share/glib-2.0/schemas/ && \
+      glib-compile-schemas ~/.local/share/glib-2.0/schemas/
   ~~~
 
   Now you can run the GUI version: `cargo run --features gui --bin gui`

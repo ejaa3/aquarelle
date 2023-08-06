@@ -101,68 +101,53 @@ export const knob_bg_large_200 = `<svg xmlns="http://www.w3.org/2000/svg" viewBo
 </svg>`;
 
 fn pause(on, scale) {
-	const set = global::main[if on { global::accent } else { "lower" }];
-	
-	const colors = switch on {
-		true => [set.area, lab::mix(set.area, set.text, 0.1), lab::mix(set.area, set.text, 0.2)],
-		   _ => [set.text.fade(0.2), set.text.fade(0.3), set.text.fade(0.4)]
-	};
+	const data = switchable(on);
 	
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 87 29" width="${87 * scale}" height="${29 * scale}">
-		<path fill=${colors[0].out()} d="M16,2C28,2 28,13.5 28,13.5 28,13.5 28,25 16,25H1V2Z"/>
+		<path fill=${data.colors[0].out()} d="M16,2C28,2 28,13.5 28,13.5 28,13.5 28,25 16,25H1V2Z"/>
 		<path fill=${global::main.lower.like.shadow(0.5)} d="M28,13.5C28,13.5 28,25 16,25H1v4H16C28,29 28,13.5 28,13.5Z"/>
 		
-		<path fill=${colors[1].out()} d="M45,2C57,2 57,13.5 57,13.5 57,13.5 57,25 45,25H30V2Z"/>
+		<path fill=${data.colors[1].out()} d="M45,2C57,2 57,13.5 57,13.5 57,13.5 57,25 45,25H30V2Z"/>
 		<path fill=${global::main.lower.like.shadow(0.75)} d="M57,13.5C57,13.5 57,25 45,25H30v4H45C57,29 57,13.5 57,13.5Z"/>
 		
-		<path fill=${colors[2].out()} d="M74,2C86,2 86,13.5 86,13.5 86,13.5 86,25 74,25H59V2Z"/>
+		<path fill=${data.colors[2].out()} d="M74,2C86,2 86,13.5 86,13.5 86,13.5 86,25 74,25H59V2Z"/>
 		<path fill=${global::main.lower.like.shadow(1)} d="M86,13.5C86,13.5 86,25 74,25H59v4H74C86,29 86,13.5 86,13.5Z"/>
 		
-		<path fill=${set.text.out()} d="M9 9L9 18L12 18L12 9L9 9zM15 9L15 18L18 18L18 9L15 9zM38 9L38 18L41 18L41 9L38 9zM44 9L44 18L47 18L47 9L44 9zM67 9L67 18L70 18L70 9L67 9zM73 9L73 18L76 18L76 9L73 9z"/>
+		<path fill=${data.set.text.out()} d="M9 9L9 18L12 18L12 9L9 9zM15 9L15 18L18 18L18 9L15 9zM38 9L38 18L41 18L41 9L38 9zM44 9L44 18L47 18L47 9L44 9zM67 9L67 18L70 18L70 9L67 9zM73 9L73 18L76 18L76 9L73 9z"/>
 	</svg>`
 }
 
 fn pause_150(on) {
-	const set = global::main[if on { global::accent } else { "lower" }];
-	
-	const colors = switch on {
-		true => [set.area, lab::mix(set.area, set.text, 0.1), lab::mix(set.area, set.text, 0.2)],
-		   _ => [set.text.fade(0.2), set.text.fade(0.3), set.text.fade(0.4)]
-	};
+	const data = switchable(on);
 	
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 44">
-		<path fill=${colors[0].out()} d="M1 2L1 38L25 38A18 18 0 0 0 43 20A18 18 0 0 0 25 2L1 2z"/>
+		<path fill=${data.colors[0].out()} d="M1 2L1 38L25 38A18 18 0 0 0 43 20A18 18 0 0 0 25 2L1 2z"/>
 		<path fill=${global::main.lower.like.shadow(0.5)} d="M43,20A18,18 0 0 1 25,38H1v6H25A18,18 0 0 0 43,26Z"/>
 		
-		<path fill=${colors[1].out()} d="M45,2V38H69A18,18 0 0 0 87,20 18,18 0 0 0 69,2Z"/>
+		<path fill=${data.colors[1].out()} d="M45,2V38H69A18,18 0 0 0 87,20 18,18 0 0 0 69,2Z"/>
 		<path fill=${global::main.lower.like.shadow(0.75)} d="M87,20A18,18 0 0 1 69,38H45v6H69A18,18 0 0 0 87,26Z"/>
 		
-		<path fill=${colors[2].out()} d="m89,2v36h24A18,18 0 0 0 131,20 18,18 0 0 0 113,2Z"/>
+		<path fill=${data.colors[2].out()} d="m89,2v36h24A18,18 0 0 0 131,20 18,18 0 0 0 113,2Z"/>
 		<path fill=${global::main.lower.like.shadow(1)} d="M131,20A18,18 0 0 1 113,38H89v6h24a18,18 0 0 0 18,-18z"/>
 		
-		<path fill=${set.text.out()} d="M13 13L13 27L18 27L18 13L13 13zM22 13L22 27L27 27L27 13L22 13zM57 13L57 27L62 27L62 13L57 13zM66 13L66 27L71 27L71 13L66 13zM101 13L101 27L106 27L106 13L101 13zM110 13L110 27L115 27L115 13L110 13z"/>
+		<path fill=${data.set.text.out()} d="M13 13L13 27L18 27L18 13L13 13zM22 13L22 27L27 27L27 13L22 13zM57 13L57 27L62 27L62 13L57 13zM66 13L66 27L71 27L71 13L66 13zM101 13L101 27L106 27L106 13L101 13zM110 13L110 27L115 27L115 13L110 13z"/>
 	</svg>`
 }
 
 fn play(synk, on, scale) {
-	const set = global::main[if on { global::accent } else { "lower" }];
-	
-	const colors = switch on {
-		true => [set.area, lab::mix(set.area, set.text, 0.1), lab::mix(set.area, set.text, 0.2)],
-		   _ => [set.text.fade(0.2), set.text.fade(0.3), set.text.fade(0.4)]
-	};
+	const data = switchable(on);
 	
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 99 35" width="${99 * scale}" height="${35 * scale}">
-		<circle fill=${colors[0].out()} cx="16.5" cy="16.5" r="14.5"/>
+		<circle fill=${data.colors[0].out()} cx="16.5" cy="16.5" r="14.5"/>
 		<path fill=${global::main.lower.like.shadow(0.5)} d="M2 16.5L2 20.5A14.5 14.5 0 0 0 16.5 35A14.5 14.5 0 0 0 31 20.5L31 16.5A14.5 14.5 0 0 1 16.5 31A14.5 14.5 0 0 1 2 16.5z"/>
 		
-		<circle fill=${colors[1].out()} cx="49.5" cy="16.5" r="14.5"/>
+		<circle fill=${data.colors[1].out()} cx="49.5" cy="16.5" r="14.5"/>
 		<path fill=${global::main.lower.like.shadow(0.75)} d="m35,16.5v4A14.5,14.5 0 0 0 49.5,35 14.5,14.5 0 0 0 64,20.5v-4A14.5,14.5 0 0 1 49.5,31 14.5,14.5 0 0 1 35,16.5Z"/>
 		
-		<circle fill=${colors[2].out()} cx="82.5" cy="16.5" r="14.5"/>
+		<circle fill=${data.colors[2].out()} cx="82.5" cy="16.5" r="14.5"/>
 		<path fill=${global::main.lower.like.shadow(1)} d="m68,16.5v4A14.5,14.5 0 0 0 82.5,35 14.5,14.5 0 0 0 97,20.5v-4A14.5,14.5 0 0 1 82.5,31 14.5,14.5 0 0 1 68,16.5Z"/>
 		
-		<path fill=${set.text.out()} d="${
+		<path fill=${data.set.text.out()} d="${
 			if !synk { `M12 11L12 22L23 16.5L12 11zM45 11L45 22L56 16.5L45 11zM78 11L78 22L89 16.5L78 11z` }
 			else { `M11.5 12C9 12 9 13 9 16L8 16L8 20L15 20L15 16L14 16C14 13 14 12 11.5 12zM17 12L17 21L26 16.5L17 12zM44.5 12C42 12 42 13 42 16L41 16L41 20L48 20L48 16L47 16C47 13 47 12 44.5 12zM50 12L50 21L59 16.5L50 12zM77.5 12C75 12 75 13 75 16L74 16L74 20L81 20L81 16L80 16C80 13 80 12 77.5 12zM83 12L83 21L92 16.5L83 12zM11.5 13C13 13 13 14 13 16L10 16C10 14 10 13 11.5 13zM44.5 13C46 13 46 15 46 16L43 16C43 14 43 13 44.5 13zM77.5 13C79 13 79 14 79 16L76 16C76 14 76 13 77.5 13z` }
 		}"/>
@@ -170,24 +155,19 @@ fn play(synk, on, scale) {
 }
 
 fn play_150(synk, on) {
-	const set = global::main[if on { global::accent } else { "lower" }];
-	
-	const colors = switch on {
-		true => [set.area, lab::mix(set.area, set.text, 0.1), lab::mix(set.area, set.text, 0.2)],
-		   _ => [set.text.fade(0.2), set.text.fade(0.3), set.text.fade(0.4)]
-	};
+	const data = switchable(on);
 	
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 53">
-		<circle fill=${colors[0].out()} cx="25" cy="25" r="22"/>
+		<circle fill=${data.colors[0].out()} cx="25" cy="25" r="22"/>
 		<path fill=${global::main.lower.like.shadow(0.5)} d="m3,25v5A22,22 0 0 0 25,52 22,22 0 0 0 47,30V25A22,22 0 0 1 25,47 22,22 0 0 1 3,25Z"/>
 		
-		<circle fill=${colors[1].out()} cx="75" cy="25" r="22"/>
+		<circle fill=${data.colors[1].out()} cx="75" cy="25" r="22"/>
 		<path fill=${global::main.lower.like.shadow(0.75)} d="m53,25v5A22,22 0 0 0 75,52 22,22 0 0 0 97,30V25A22,22 0 0 1 75,47 22,22 0 0 1 53,25Z"/>
 		
-		<circle fill=${colors[2].out()} cx="125" cy="25" r="22"/>
+		<circle fill=${data.colors[2].out()} cx="125" cy="25" r="22"/>
 		<path fill=${global::main.lower.like.shadow(1)} d="m103,25v5a22,22 0 0 0 22,22 22,22 0 0 0 22,-22V25A22,22 0 0 1 125,47 22,22 0 0 1 103,25Z"/>
 		
-		<path fill=${set.text.out()} d="${
+		<path fill=${data.set.text.out()} d="${
 			if !synk { `M18 16L18 34L35 25L18 16zM68 16L68 34L85 25L68 16zM118 16L118 34L135 25L118 16z` }
 			else { `M17.5 18C14 18 14 24 14 24L12 24L12 30L23 30L23 24L21 24C21 24 21 18 17.5 18zM26 18L26 32L39 25L26 18zM67.5 18C64 18 64 24 64 24L62 24L62 30L73 30L73 24L71 24C71 24 71 18 67.5 18zM76 18L76 32L89 25L76 18zM117.5 18C114 18 114 24 114 24L112 24L112 30L123 30L123 24L121 24C121 24 121 18 117.5 18zM126 18L126 32L139 25L126 18zM17.5 20C19 20 19 24 19 24L16 24C16 24 16 20 17.5 20zM67.5 20C69 20 69 24 69 24L66 24C66 24 66 20 67.5 20zM117.5 20C119 20 119 24 119 24L116 24C116 24 116 20 117.5 20z` }
 		}"/>

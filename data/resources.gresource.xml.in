@@ -10,7 +10,7 @@
 		<file>style.css</file>
 	</gresource>
 	<gresource prefix="/@APP_PATH@/icons/scalable/apps/">
-		<file preprocess="xml-stripblanks" alias="@APP@-@RANDOM@-symbolic.svg">icons/app/io.github.ejaa3.Aquarelle-symbolic.svg</file>
+		<file preprocess="xml-stripblanks" alias="@APP@-@RANDOM@-symbolic.svg">app-icons/io.github.ejaa3.Aquarelle-symbolic.svg</file>
 	</gresource>
 	<gresource prefix="/@APP_PATH@/icons/scalable/actions/">
 		<file preprocess="xml-stripblanks" alias="applications-graphics-@RANDOM@-symbolic.svg">icons/applications-graphics-symbolic.svg</file>

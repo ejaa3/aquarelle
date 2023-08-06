@@ -35,180 +35,249 @@ accent = { name = 'Accent Color Set', default.set = 'any' }
 default = { default = 'reaper' }
 
 [files]
-# colors = { type = 'text', name = 'Aquarelle_6.0.ReaperTheme' }
-# envcp_arm_off = { type = 'svg-to-png', at = 1, name = 'envcp_arm_off.png' }
-# envcp_arm_off_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_off.png' }
-# envcp_arm_off_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_off.png' }
-# envcp_arm_off_OL = { type = 'svg-to-png', at = 1, name = 'envcp_arm_off_OL.png' }
-# envcp_arm_off_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_off_ol.png' }
-# envcp_arm_off_OL_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_off_OL.png' }
-# envcp_arm_on = { type = 'svg-to-png', at = 1, name = 'envcp_arm_on.png' }
-# envcp_arm_on_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_on.png' }
-# envcp_arm_on_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_on.png' }
-# envcp_arm_on_OL = { type = 'svg-to-png', at = 1, name = 'envcp_arm_on_OL.png' }
-# envcp_arm_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_on_ol.png' }
-# envcp_arm_on_OL_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_on_OL.png' }
-# envcp_bg = { type = 'svg-to-png', at = 1, name = 'envcp_bg.png' }
-# envcp_bgsel = { type = 'svg-to-png', at = 1, name = 'envcp_bgsel.png' }
-# envcp_bypass_off = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_off.png' }
-# envcp_bypass_off_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_off.png' }
-# envcp_bypass_off_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_off.png' }
-# envcp_bypass_off_ol = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_off_ol.png' }
-# envcp_bypass_off_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_off_ol.png' }
-# envcp_bypass_off_ol_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_off_ol.png' }
-# envcp_bypass_on = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_on.png' }
-# envcp_bypass_on_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_on.png' }
-# envcp_bypass_on_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_on.png' }
-# envcp_bypass_on_ol = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_on_ol.png' }
-# envcp_bypass_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_on_ol.png' }
-# envcp_bypass_on_ol_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_on_ol.png' }
-# envcp_hide = { type = 'svg-to-png', at = 1, name = 'envcp_hide.png' }
-# envcp_hide_150 = { type = 'svg-to-png', at = 2, name = 'envcp_hide.png' }
-# envcp_hide_200 = { type = 'svg-to-png', at = 3, name = 'envcp_hide.png' }
-# envcp_knob_small = { type = 'svg-to-png', at = 1, name = 'envcp_knob_small.png' }
-# envcp_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'envcp_knob_small.png' }
-# envcp_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'envcp_knob_small.png' }
-
+colors = { type = 'text', name = 'Aquarelle_6.0.ReaperTheme' }
+envcp_arm_off = { type = 'svg-to-png', at = 1, name = 'envcp_arm_off.png' }
+envcp_arm_off_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_off.png' }
+envcp_arm_off_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_off.png' }
+envcp_arm_off_OL = { type = 'svg-to-png', at = 1, name = 'envcp_arm_off_OL.png' }
+envcp_arm_off_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_off_ol.png' }
+envcp_arm_off_OL_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_off_OL.png' }
+envcp_arm_on = { type = 'svg-to-png', at = 1, name = 'envcp_arm_on.png' }
+envcp_arm_on_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_on.png' }
+envcp_arm_on_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_on.png' }
+envcp_arm_on_OL = { type = 'svg-to-png', at = 1, name = 'envcp_arm_on_OL.png' }
+envcp_arm_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_on_ol.png' }
+envcp_arm_on_OL_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_on_OL.png' }
+envcp_bg = { type = 'svg-to-png', at = 1, name = 'envcp_bg.png' }
+envcp_bgsel = { type = 'svg-to-png', at = 1, name = 'envcp_bgsel.png' }
+envcp_bypass_off = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_off.png' }
+envcp_bypass_off_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_off.png' }
+envcp_bypass_off_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_off.png' }
+envcp_bypass_off_ol = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_off_ol.png' }
+envcp_bypass_off_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_off_ol.png' }
+envcp_bypass_off_ol_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_off_ol.png' }
+envcp_bypass_on = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_on.png' }
+envcp_bypass_on_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_on.png' }
+envcp_bypass_on_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_on.png' }
+envcp_bypass_on_ol = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_on_ol.png' }
+envcp_bypass_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_on_ol.png' }
+envcp_bypass_on_ol_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_on_ol.png' }
+envcp_hide = { type = 'svg-to-png', at = 1, name = 'envcp_hide.png' }
+envcp_hide_150 = { type = 'svg-to-png', at = 2, name = 'envcp_hide.png' }
+envcp_hide_200 = { type = 'svg-to-png', at = 3, name = 'envcp_hide.png' }
+envcp_knob_small = { type = 'svg-to-png', at = 1, name = 'envcp_knob_small.png' }
+envcp_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'envcp_knob_small.png' }
+envcp_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'envcp_knob_small.png' }
+gen_end = { type = 'svg-to-png', at = 1, name = 'gen_end.png' }
+gen_end_150 = { type = 'svg-to-png', at = 2, name = 'gen_end.png' }
+gen_end_200 = { type = 'svg-to-png', at = 3, name = 'gen_end.png' }
+gen_home = { type = 'svg-to-png', at = 1, name = 'gen_home.png' }
+gen_home_150 = { type = 'svg-to-png', at = 2, name = 'gen_home.png' }
+gen_home_200 = { type = 'svg-to-png', at = 3, name = 'gen_home.png' }
 gen_panbg_horz = { type = 'svg-to-png', at = 1, name = 'gen_panbg_horz.png' }
 gen_panbg_horz_dark = { type = 'svg-to-png', at = 1, name = 'gen_panbg_horz_dark.png' }
 gen_panthumb_horz = { type = 'svg-to-png', at = 1, name = 'gen_panthumb_horz.png' }
-# gen_volbg_horz = { type = 'svg-to-png', at = 1, name = 'gen_volbg_horz.png' }
-# gen_volbg_horz_dark = { type = 'svg-to-png', at = 1, name = 'gen_volbg_horz_dark.png' }
-# gen_volbg_vert = { type = 'svg-to-png', at = 1, name = 'gen_volbg_vert.png' }
-# gen_volbg_vert_dark = { type = 'svg-to-png', at = 1, name = 'gen_volbg_vert_dark.png' }
-# gen_volthumb_horz = { type = 'svg-to-png', at = 1, name = 'gen_volthumb_horz.png' }
-# gen_volthumb_horz_150 = { type = 'svg-to-png', at = 2, name = 'gen_volthumb_horz.png' }
-# gen_volthumb_horz_200 = { type = 'svg-to-png', at = 3, name = 'gen_volthumb_horz.png' }
-# gen_volthumb_vert = { type = 'svg-to-png', at = 1, name = 'gen_volthumb_vert.png' }
-# gen_volthumb_vert_150 = { type = 'svg-to-png', at = 2, name = 'gen_volthumb_vert.png' }
-# gen_volthumb_vert_200 = { type = 'svg-to-png', at = 3, name = 'gen_volthumb_vert.png' }
-
-# mcp_mainbg = { type = 'svg-to-png', at = 1, name = 'mcp_mainbg.png' }
-# mcp_mainbgsel = { type = 'svg-to-png', at = 1, name = 'mcp_mainbgsel.png' }
-# mcp_master_volbg = { type = 'svg-to-png', at = 1, name = 'mcp_master_volbg.png' }
-# mcp_master_volbg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_master_volbg.png' }
-# mcp_master_volbg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_master_volbg.png' }
-# mcp_volbg = { type = 'svg-to-png', at = 1, name = 'mcp_volbg.png' }
-# mcp_volbg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_volbg.png' }
-# mcp_volbg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_volbg.png' }
-# piano_black_key = { type = 'svg-to-png', at = 1, name = 'piano_black_key.png' }
-# piano_black_key_sel = { type = 'svg-to-png', at = 1, name = 'piano_black_key_sel.png' }
-# piano_white_key = { type = 'svg-to-png', at = 1, name = 'piano_white_key.png' }
-# piano_white_key_sel = { type = 'svg-to-png', at = 1, name = 'piano_white_key_sel.png' }
-# scrollbar = { type = 'svg-to-png', at = 1, name = 'scrollbar.png' }
-# scrollbar_3 = { type = 'svg-to-png', at = 1, name = 'scrollbar_3.png' }
-# tcp_bg = { type = 'svg-to-png', at = 1, name = 'tcp_bg.png' }
-# tcp_bgsel = { type = 'svg-to-png', at = 1, name = 'tcp_bgsel.png' }
-# tcp_main_namebg_sel = { type = 'svg-to-png', at = 1, name = 'tcp_main_namebg_sel.png' }
-# tcp_mainbg = { type = 'svg-to-png', at = 1, name = 'tcp_mainbg.png' }
-# tcp_mainbgsel = { type = 'svg-to-png', at = 1, name = 'tcp_mainbgsel.png' }
-# tcp_namebg = { type = 'svg-to-png', at = 1, name = 'tcp_namebg.png' }
-# tcp_namebg_200 = { type = 'svg-to-png', at = 3, name = 'tcp_namebg.png' }
-# tcp_volbg = { type = 'svg-to-png', at = 1, name = 'tcp_volbg.png' }
-# tcp_volbg_150 = { type = 'svg-to-png', at = 2, name = 'tcp_volbg.png' }
-# tcp_volbg_200 = { type = 'svg-to-png', at = 3, name = 'tcp_volbg.png' }
-# tcp_vol_knob_small = { type = 'svg-to-png', at = 1, name = 'tcp_vol_knob_small.png' }
-# tcp_vol_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'tcp_vol_knob_small.png' }
-# tcp_vol_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'tcp_vol_knob_small.png' }
-# track_recarm_auto = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto.png' }
-# track_recarm_auto_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto.png' }
-# track_recarm_auto_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto.png' }
-# track_recarm_auto_norec = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_norec.png' }
-# track_recarm_auto_norec_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_norec.png' }
-# track_recarm_auto_norec_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_norec.png' }
-# track_recarm_auto_norec_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_norec_ol.png' }
-# track_recarm_auto_norec_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_norec_ol.png' }
-# track_recarm_auto_norec_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_norec_ol.png' }
-# track_recarm_auto_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_ol.png' }
-# track_recarm_auto_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_ol.png' }
-# track_recarm_auto_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_ol.png' }
-# track_recarm_auto_on = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_on.png' }
-# track_recarm_auto_on_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_on.png' }
-# track_recarm_auto_on_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_on.png' }
-# track_recarm_auto_on_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_on_ol.png' }
-# track_recarm_auto_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_on_ol.png' }
-# track_recarm_auto_on_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_on_ol.png' }
-# track_recarm_norec = { type = 'svg-to-png', at = 1, name = 'track_recarm_norec.png' }
-# track_recarm_norec_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_norec.png' }
-# track_recarm_norec_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_norec.png' }
-# track_recarm_norec_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_norec_ol.png' }
-# track_recarm_norec_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_norec_ol.png' }
-# track_recarm_norec_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_norec_ol.png' }
-# track_recarm_off = { type = 'svg-to-png', at = 1, name = 'track_recarm_off.png' }
-# track_recarm_off_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_off.png' }
-# track_recarm_off_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_off.png' }
-# track_recarm_off_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_off_ol.png' }
-# track_recarm_off_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_off_ol.png' }
-# track_recarm_off_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_off_ol.png' }
-# track_recarm_on = { type = 'svg-to-png', at = 1, name = 'track_recarm_on.png' }
-# track_recarm_on_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_on.png' }
-# track_recarm_on_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_on.png' }
-# track_recarm_on_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_on_ol.png' }
-# track_recarm_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_on_ol.png' }
-# track_recarm_on_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_on_ol.png' }
-# transport_bg = { type = 'svg-to-png', at = 1, name = 'transport_bg.png' }
-# transport_bpm = { type = 'svg-to-png', at = 1, name = 'transport_bpm.png' }
-# transport_bpm_bg = { type = 'svg-to-png', at = 1, name = 'transport_bpm_bg.png' }
-# transport_end = { type = 'svg-to-png', at = 1, name = 'transport_end.png' }
-# transport_end_150 = { type = 'svg-to-png', at = 2, name = 'transport_end.png' }
-# transport_end_200 = { type = 'svg-to-png', at = 3, name = 'transport_end.png' }
-# transport_home = { type = 'svg-to-png', at = 1, name = 'transport_home.png' }
-# transport_home_150 = { type = 'svg-to-png', at = 2, name = 'transport_home.png' }
-# transport_home_200 = { type = 'svg-to-png', at = 3, name = 'transport_home.png' }
-# transport_knob_bg_large = { type = 'svg-to-png', at = 1, name = 'transport_knob_bg_large.png' }
-# transport_knob_bg_large_150 = { type = 'svg-to-png', at = 2, name = 'transport_knob_bg_large.png' }
-# transport_knob_bg_large_200 = { type = 'svg-to-png', at = 3, name = 'transport_knob_bg_large.png' }
-# transport_next = { type = 'svg-to-png', at = 1, name = 'transport_next.png' }
-# transport_next_150 = { type = 'svg-to-png', at = 2, name = 'transport_next.png' }
-# transport_next_200 = { type = 'svg-to-png', at = 3, name = 'transport_next.png' }
-# transport_pause = { type = 'svg-to-png', at = 1, name = 'transport_pause.png' }
-# transport_pause_150 = { type = 'svg-to-png', at = 2, name = 'transport_pause.png' }
-# transport_pause_200 = { type = 'svg-to-png', at = 3, name = 'transport_pause.png' }
-# transport_pause_on = { type = 'svg-to-png', at = 1, name = 'transport_pause_on.png' }
-# transport_pause_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_pause_on.png' }
-# transport_pause_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_pause_on.png' }
-# transport_play = { type = 'svg-to-png', at = 1, name = 'transport_play.png' }
-# transport_play_150 = { type = 'svg-to-png', at = 2, name = 'transport_play.png' }
-# transport_play_200 = { type = 'svg-to-png', at = 3, name = 'transport_play.png' }
-# transport_play_on = { type = 'svg-to-png', at = 1, name = 'transport_play_on.png' }
-# transport_play_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_play_on.png' }
-# transport_play_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_play_on.png' }
-# transport_play_sync = { type = 'svg-to-png', at = 1, name = 'transport_play_sync.png' }
-# transport_play_sync_150 = { type = 'svg-to-png', at = 2, name = 'transport_play_sync.png' }
-# transport_play_sync_200 = { type = 'svg-to-png', at = 3, name = 'transport_play_sync.png' }
-# transport_play_sync_on = { type = 'svg-to-png', at = 1, name = 'transport_play_sync_on.png' }
-# transport_play_sync_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_play_sync_on.png' }
-# transport_play_sync_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_play_sync_on.png' }
-# transport_playspeedbg = { type = 'svg-to-png', at = 1, name = 'transport_playspeedbg.png' } # WARNING undetected
-# transport_previous = { type = 'svg-to-png', at = 1, name = 'transport_previous.png' }
-# transport_previous_150 = { type = 'svg-to-png', at = 2, name = 'transport_previous.png' }
-# transport_previous_200 = { type = 'svg-to-png', at = 3, name = 'transport_previous.png' }
-# transport_record = { type = 'svg-to-png', at = 1, name = 'transport_record.png' }
-# transport_record_150 = { type = 'svg-to-png', at = 2, name = 'transport_record.png' }
-# transport_record_200 = { type = 'svg-to-png', at = 3, name = 'transport_record.png' }
-# transport_record_item = { type = 'svg-to-png', at = 1, name = 'transport_record_item.png' }
-# transport_record_item_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_item.png' }
-# transport_record_item_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_item.png' }
-# transport_record_item_on = { type = 'svg-to-png', at = 1, name = 'transport_record_item_on.png' }
-# transport_record_item_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_item_on.png' }
-# transport_record_item_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_item_on.png' }
-# transport_record_loop = { type = 'svg-to-png', at = 1, name = 'transport_record_loop.png' }
-# transport_record_loop_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_loop.png' }
-# transport_record_loop_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_loop.png' }
-# transport_record_loop_on = { type = 'svg-to-png', at = 1, name = 'transport_record_loop_on.png' }
-# transport_record_loop_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_loop_on.png' }
-# transport_record_loop_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_loop_on.png' }
-# transport_record_on = { type = 'svg-to-png', at = 1, name = 'transport_record_on.png' }
-# transport_record_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_on.png' }
-# transport_record_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_on.png' }
-# transport_repeat_off = { type = 'svg-to-png', at = 1, name = 'transport_repeat_off.png' }
-# transport_repeat_off_150 = { type = 'svg-to-png', at = 2, name = 'transport_repeat_off.png' }
-# transport_repeat_off_200 = { type = 'svg-to-png', at = 3, name = 'transport_repeat_off.png' }
-# transport_repeat_on = { type = 'svg-to-png', at = 1, name = 'transport_repeat_on.png' }
-# transport_repeat_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_repeat_on.png' }
-# transport_repeat_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_repeat_on.png' }
-# transport_status_bg = { type = 'svg-to-png', at = 1, name = 'transport_status_bg.png' }
-# transport_status_bg_err = { type = 'svg-to-png', at = 1, name = 'transport_status_bg_err.png' }
-# transport_stop = { type = 'svg-to-png', at = 1, name = 'transport_stop.png' }
-# transport_stop_150 = { type = 'svg-to-png', at = 2, name = 'transport_stop.png' }
-# transport_stop_200 = { type = 'svg-to-png', at = 3, name = 'transport_stop.png' }
+gen_panthumb_horz_150 = { type = 'svg-to-png', at = 2, name = 'gen_panthumb_horz.png' }
+gen_panthumb_horz_200 = { type = 'svg-to-png', at = 3, name = 'gen_panthumb_horz.png' }
+gen_pause = { type = 'svg-to-png', at = 1, name = 'gen_pause.png' }
+gen_pause_150 = { type = 'svg-to-png', at = 2, name = 'gen_pause.png' }
+gen_pause_200 = { type = 'svg-to-png', at = 3, name = 'gen_pause.png' }
+gen_pause_on = { type = 'svg-to-png', at = 1, name = 'gen_pause_on.png' }
+gen_pause_on_150 = { type = 'svg-to-png', at = 2, name = 'gen_pause_on.png' }
+gen_pause_on_200 = { type = 'svg-to-png', at = 3, name = 'gen_pause_on.png' }
+gen_play = { type = 'svg-to-png', at = 1, name = 'gen_play.png' }
+gen_play_150 = { type = 'svg-to-png', at = 2, name = 'gen_play.png' }
+gen_play_200 = { type = 'svg-to-png', at = 3, name = 'gen_play.png' }
+gen_play_on = { type = 'svg-to-png', at = 1, name = 'gen_play_on.png' }
+gen_play_on_150 = { type = 'svg-to-png', at = 2, name = 'gen_play_on.png' }
+gen_play_on_200 = { type = 'svg-to-png', at = 3, name = 'gen_play_on.png' }
+gen_repeat = { type = 'svg-to-png', at = 1, name = 'gen_repeat_off.png' }
+gen_repeat_150 = { type = 'svg-to-png', at = 2, name = 'gen_repeat_off.png' }
+gen_repeat_200 = { type = 'svg-to-png', at = 3, name = 'gen_repeat_off.png' }
+gen_repeat_on = { type = 'svg-to-png', at = 1, name = 'gen_repeat_on.png' }
+gen_repeat_on_150 = { type = 'svg-to-png', at = 2, name = 'gen_repeat_on.png' }
+gen_repeat_on_200 = { type = 'svg-to-png', at = 3, name = 'gen_repeat_on.png' }
+gen_stop = { type = 'svg-to-png', at = 1, name = 'gen_stop.png' }
+gen_stop_150 = { type = 'svg-to-png', at = 2, name = 'gen_stop.png' }
+gen_stop_200 = { type = 'svg-to-png', at = 3, name = 'gen_stop.png' }
+gen_volbg_horz = { type = 'svg-to-png', at = 1, name = 'gen_volbg_horz.png' }
+gen_volbg_horz_dark = { type = 'svg-to-png', at = 1, name = 'gen_volbg_horz_dark.png' }
+gen_volbg_vert = { type = 'svg-to-png', at = 1, name = 'gen_volbg_vert.png' }
+gen_volbg_vert_dark = { type = 'svg-to-png', at = 1, name = 'gen_volbg_vert_dark.png' }
+gen_volthumb_horz = { type = 'svg-to-png', at = 1, name = 'gen_volthumb_horz.png' }
+gen_volthumb_horz_150 = { type = 'svg-to-png', at = 2, name = 'gen_volthumb_horz.png' }
+gen_volthumb_horz_200 = { type = 'svg-to-png', at = 3, name = 'gen_volthumb_horz.png' }
+gen_volthumb_vert = { type = 'svg-to-png', at = 1, name = 'gen_volthumb_vert.png' }
+gen_volthumb_vert_150 = { type = 'svg-to-png', at = 2, name = 'gen_volthumb_vert.png' }
+gen_volthumb_vert_200 = { type = 'svg-to-png', at = 3, name = 'gen_volthumb_vert.png' }
+mcp_bg = { type = 'svg-to-png', at = 1, name = 'mcp_bg.png' }
+mcp_bg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_bg.png' }
+mcp_bg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_bg.png' }
+mcp_bgsel = { type = 'svg-to-png', at = 1, name = 'mcp_bgsel.png' }
+mcp_bgsel_150 = { type = 'svg-to-png', at = 2, name = 'mcp_bgsel.png' }
+mcp_bgsel_200 = { type = 'svg-to-png', at = 3, name = 'mcp_bgsel.png' }
+mcp_extmixbg = { type = 'svg-to-png', at = 1, name = 'mcp_extmixbg.png' }
+mcp_extmixbgsel = { type = 'svg-to-png', at = 1, name = 'mcp_extmixbgsel.png' }
+mcp_fxlist_bg = { type = 'svg-to-png', at = 1, name = 'mcp_fxlist_bg.png' }
+mcp_fxlist_byp = { type = 'svg-to-png', at = 1, name = 'mcp_fxlist_byp.png' }
+mcp_fxlist_byp_200 = { type = 'svg-to-png', at = 3, name = 'mcp_fxlist_byp.png' }
+mcp_fxlist_empty = { type = 'svg-to-png', at = 1, name = 'mcp_fxlist_empty.png' }
+mcp_fxlist_empty_200 = { type = 'svg-to-png', at = 3, name = 'mcp_fxlist_empty.png' }
+mcp_fxlist_norm = { type = 'svg-to-png', at = 1, name = 'mcp_fxlist_norm.png' }
+mcp_fxlist_norm_200 = { type = 'svg-to-png', at = 3, name = 'mcp_fxlist_norm.png' }
+mcp_idxbg = { type = 'svg-to-png', at = 1, name = 'mcp_idxbg.png' }
+mcp_idxbg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_idxbg.png' }
+mcp_idxbg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_idxbg.png' }
+mcp_idxbg_sel = { type = 'svg-to-png', at = 1, name = 'mcp_idxbg_sel.png' }
+mcp_idxbg_sel_150 = { type = 'svg-to-png', at = 2, name = 'mcp_idxbg_sel.png' }
+mcp_idxbg_sel_200 = { type = 'svg-to-png', at = 3, name = 'mcp_idxbg_sel.png' }
+mcp_mainbg = { type = 'svg-to-png', at = 1, name = 'mcp_mainbg.png' }
+mcp_mainbgsel = { type = 'svg-to-png', at = 1, name = 'mcp_mainbgsel.png' }
+mcp_master_volbg = { type = 'svg-to-png', at = 1, name = 'mcp_master_volbg.png' }
+mcp_master_volbg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_master_volbg.png' }
+mcp_master_volbg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_master_volbg.png' }
+mcp_pan_knob_small = { type = 'svg-to-png', at = 1, name = 'mcp_pan_knob_small.png' }
+mcp_pan_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'mcp_pan_knob_small.png' }
+mcp_pan_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'mcp_pan_knob_small.png' }
+mcp_volbg = { type = 'svg-to-png', at = 1, name = 'mcp_volbg.png' }
+mcp_volbg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_volbg.png' }
+mcp_volbg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_volbg.png' }
+mcp_width_knob_small = { type = 'svg-to-png', at = 1, name = 'mcp_width_knob_small.png' }
+mcp_width_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'mcp_width_knob_small.png' }
+mcp_width_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'mcp_width_knob_small.png' }
+piano_black_key = { type = 'svg-to-png', at = 1, name = 'piano_black_key.png' }
+piano_black_key_sel = { type = 'svg-to-png', at = 1, name = 'piano_black_key_sel.png' }
+piano_white_key = { type = 'svg-to-png', at = 1, name = 'piano_white_key.png' }
+piano_white_key_sel = { type = 'svg-to-png', at = 1, name = 'piano_white_key_sel.png' }
+scrollbar = { type = 'svg-to-png', at = 1, name = 'scrollbar.png' }
+scrollbar_3 = { type = 'svg-to-png', at = 1, name = 'scrollbar_3.png' }
+tcp_bg = { type = 'svg-to-png', at = 1, name = 'tcp_bg.png' }
+tcp_bgsel = { type = 'svg-to-png', at = 1, name = 'tcp_bgsel.png' }
+tcp_idxbg = { type = 'svg-to-png', at = 1, name = 'tcp_idxbg.png' }
+tcp_idxbg_150 = { type = 'svg-to-png', at = 2, name = 'tcp_idxbg.png' }
+tcp_idxbg_200 = { type = 'svg-to-png', at = 3, name = 'tcp_idxbg.png' }
+tcp_idxbg_sel = { type = 'svg-to-png', at = 1, name = 'tcp_idxbg_sel.png' }
+tcp_idxbg_sel_150 = { type = 'svg-to-png', at = 2, name = 'tcp_idxbg_sel.png' }
+tcp_idxbg_sel_200 = { type = 'svg-to-png', at = 3, name = 'tcp_idxbg_sel.png' }
+tcp_main_namebg_sel = { type = 'svg-to-png', at = 1, name = 'tcp_main_namebg_sel.png' }
+tcp_mainbg = { type = 'svg-to-png', at = 1, name = 'tcp_mainbg.png' }
+tcp_mainbgsel = { type = 'svg-to-png', at = 1, name = 'tcp_mainbgsel.png' }
+tcp_namebg = { type = 'svg-to-png', at = 1, name = 'tcp_namebg.png' }
+tcp_namebg_200 = { type = 'svg-to-png', at = 3, name = 'tcp_namebg.png' }
+tcp_pan_knob_small = { type = 'svg-to-png', at = 1, name = 'tcp_pan_knob_small.png' }
+tcp_pan_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'tcp_pan_knob_small.png' }
+tcp_pan_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'tcp_pan_knob_small.png' }
+tcp_vol_knob_small = { type = 'svg-to-png', at = 1, name = 'tcp_vol_knob_small.png' }
+tcp_vol_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'tcp_vol_knob_small.png' }
+tcp_vol_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'tcp_vol_knob_small.png' }
+tcp_volbg = { type = 'svg-to-png', at = 1, name = 'tcp_volbg.png' }
+tcp_volbg_150 = { type = 'svg-to-png', at = 2, name = 'tcp_volbg.png' }
+tcp_volbg_200 = { type = 'svg-to-png', at = 3, name = 'tcp_volbg.png' }
+tcp_volthumb = { type = 'svg-to-png', at = 1, name = 'tcp_volthumb.png' }
+tcp_volthumb_150 = { type = 'svg-to-png', at = 2, name = 'tcp_volthumb.png' }
+tcp_volthumb_200 = { type = 'svg-to-png', at = 3, name = 'tcp_volthumb.png' }
+tcp_width_knob_small = { type = 'svg-to-png', at = 1, name = 'tcp_width_knob_small.png' }
+tcp_width_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'tcp_width_knob_small.png' }
+tcp_width_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'tcp_width_knob_small.png' }
+track_recarm_auto = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto.png' }
+track_recarm_auto_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto.png' }
+track_recarm_auto_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto.png' }
+track_recarm_auto_norec = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_norec.png' }
+track_recarm_auto_norec_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_norec.png' }
+track_recarm_auto_norec_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_norec.png' }
+track_recarm_auto_norec_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_norec_ol.png' }
+track_recarm_auto_norec_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_norec_ol.png' }
+track_recarm_auto_norec_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_norec_ol.png' }
+track_recarm_auto_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_ol.png' }
+track_recarm_auto_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_ol.png' }
+track_recarm_auto_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_ol.png' }
+track_recarm_auto_on = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_on.png' }
+track_recarm_auto_on_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_on.png' }
+track_recarm_auto_on_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_on.png' }
+track_recarm_auto_on_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_on_ol.png' }
+track_recarm_auto_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_on_ol.png' }
+track_recarm_auto_on_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_on_ol.png' }
+track_recarm_norec = { type = 'svg-to-png', at = 1, name = 'track_recarm_norec.png' }
+track_recarm_norec_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_norec.png' }
+track_recarm_norec_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_norec.png' }
+track_recarm_norec_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_norec_ol.png' }
+track_recarm_norec_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_norec_ol.png' }
+track_recarm_norec_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_norec_ol.png' }
+track_recarm_off = { type = 'svg-to-png', at = 1, name = 'track_recarm_off.png' }
+track_recarm_off_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_off.png' }
+track_recarm_off_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_off.png' }
+track_recarm_off_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_off_ol.png' }
+track_recarm_off_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_off_ol.png' }
+track_recarm_off_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_off_ol.png' }
+track_recarm_on = { type = 'svg-to-png', at = 1, name = 'track_recarm_on.png' }
+track_recarm_on_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_on.png' }
+track_recarm_on_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_on.png' }
+track_recarm_on_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_on_ol.png' }
+track_recarm_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_on_ol.png' }
+track_recarm_on_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_on_ol.png' }
+transport_bg = { type = 'svg-to-png', at = 1, name = 'transport_bg.png' }
+transport_bpm = { type = 'svg-to-png', at = 1, name = 'transport_bpm.png' }
+transport_bpm_bg = { type = 'svg-to-png', at = 1, name = 'transport_bpm_bg.png' }
+transport_end = { type = 'svg-to-png', at = 1, name = 'transport_end.png' }
+transport_end_150 = { type = 'svg-to-png', at = 2, name = 'transport_end.png' }
+transport_end_200 = { type = 'svg-to-png', at = 3, name = 'transport_end.png' }
+transport_home = { type = 'svg-to-png', at = 1, name = 'transport_home.png' }
+transport_home_150 = { type = 'svg-to-png', at = 2, name = 'transport_home.png' }
+transport_home_200 = { type = 'svg-to-png', at = 3, name = 'transport_home.png' }
+transport_knob_bg_large = { type = 'svg-to-png', at = 1, name = 'transport_knob_bg_large.png' }
+transport_knob_bg_large_150 = { type = 'svg-to-png', at = 2, name = 'transport_knob_bg_large.png' }
+transport_knob_bg_large_200 = { type = 'svg-to-png', at = 3, name = 'transport_knob_bg_large.png' }
+transport_next = { type = 'svg-to-png', at = 1, name = 'transport_next.png' }
+transport_next_150 = { type = 'svg-to-png', at = 2, name = 'transport_next.png' }
+transport_next_200 = { type = 'svg-to-png', at = 3, name = 'transport_next.png' }
+transport_pause = { type = 'svg-to-png', at = 1, name = 'transport_pause.png' }
+transport_pause_150 = { type = 'svg-to-png', at = 2, name = 'transport_pause.png' }
+transport_pause_200 = { type = 'svg-to-png', at = 3, name = 'transport_pause.png' }
+transport_pause_on = { type = 'svg-to-png', at = 1, name = 'transport_pause_on.png' }
+transport_pause_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_pause_on.png' }
+transport_pause_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_pause_on.png' }
+transport_play = { type = 'svg-to-png', at = 1, name = 'transport_play.png' }
+transport_play_150 = { type = 'svg-to-png', at = 2, name = 'transport_play.png' }
+transport_play_200 = { type = 'svg-to-png', at = 3, name = 'transport_play.png' }
+transport_play_on = { type = 'svg-to-png', at = 1, name = 'transport_play_on.png' }
+transport_play_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_play_on.png' }
+transport_play_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_play_on.png' }
+transport_play_sync = { type = 'svg-to-png', at = 1, name = 'transport_play_sync.png' }
+transport_play_sync_150 = { type = 'svg-to-png', at = 2, name = 'transport_play_sync.png' }
+transport_play_sync_200 = { type = 'svg-to-png', at = 3, name = 'transport_play_sync.png' }
+transport_play_sync_on = { type = 'svg-to-png', at = 1, name = 'transport_play_sync_on.png' }
+transport_play_sync_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_play_sync_on.png' }
+transport_play_sync_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_play_sync_on.png' }
+transport_playspeedbg = { type = 'svg-to-png', at = 1, name = 'transport_playspeedbg.png' } # WARNING undetected
+transport_previous = { type = 'svg-to-png', at = 1, name = 'transport_previous.png' }
+transport_previous_150 = { type = 'svg-to-png', at = 2, name = 'transport_previous.png' }
+transport_previous_200 = { type = 'svg-to-png', at = 3, name = 'transport_previous.png' }
+transport_record = { type = 'svg-to-png', at = 1, name = 'transport_record.png' }
+transport_record_150 = { type = 'svg-to-png', at = 2, name = 'transport_record.png' }
+transport_record_200 = { type = 'svg-to-png', at = 3, name = 'transport_record.png' }
+transport_record_item = { type = 'svg-to-png', at = 1, name = 'transport_record_item.png' }
+transport_record_item_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_item.png' }
+transport_record_item_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_item.png' }
+transport_record_item_on = { type = 'svg-to-png', at = 1, name = 'transport_record_item_on.png' }
+transport_record_item_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_item_on.png' }
+transport_record_item_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_item_on.png' }
+transport_record_loop = { type = 'svg-to-png', at = 1, name = 'transport_record_loop.png' }
+transport_record_loop_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_loop.png' }
+transport_record_loop_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_loop.png' }
+transport_record_loop_on = { type = 'svg-to-png', at = 1, name = 'transport_record_loop_on.png' }
+transport_record_loop_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_loop_on.png' }
+transport_record_loop_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_loop_on.png' }
+transport_record_on = { type = 'svg-to-png', at = 1, name = 'transport_record_on.png' }
+transport_record_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_on.png' }
+transport_record_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_on.png' }
+transport_repeat_off = { type = 'svg-to-png', at = 1, name = 'transport_repeat_off.png' }
+transport_repeat_off_150 = { type = 'svg-to-png', at = 2, name = 'transport_repeat_off.png' }
+transport_repeat_off_200 = { type = 'svg-to-png', at = 3, name = 'transport_repeat_off.png' }
+transport_repeat_on = { type = 'svg-to-png', at = 1, name = 'transport_repeat_on.png' }
+transport_repeat_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_repeat_on.png' }
+transport_repeat_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_repeat_on.png' }
+transport_status_bg = { type = 'svg-to-png', at = 1, name = 'transport_status_bg.png' }
+transport_status_bg_err = { type = 'svg-to-png', at = 1, name = 'transport_status_bg_err.png' }
+transport_stop = { type = 'svg-to-png', at = 1, name = 'transport_stop.png' }
+transport_stop_150 = { type = 'svg-to-png', at = 2, name = 'transport_stop.png' }
+transport_stop_200 = { type = 'svg-to-png', at = 3, name = 'transport_stop.png' }

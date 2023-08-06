@@ -78,7 +78,7 @@ fn namespace(
 	    radio: & gtk::CheckButton,
 	selection:   SharedSelection,
 ) -> (adw::ExpanderRow, glib::Sender<bool>) {
-	let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+	let (tx, rx) = glib::MainContext::channel(glib::Priority::DEFAULT);
 	expand_view_here! { }
 	container.add(&root);
 	
@@ -90,7 +90,7 @@ fn namespace(
 		if no_group { selected.group.clear(); }
 		
 		send!(Msg::Select => parent);
-		glib::Continue(true)
+		glib::ControlFlow::Continue
 	});
 	
 	(root, tx)

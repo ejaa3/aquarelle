@@ -234,7 +234,7 @@ const ABOUT    : &str = "win.about";
 			settings.set(LOG_HEIGHT, log.height_request()).unwrap_or_else(
 				|error| critical!("Failed to save {LOG_HEIGHT:?} setting: {error}")
 			);
-			glib::signal::Inhibit(false)
+			glib::Propagation::Proceed
 		}]
 	}
 	

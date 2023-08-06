@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Firefox GNOME Theme'
+ name = 'Firefox GNOME Theme (v166)'
  type = 'text-file'
 about = 'Style sheet that remaps <a href="https://github.com/rafaelmardojai/firefox-gnome-theme">Firefox GNOME theme</a> colors.'
 

@@ -7,7 +7,7 @@
 use std::rc::Rc;
 use declarative::{builder_mode, view};
 use glib::subclass::types::ObjectSubclassIsExt;
-use gtk::{glib, traits::BoxExt, prelude::GObjectPropertyExpressionExt};
+use gtk::{glib, traits::{BoxExt, ListItemExt}, prelude::GObjectPropertyExpressionExt};
 use palette::{FromColor, Srgba, rgb::channels::Rgba};
 use crate::icons;
 

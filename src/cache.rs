@@ -20,7 +20,7 @@ impl Cache {
 	pub fn new(mut handle: impl FnMut(ScanError)) -> Self {
 		let mut namespaces = BTreeMap::new();
 		
-		let system_path = &[PREFIX_DIR, DATA_DIR, APP].iter().collect::<path::PathBuf>();
+		let system_path = &[PREFIX_DIR, DATA_DIR, APP].iter().collect();
 		let  local_path = &mut dirs::data_dir().unwrap(); local_path.push(APP);
 		
 		for (local, path) in [(false, system_path), (true, local_path)] {

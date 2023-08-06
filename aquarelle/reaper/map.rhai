@@ -6,6 +6,7 @@
 
 import "colors" as colors;
 import "control_panel" as cp;
+import "general" as gen;
 import "transport" as transport;
 
 const   main = cfg::scheme("main");
@@ -14,8 +15,8 @@ const accent = cfg::option("accent");
 fn out() { `"#${this.to_hex_rgba(true)}"` }
 
 fn shadow(factor) {
-	const x = this.luma();
-	rgb(0.0, 0.0, 0.0, (2 ** -x + 0.2 * x - 0.6) * factor).out()
+	const L = this.luma();
+	rgb(0.0, 0.0, 0.0, (2 ** -L + 0.2 * L - 0.6) * factor).out()
 }
 
 fn is_dark() { this.lower.text.luma() > this.lower.like.luma() }
@@ -32,6 +33,17 @@ fn lower(set, role, bias) {
 		true => lab::darken (this[set][role], bias),
 		   _ => lab::lighten(this[set][role], bias)
 	}
+}
+
+fn switchable(on) {
+	const SET = global::main[if on { global::accent } else { "lower" }];
+	
+	const COLORS = switch on {
+		true => [SET.area, lab::mix(SET.area, SET.text, 0.1), lab::mix(SET.area, SET.text, 0.2)],
+		   _ => [SET.text.fade(0.2), SET.text.fade(0.3), SET.text.fade(0.4)]
+	};
+	
+	#{ set: SET, colors: COLORS }
 }
 
 const SCROLLBAR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 204 238">
@@ -125,56 +137,84 @@ fn rectangle(color, width, height) {
 	envcp_knob_small_150: cp::knob_small_150(false),
 	envcp_knob_small_200: cp::knob_small_200(false),
 	
+	gen_end: gen::transport(`end`, false, 1),
+	gen_end_150: gen::transport(`end`, false, 1.5),
+	gen_end_200: gen::transport(`end`, false, 2),
+	gen_home: gen::transport(`home`, false, 1),
+	gen_home_150: gen::transport(`home`, false, 1.5),
+	gen_home_200: gen::transport(`home`, false, 2),
 	gen_panbg_horz: rectangle(main.lower.area, 14, 14),
 	gen_panbg_horz_dark: rectangle(main.red.area, 14, 14),
-	gen_panthumb_horz: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 29">
-		<path fill="magenta" d="M 0 28 L 0 29 L 1 29 L 1 28 L 0 28 z M 24 28 L 24 29 L 25 29 L 25 28 L 24 28 z "/>
-		<path fill=${main.lower.text.fade(main.dim).out()} d="M 7.5 6 A 4.5 4.5 0 0 0 3 10.5 L 3 17.5 A 4.5 4.5 0 0 0 7.5 22 L 12 22 L 12 17.5 L 12 10.5 L 12 6 L 7.5 6 z M 13 6 L 13 10.5 L 13 17.5 L 13 22 L 17.5 22 A 4.5 4.5 0 0 0 22 17.5 L 22 10.5 A 4.5 4.5 0 0 0 17.5 6 L 13 6 z "/>
-		<path fill=${main.lower.like.shadow(0.5)} d="M 3 17.5 L 3 22.5 A 4.5 4.5 0 0 0 7.5 27 L 12 27 L 12 22.5 L 12 22 L 7.5 22 A 4.5 4.5 0 0 1 3 17.5 z M 22 17.5 A 4.5 4.5 0 0 1 17.5 22 L 13 22 L 13 22.5 L 13 27 L 17.5 27 A 4.5 4.5 0 0 0 22 22.5 L 22 17.5 z "/>
-	</svg>`,
+	gen_panthumb_horz: gen::panthumb_horz,
+	gen_panthumb_horz_150: gen::panthumb_horz_150,
+	gen_panthumb_horz_200: gen::panthumb_horz_200,
+	gen_pause: gen::transport(`pause`, false, 1),
+	gen_pause_150: gen::transport(`pause`, false, 1.5),
+	gen_pause_200: gen::transport(`pause`, false, 2),
+	gen_pause_on: gen::transport(`pause`, true, 1),
+	gen_pause_on_150: gen::transport(`pause`, true, 1.5),
+	gen_pause_on_200: gen::transport(`pause`, true, 2),
+	gen_play: gen::transport(`play`, false, 1),
+	gen_play_150: gen::transport(`play`, false, 1.5),
+	gen_play_200: gen::transport(`play`, false, 2),
+	gen_play_on: gen::transport(`play`, true, 1),
+	gen_play_on_150: gen::transport(`play`, true, 1.5),
+	gen_play_on_200: gen::transport(`play`, true, 2),
+	gen_repeat: gen::transport(`repeat`, false, 1),
+	gen_repeat_150: gen::transport(`repeat`, false, 1.5),
+	gen_repeat_200: gen::transport(`repeat`, false, 2),
+	gen_repeat_on: gen::transport(`repeat`, true, 1),
+	gen_repeat_on_150: gen::transport(`repeat`, true, 1.5),
+	gen_repeat_on_200: gen::transport(`repeat`, true, 2),
+	gen_stop: gen::transport(`stop`, false, 1),
+	gen_stop_150: gen::transport(`stop`, false, 1.5),
+	gen_stop_200: gen::transport(`stop`, false, 2),
 	gen_volbg_horz: rectangle(main.lower.area, 14, 14),
 	gen_volbg_horz_dark: rectangle(main.red.area, 14, 14),
 	gen_volbg_vert: rectangle(main.lower.area, 14, 14),
 	gen_volbg_vert_dark: rectangle(main.red.area, 14, 14),
-	gen_volthumb_horz: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 29">
-		<path fill="magenta" d="M 0 28 L 0 29 L 1 29 L 1 28 L 0 28 z M 24 28 L 24 29 L 25 29 L 25 28 L 24 28 z "/>
-		<path fill=${main.lower.text.fade(main.dim).out()} d="M 7.5 6 A 4.5 4.5 0 0 0 3 10.5 L 3 17.5 A 4.5 4.5 0 0 0 7.5 22 L 12 22 L 12 17.5 L 12 10.5 L 12 6 L 7.5 6 z M 13 6 L 13 10.5 L 13 17.5 L 13 22 L 17.5 22 A 4.5 4.5 0 0 0 22 17.5 L 22 10.5 A 4.5 4.5 0 0 0 17.5 6 L 13 6 z "/>
-		<path fill=${main.lower.like.shadow(0.5)} d="M 3 17.5 L 3 22.5 A 4.5 4.5 0 0 0 7.5 27 L 12 27 L 12 22.5 L 12 22 L 7.5 22 A 4.5 4.5 0 0 1 3 17.5 z M 22 17.5 A 4.5 4.5 0 0 1 17.5 22 L 13 22 L 13 22.5 L 13 27 L 17.5 27 A 4.5 4.5 0 0 0 22 22.5 L 22 17.5 z "/>
-	</svg>`,
-	gen_volthumb_horz_150: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 43">
-		<path fill="magenta" d="M 0 42 L 0 43 L 1 43 L 1 42 L 0 42 z M 36 42 L 36 43 L 37 43 L 37 42 L 36 42 z "/>
-		<path fill=${main.lower.text.fade(main.dim).out()} d="M 16.5 9 A 11.5 11.5 0 0 0 5 20.5 A 11.5 11.5 0 0 0 16.5 32 L 18 32 L 18 9 L 16.5 9 z M 19 9 L 19 32 L 20.5 32 A 11.5 11.5 0 0 0 32 20.5 A 11.5 11.5 0 0 0 20.5 9 L 19 9 z "/>
-		<path fill=${main.lower.like.shadow(0.5)} d="M 5 20.5 L 5 28.5 A 11.5 11.5 0 0 0 16.5 40 L 18 40 L 18 32 L 16.5 32 A 11.5 11.5 0 0 1 5 20.5 z M 32 20.5 A 11.5 11.5 0 0 1 20.5 32 L 19 32 L 19 40 L 20.5 40 A 11.5 11.5 0 0 0 32 28.5 L 32 20.5 z "/>
-	</svg>`,
-	gen_volthumb_horz_200: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 57">
-		<path fill="magenta" d="M 0 56 L 0 57 L 1 57 L 1 56 L 0 56 z M 47 56 L 47 57 L 48 57 L 48 56 L 47 56 z "/>
-		<path fill=${main.lower.text.fade(main.dim).out()} d="M 21 12 A 16 16 0 0 0 5 28 A 16 16 0 0 0 21 44 L 23 44 L 23 12 L 21 12 z M 25 12 L 25 44 L 27 44 A 16 16 0 0 0 43 28 A 16 16 0 0 0 27 12 L 25 12 z "/>
-		<path fill=${main.lower.like.shadow(0.5)} d="m 5,28 v 9 a 16,16 0 0 0 16,16 h 2 V 44 H 21 A 16,16 0 0 1 5,28 Z m 38,0 A 16,16 0 0 1 27,44 h -2 v 9 h 2 A 16,16 0 0 0 43,37 Z"/>
-	</svg>`,
-	gen_volthumb_vert: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 31">
-		<path fill="magenta" d="M 20 0 L 20 5 L 21 5 L 21 0 L 20 0 z M 20 26 L 20 31 L 21 31 L 21 26 L 20 26 z "/>
-		<path fill=${main.lower.text.fade(main.dim).out()} d="M 18,10.5 A 4.5,4.5 0 0 0 13.5,6 h -7 A 4.5,4.5 0 0 0 2,10.5 V 15 h 4.5 7 4.5 z M 18,16 H 13.5 6.5 2 v 4.5 A 4.5,4.5 0 0 0 6.5,25 h 7 A 4.5,4.5 0 0 0 18,20.5 Z"/>
-		<path fill=${main.lower.like.shadow(0.5)} d="M 2 20.5 L 2 24.5 A 4.5 4.5 0 0 0 6.5 29 L 13.5 29 A 4.5 4.5 0 0 0 18 24.5 L 18 20.5 A 4.5 4.5 0 0 1 13.5 25 L 6.5 25 A 4.5 4.5 0 0 1 2 20.5 z "/>
-	</svg>`,
-	gen_volthumb_vert_150: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 47">
-		<path fill="magenta" d="M 30 0 L 30 8 L 31 8 L 31 0 L 30 0 z M 30 39 L 30 47 L 31 47 L 31 39 L 30 39 z "/>
-		<path fill=${main.lower.text.fade(main.dim).out()} d="M 15 9 A 12 12 0 0 0 3 21 L 3 23 L 27 23 L 27 21 A 12 12 0 0 0 15 9 z M 3 24 L 3 26 A 12 12 0 0 0 15 38 A 12 12 0 0 0 27 26 L 27 24 L 3 24 z "/>
-		<path fill=${main.lower.like.shadow(0.5)} d="m 3,26 v 2 2.5 2.5 A 12,12 0 0 0 15,45 12,12 0 0 0 27,33 V 30.5 28 26 A 12,12 0 0 1 15,38 12,12 0 0 1 3,26 Z"/>
-	</svg>`,
-	gen_volthumb_vert_200: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 54">
-		<path fill="magenta" d="M 40 0 L 40 6 L 41 6 L 41 0 L 40 0 z M 40 48 L 40 54 L 41 54 L 41 48 L 40 48 z "/>
-		<path fill=${main.lower.text.fade(main.dim).out()} d="M 36,24 A 16,16 0 0 0 20,8 16,16 0 0 0 4,24 v 2 h 32 z m 0,4 H 4 v 2 A 16,16 0 0 0 20,46 16,16 0 0 0 36,30 Z"/>
-		<path fill=${main.lower.like.shadow(0.5)} d="m 4,30 v 1 2 2 2 A 16,16 0 0 0 20,53 16,16 0 0 0 36,37 V 35 33 31 30 A 16,16 0 0 1 20,46 16,16 0 0 1 4,30 Z"/>
-	</svg>`,
+	gen_volthumb_horz: gen::volthumb_horz,
+	gen_volthumb_horz_150: gen::volthumb_horz_150,
+	gen_volthumb_horz_200: gen::volthumb_horz_200,
+	gen_volthumb_vert: gen::volthumb_vert,
+	gen_volthumb_vert_150: gen::volthumb_vert_150,
+	gen_volthumb_vert_200: gen::volthumb_vert_200,
 	
+	mcp_bg: cp::mcp_bg(0.0),
+	mcp_bg_150: cp::mcp_bg_150(0.0),
+	mcp_bg_200: cp::mcp_bg_200(0.0),
+	mcp_bgsel: cp::mcp_bg(0.05),
+	mcp_bgsel_150: cp::mcp_bg_150(0.05),
+	mcp_bgsel_200: cp::mcp_bg_200(0.05),
+	mcp_extmixbg: cp::mcp_extmixbg(0.0),
+	mcp_extmixbgsel: cp::mcp_extmixbg(0.05),
+	mcp_fxlist_bg: cp::mcp_fxlist_bg,
+	mcp_fxlist_byp: cp::mcp_fxlist_byp,
+	mcp_fxlist_byp_200: cp::mcp_fxlist_200(2),
+	mcp_fxlist_empty: cp::mcp_fxlist_empty,
+	mcp_fxlist_empty_200: cp::mcp_fxlist_200(1),
+	mcp_fxlist_norm: cp::mcp_fxlist_norm,
+	mcp_fxlist_norm_200: cp::mcp_fxlist_200(3),
+	mcp_idxbg: cp::mcp_idxbg,
+	mcp_idxbg_150: cp::mcp_idxbg_150,
+	mcp_idxbg_200: cp::mcp_idxbg_200,
+	mcp_idxbg_sel: cp::mcp_idxbg_sel,
+	mcp_idxbg_sel_150: cp::mcp_idxbg_sel_150,
+	mcp_idxbg_sel_200: cp::mcp_idxbg_sel_200,
 	mcp_mainbg: rectangle(main.lower.like, 22, 9),
 	mcp_mainbgsel: rectangle(main.raise("lower", "like", 0.05), 22, 9),
 	mcp_master_volbg: cp::mcp_master_volbg,
 	mcp_master_volbg_150: cp::mcp_master_volbg_150,
 	mcp_master_volbg_200: cp::mcp_master_volbg_200,
+	mcp_pan_knob_small: cp::mcp_knob_small(true),
+	mcp_pan_knob_small_150: cp::mcp_knob_small_150(true),
+	mcp_pan_knob_small_200: cp::mcp_knob_small_200(true),
 	mcp_volbg: cp::mcp_volbg,
 	mcp_volbg_150: cp::mcp_volbg_150,
 	mcp_volbg_200: cp::mcp_volbg_200,
+	mcp_width_knob_small: cp::mcp_knob_small(false),
+	mcp_width_knob_small_150: cp::mcp_knob_small_150(false),
+	mcp_width_knob_small_200: cp::mcp_knob_small_200(false),
 	
 	scrollbar: SCROLLBAR,
 	scrollbar_3: SCROLLBAR,
@@ -185,21 +225,18 @@ fn rectangle(color, width, height) {
 		<rect fill=${if main.is_dark() { main.lower.area.out() } else { lab::mix(main.lower.like, main.lower.text, main.dim).out() }} x="1" y="1" width="7" height="5"/>
 		<rect fill=${if main.is_dark() { main.lower.area.shadow(0.5) } else { lab::mix(main.lower.like, main.lower.text, main.dim).shadow(0.5) }} x="1" y="6" width="6" height="3"/>
 	</svg>`,
-	
 	piano_black_key_sel: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 10">
 		<path fill="yellow" d="M0 0L0 1L1 1L1 0L0 0zM8 5L8 10L9 10L9 5L8 5z"/>
 		<path fill="magenta" d="M1 0L1 1L2 1L2 0L1 0zM1 1L0 1L0 2L1 2L1 1zM8 4L8 5L9 5L9 4L8 4zM6 9L6 10L8 10L8 9L6 9z"/>
 		<rect fill=${main[accent].area.out()} x="1" y="1" width="7" height="5"/>
 		<rect fill=${if main.is_dark() { main.lower.area.shadow(1) } else { lab::mix(main.lower.like, main.lower.text, main.dim).shadow(1) }} x="1" y="6" width="6" height="3"/>
 	</svg>`,
-	
 	piano_white_key: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 10">
 		<path fill="magenta" d="M0 0L0 1L0 2L1 2L1 1L2 1L2 0L0 0zM8 8L8 9L7 9L7 10L8 10L9 10L9 8L8 8z"/>
 		<rect fill=${if main.is_dark() { lab::mix(main.lower.area, main.lower.text, main.dim).out() } else { main.lower.like.out() }} x="1" y="1" width="7" height="7"/>
 		<rect fill=${if main.is_dark() { lab::mix(main.lower.area, main.lower.text, main.dim).out() } else { main.lower.like.out() }} x="1" y="8" width="7" height="1"/>
 		<rect fill=${if main.is_dark() { lab::mix(main.lower.area, main.lower.text, main.dim).shadow(1.5) } else { main.lower.like.shadow(1.5) }} x="1" y="8" width="7" height="1"/>
 	</svg>`,
-	
 	piano_white_key_sel: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 10">
 		<path fill="magenta" d="M0 0L0 1L0 2L1 2L1 1L2 1L2 0L0 0zM8 8L8 9L7 9L7 10L8 10L9 10L9 8L8 8z"/>
 		<rect fill=${main[accent].area.out()} x="1" y="1" width="7" height="7"/>
@@ -209,17 +246,32 @@ fn rectangle(color, width, height) {
 	
 	tcp_bg: cp::tcp_bg(main.raise("lower", "like", 0.05), 0, 47),
 	tcp_bgsel: cp::tcp_bg(main.raise("lower", "like", 0.1), 0, 47),
+	tcp_idxbg: cp::tcp_idxbg,
+	tcp_idxbg_150: cp::tcp_idxbg_150,
+	tcp_idxbg_200: cp::tcp_idxbg_200,
+	tcp_idxbg_sel: cp::tcp_idxbg_sel,
+	tcp_idxbg_sel_150: cp::tcp_idxbg_sel_150,
+	tcp_idxbg_sel_200: cp::tcp_idxbg_sel_200,
 	tcp_main_namebg_sel: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 3"/>`,
 	tcp_mainbg: rectangle(main.lower.like, 22, 9),
 	tcp_mainbgsel: rectangle(main.raise("lower", "like", 0.05), 22, 9),
 	tcp_namebg: cp::tcp_namebg,
 	tcp_namebg_200: cp::tcp_namebg_200,
+	tcp_pan_knob_small: cp::tcp_knob_small(true),
+	tcp_pan_knob_small_150: cp::tcp_knob_small_150(true),
+	tcp_pan_knob_small_200: cp::tcp_knob_small_200(true),
 	tcp_volbg: cp::tcp_volbg,
 	tcp_volbg_150: cp::tcp_volbg_150,
 	tcp_volbg_200: cp::tcp_volbg_200,
 	tcp_vol_knob_small: cp::knob_small(true),
 	tcp_vol_knob_small_150: cp::knob_small_150(true),
 	tcp_vol_knob_small_200: cp::knob_small_200(true),
+	tcp_volthumb: cp::tcp_volthumb,
+	tcp_volthumb_150: cp::tcp_volthumb_150,
+	tcp_volthumb_200: cp::tcp_volthumb_200,
+	tcp_width_knob_small: cp::tcp_knob_small(false),
+	tcp_width_knob_small_150: cp::tcp_knob_small_150(false),
+	tcp_width_knob_small_200: cp::tcp_knob_small_200(false),
 	
 	track_recarm_auto: cp::arm("auto", "off", 1),
 	track_recarm_auto_150: cp::arm("auto", "off", 1.5),

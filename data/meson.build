@@ -10,6 +10,15 @@ config = {
 	'LICENSE': meson.project_license().get(0),
 }
 
+install_data('app-icons' / f'@app_id@.svg',
+	install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps'
+)
+
+install_data('app-icons' / f'@base_id@-symbolic.svg',
+	install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'symbolic' / 'apps',
+	rename: f'@app_id@-symbolic.svg',
+)
+
 desktop_file = i18n.merge_file(
 	input: configure_file(
 		input: f'@base_id@.desktop.in.in',
@@ -76,5 +85,3 @@ run_command('ln', '-frs', configure_file(
 	output: '@BASENAME@',
 	configuration: config,
 ), symlink, check: true)
-
-subdir('icons')

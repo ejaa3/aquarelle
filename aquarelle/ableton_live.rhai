@@ -14,8 +14,8 @@ const solar_area = // HACK better solarized
 		{ main.lower.like } else { main.upper.area };
 
 fn shadow(factor) {
-	const x = this.luma();
-	lab::mix(this, rgb(0, 0, 0), (2 ** -x + 0.2 * x - 0.6) * factor).out()
+	const L = this.luma();
+	lab::mix(this, rgb(0, 0, 0), (2 ** -L + 0.2 * L - 0.6) * factor).out()
 }
 
 `<?xml version="1.0" encoding="UTF-8"?>

@@ -262,12 +262,10 @@ fn write<'a>(
 				}
 			}
 			
-			macro_rules! policy {
-				($policy:ident) => {
-					(map::Replica::Arrangement, arrangement::Replica::$policy) |
-					(map::Replica::$policy    , _)
-				};
-			}
+			macro_rules! policy (($policy:ident) => {
+				(map::Replica::Arrangement, arrangement::Replica::$policy) |
+				(map::Replica::$policy    , _)
+			});
 			
 			let result = match replica {
 				policy!(HardLink) => {
@@ -277,9 +275,7 @@ fn write<'a>(
 					#[cfg(unix)]
 					std::os::unix::fs::symlink(written_path.as_path(), path.buf.as_path()).err()
 				}
-				policy!(Copy) => {
-					std::fs::copy(written_path.as_path(), path.buf.as_path()).err()
-				}
+				policy!(Copy) => std::fs::copy(written_path.as_path(), path.buf.as_path()).err()
 			};
 			
 			if let Some(error) = result { io_errors.push(IoError { path, error }) }
@@ -292,9 +288,7 @@ fn write<'a>(
 				Err(error) => io_errors.push(IoError { path, error })
 			};
 		}
-	}
-	
-	Ok(())
+	} Ok(())
 }
 
 // WATCH https://github.com/RazrFalcon/resvg/blob/master/crates/resvg/examples/minimal.rs

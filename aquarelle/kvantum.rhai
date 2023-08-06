@@ -8,7 +8,7 @@ const   main = cfg::scheme("main");
 const accent = cfg::option("accent");
 
 fn out() { '#' + this.to_hex_rgb(true) }
-fn shadow() { const x = this.luma(); 2 ** -x + 0.2 * x - 0.6 }
+fn shadow() { const L = this.luma(); 2 ** -L + 0.2 * L - 0.6 }
 
 // animate_states = true
 const CONFIG = `[%General]

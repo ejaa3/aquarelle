@@ -35,7 +35,7 @@ const SELECT = 0.375;
 fn out() { '#' + this.to_hex_rgba(true) }
 fn dim(set) { this[set].text.fade(this.dim).out() }
 fn dark() { this.lower.text.luma() > this.lower.like.luma() }
-fn shadow() { const x = this.luma(); 2 ** -x + 0.2 * x - 0.6 }
+fn shadow() { const L = this.luma(); 2 ** -L + 0.2 * L - 0.6 }
 
 fn solar_bg() {
 	if !this.dark() || this.lower.area.luma() < this.lower.like.luma()

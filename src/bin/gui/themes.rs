@@ -125,7 +125,7 @@ impl Themes<'_> {
 }]
 
 fn start(Themes { cache, selection, settings, tags, window }: Themes) -> Template {
-	let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+	let (tx, rx) = glib::MainContext::channel(glib::Priority::DEFAULT);
 	
 	let scheme = SelectedScheme::default();
 	
@@ -161,7 +161,7 @@ fn start(Themes { cache, selection, settings, tags, window }: Themes) -> Templat
 		}
 	});
 	
-	rx.attach(None, move |msg| { update(msg); glib::Continue(true) });
+	rx.attach(None, move |msg| { update(msg); glib::ControlFlow::Continue });
 	
 	Template { root, buttons }
 }
