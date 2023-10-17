@@ -11,17 +11,12 @@ about = 'Theme to exemplify Neon Cake dynamic scheme'
 light-old.request = { scheme = 'neon-cake' }
    purple.request = { scheme = 'neon-cake' }
 
+misty-forest-dark  .request = { scheme = 'neon-cake' }
+misty-forest-darker.request = { scheme = 'neon-cake' }
+misty-forest-light .request = { scheme = 'neon-cake' }
+
 [schemes.dark.options]
 name = 'Neon Cake Dark'
-
-[schemes.purple.options]
-    hue = 300.0
-   name = 'Neon Cake Dark Purple'
- rotate = 30.0
-shading = 12.0
-surface-chroma    = 16.0
-surface-luminance = 12.0
-   text-chroma    = 32.0
 
 [schemes.light.options]
 name = 'Neon Cake Light'
@@ -35,3 +30,32 @@ name = 'Neon Cake Light (Old)'
 surface-luminance = 82.5
    text-luminance = 35.0
 overall-luminance = 35.0
+
+[schemes.purple.options]
+    hue = 300.0
+   name = 'Neon Cake Dark Purple'
+ rotate = 30.0
+shading = 12.0
+surface-chroma    = 16.0
+surface-luminance = 12.0
+   text-chroma    = 32.0
+
+[schemes.misty-forest-dark.options]
+name = 'Misty Forest Dark'
+ hue = 110.0
+surface-chroma = 8.0
+
+[schemes.misty-forest-darker.options]
+name = 'Misty Forest Darker'
+ hue = 110.0
+surface-luminance = 15.0
+surface-chroma    = 8.0
+
+[schemes.misty-forest-light.options]
+name = 'Misty Forest Light'
+ hue = 110.0
+# surface-chroma = 24.0
+surface-luminance = 82.5
+   text-luminance = 35.0
+overall-chroma    = 64.0
+overall-luminance = 42.5

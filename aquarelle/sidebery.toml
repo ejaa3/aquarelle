@@ -4,20 +4,11 @@
 
  name = 'Sidebery'
  type = 'text-files'
-about = """
-A JSON file that configures the extension <a href='https://github.com/mbnuqw/sidebery'>Sidebery</a>.
-
-You can import it from the extension, but be careful about \
-overwriting your current preferences with the ones in this map.
-
-The options are hard coded to my preferences, so you might not like it. \
-If Aquarelle comes to support enumerated options, I could map them accordingly. \
-If you want other options you can fork this map into your own namespace.
-"""
+about = 'A CSS file for the extension <a href="https://github.com/mbnuqw/sidebery">Sidebery</a>.'
 
 displaying = '`${arrangement} – ${scheme("main")}`'
     naming = '`${arrangement} – ${scheme("main")}`'
- extension = '.json'
+ extension = '.css'
 
 [schemes]
 main = { name = 'Main Color Scheme' }

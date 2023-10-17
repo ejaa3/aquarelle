@@ -319,7 +319,7 @@ impl Error<'_> {
 			}
 			Self::BadNaming { id, map_id, error } => {
 				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ']'! "failed\n"
+					"Request for " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ']'! " failed\n"
 					"Bad " /fg blue; "naming"! " found for plural type map " /fg yellow; "{:?}"! "\n{}"
 				}, map_id, id, error)?;
 				

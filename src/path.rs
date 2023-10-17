@@ -17,9 +17,9 @@ pub struct Located { pub location: Location, pub path: String }
 impl Located {
 	pub fn to_path_buf(&self, default: Option<&PathBuf>) -> Option<PathBuf> {
 		let mut path = match self.location {
-			Location::None      => PathBuf::new(),
-			Location::Temporary => std::env::temp_dir(),
-			Location::Default   => default.cloned()?,
+			Location::None        => PathBuf::new(),
+			Location::Temporary   => std::env::temp_dir(),
+			Location::Default     => default.cloned()?,
 			
 			Location::Cache       => dirs::cache_dir()?,
 			Location::Config      => dirs::config_dir()?,

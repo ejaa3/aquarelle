@@ -13,7 +13,7 @@ const  bad = if accent == "red" { "magenta" } else { "red" };
 const good = if accent == "green" { "blue" } else { "green" };
 const warn = if accent == "yellow" { "any" } else { "yellow" };
 
-const dark = main.lower.text.luma() > main.upper.area.luma();
+const dark = main.lower.text.luma() > main.lower.like.luma();
 
 const view = if !dark || main.lower.area.luma() < main.lower.like.luma()
 	{ main.lower.area } else { main.upper.area }; // HACK better solarized
@@ -59,16 +59,31 @@ fn out() { '#' + this.to_hex_rgb(true) }
 	if cfg::option("dim-header") { main.lower.like.out() } else { main.upper.area.out() }
 };
 @define-color headerbar_shade_color alpha(black, ${view.shadow()});
+@define-color headerbar_darker_shade_color alpha(black, ${view.shadow() * 2});
+
+@define-color sidebar_bg_color ${main.upper.area.out()};
+@define-color sidebar_fg_color ${main.lower.text.out()};
+@define-color sidebar_backdrop_color ${lab::mix(main.upper.area, main.lower.like, 0.5).out()};
+@define-color sidebar_shade_color alpha(black, ${main.lower.like.shadow()});
+
+@define-color secondary_sidebar_bg_color ${lab::mix(main.upper.area, main.lower.like, 0.5).out()};
+@define-color secondary_sidebar_fg_color ${main.lower.text.out()};
+@define-color secondary_sidebar_backdrop_color ${lab::mix(main.upper.area, main.lower.like, 0.75).out()};
+@define-color secondary_sidebar_shade_color alpha(black, ${main.lower.like.shadow()});
 
 @define-color card_bg_color ${main.upper.like.out()};
 @define-color card_fg_color ${main.upper.text.out()};
 @define-color card_shade_color alpha(black, ${main.upper.like.shadow()});
+
+@define-color thumbnail_bg_color ${main.upper.like.out()};
+@define-color thumbnail_fg_color ${main.upper.text.out()};
 
 @define-color dialog_bg_color ${main.upper.like.out()};
 @define-color dialog_fg_color ${main.upper.text.out()};
 
 @define-color popover_bg_color ${main.upper.like.out()};
 @define-color popover_fg_color ${main.upper.text.out()};
+@define-color popover_shade_color alpha(black, ${main.upper.like.shadow()});
 
 @define-color shade_color alpha(black, ${main.lower.like.shadow()});
 @define-color scrollbar_outline_color ${

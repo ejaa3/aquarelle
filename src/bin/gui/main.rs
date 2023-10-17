@@ -39,19 +39,16 @@ fn main() -> gtk::glib::ExitCode {
 
 mod utils {
 	use aquarelle::scheme::Sets;
-	use declarative::{builder_mode, view};
+	use declarative::{construct, view};
 	use gtk::{gdk, traits::TextTagExt};
 	
-	#[view {
-		gtk::ShortcutController controller {
-			set_scope: gtk::ShortcutScope::Managed
-			
-			gtk::Shortcut #add_shortcut(#) {
-				set_trigger: gtk::ShortcutTrigger::parse_string(trigger)
-				set_action: gtk::ShortcutAction::parse_string(action)
-			}
-		}
-	}]
+	#[view[ gtk::ShortcutController controller {
+		set_scope: gtk::ShortcutScope::Managed
+		add_shortcut: _ @ gtk::Shortcut {
+			set_trigger: gtk::ShortcutTrigger::parse_string(trigger)
+			set_action: gtk::ShortcutAction::parse_string(action)
+		}!
+	}! ]]
 	
 	pub fn shortcut(trigger: &str, action: &str) -> gtk::ShortcutController {
 		expand_view_here! { }
@@ -72,38 +69,38 @@ mod utils {
 		#[derive(Clone)]
 		pub struct Tags { }
 		
-		gtk::TextBuffer pub buffer: !{ tag_table: &table }
+		gtk::TextBuffer pub buffer { tag_table: &table }
 		
 		gtk::TextTagTable table {
-			gtk::TextTag pub red: #add(&#) !{
+			add: &_ @ gtk::TextTag pub red {
 				foreground: "red"
 				'bind set_foreground_rgba: Some(&rgba(sets.red.like))
 			}
-			gtk::TextTag pub yellow: #add(&#) !{
+			add: &_ @ gtk::TextTag pub yellow {
 				foreground: "yellow"
 				'bind set_foreground_rgba: Some(&rgba(sets.yellow.like))
 			}
-			gtk::TextTag pub green: #add(&#) !{
+			add: &_ @ gtk::TextTag pub green {
 				foreground: "green"
 				'bind set_foreground_rgba: Some(&rgba(sets.green.like))
 			}
-			gtk::TextTag pub cyan: #add(&#) !{
+			add: &_ @ gtk::TextTag pub cyan {
 				foreground: "cyan"
 				'bind set_foreground_rgba: Some(&rgba(sets.cyan.like))
 			}
-			gtk::TextTag pub blue: #add(&#) !{
+			add: &_ @ gtk::TextTag pub blue {
 				foreground: "blue"
 				'bind set_foreground_rgba: Some(&rgba(sets.blue.like))
 			}
-			gtk::TextTag pub magenta: #add(&#) !{
+			add: &_ @ gtk::TextTag pub magenta {
 				foreground: "magenta"
 				'bind set_foreground_rgba: Some(&rgba(sets.magenta.like))
 			}
-			gtk::TextTag pub any: #add(&#) !{
+			add: &_ @ gtk::TextTag pub any {
 				foreground: "purple"
 				'bind set_foreground_rgba: Some(&rgba(sets.any.like))
 			}
-		}
+		}!
 	}]
 	
 	impl Tags {

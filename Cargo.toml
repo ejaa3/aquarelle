@@ -17,20 +17,22 @@ default-run = 'aquarelle'
 [dependencies]
 compact_str = { version = '0.7' , default-features = false, features = ['serde'] }
 dirs        = { version = '5'   , default-features = false }
+fastrand    = '2'
 itertools   = { version = '0.11', default-features = false }
 palette     = { version = '0.7' , default-features = false, features = ['std'] }
 regex       = { version = '1'   }
+rhai        = { version = '1'   , features = ['only_i32', 'f32_float', 'no_custom_syntax', 'serde'] }
 smallvec    = { version = '1'   , default-features = false }
 smartstring = { version = '1'   , default-features = false }
 zip         = { version = '0.6' , default-features = false }
 
 serde     = { version = '1'   , features = ['derive', 'rc'] }
-toml_edit = { version = '0.19', features = ['serde'] }
+toml_edit = { version = '0.20', features = ['serde'] }
 
 png              = { version = '0.17', default-features = false }
-resvg            = { version = '0.35' }
-usvg             = { version = '0.35', default-features = false }
-usvg-text-layout = { version = '0.35' }
+resvg            = { version = '0.36' }
+usvg             = { version = '0.36', default-features = false }
+usvg-text-layout = { version = '0.36' }
 
 # CLI:
 clap     = { version = '4'  , optional = true, features = ['derive'] }
@@ -42,14 +44,20 @@ default-features = false
 features = ['gnome_44']
 optional = true
 package = 'gtk4'
-version = '0'
+version = '0.7'
+
+# [dependencies.sourceview]
+# default-features = false
+# optional = true
+# package = 'sourceview5'
+# version = '0.7'
 
 [dependencies.adw]
 default-features = false
-features = ['v1_3']
+features = ['v1_4']
 optional = true
 package = 'libadwaita'
-version = '0'
+version = '0.5'
 
 [dependencies.gettext-rs]
 version = '0.7'
@@ -58,13 +66,8 @@ default-features = false
 features = ['gettext-system']
 
 [dependencies.declarative]
-features = ['gtk-rs']
 optional = true
-version = '0.5'
-
-[dependencies.rhai] # 1.15.1 is bugged
-features = ['only_i32', 'f32_float', 'no_custom_syntax', 'serde']
-git = 'https://github.com/rhaiscript/rhai'
+version = '0.6'
 
 [build-dependencies]
 glib-build-tools = { git = 'https://github.com/gtk-rs/gtk-rs-core', optional = true }

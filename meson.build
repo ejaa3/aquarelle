@@ -12,13 +12,14 @@ project('aquarelle', 'rust',
 gnome = import('gnome', required: true)
 i18n = import('i18n', required: true)
 
-dependency('glib-2.0', version: '>= 2.66')
-dependency('gio-2.0', version: '>= 2.66')
-dependency('pango', version: '>= 1.46')
-dependency('cairo', version: '>= 1.14')
-dependency('gdk-pixbuf-2.0')
-dependency('gtk4', version: '>= 4.0.0')
-dependency('libadwaita-1', version: '>=1.1.0')
+dependency('glib-2.0', version: '>= 2.76')
+dependency('gio-2.0', version: '>= 2.76')
+dependency('pango', version: '>= 1.50')
+dependency('cairo', version: '>= 1.16')
+dependency('gdk-pixbuf-2.0', version: '>= 2.42')
+dependency('gtk4', version: '>= 4.10')
+# dependency('gtksourceview-5', version: '>= 5.8')
+dependency('libadwaita-1', version: '>= 1.4')
 
 base_id = 'io.github.ejaa3.Aquarelle'
 app_id = get_option('profile') == 'dev' ? f'@base_id@.Devel' : base_id

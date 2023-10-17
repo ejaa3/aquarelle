@@ -410,7 +410,6 @@ pub fn pathing_errors(tags @ Tags { buffer, blue, yellow, red, green, .. }: &Tag
 		pathing::Error::Map { id, namespace_id, error } => { failed(id); namespace_error(tags, error, namespace_id) },
 		pathing::Error::PathsIncludeNotFound { id, namespace_id, map_id, include_id } => {
 			failed(id);
-			
 			let text = i18n("Suggested path {id} not found in map {map-id} at namespace {namespace-id}");
 			
 			if let Some((left_1, right_1)) = text.split_once("{id}") {
@@ -431,16 +430,34 @@ pub fn pathing_errors(tags @ Tags { buffer, blue, yellow, red, green, .. }: &Tag
 			insert!(buffer: "Suggested path ", [red: include_id], " not found in map ", [green: map_id], " at namespace ", [green: namespace_id])
 		}
 		pathing::Error::MissingPath { id, located } => {
+			let text = i18n("Unable to parse {id} with value {value}");
+			
+			if let Some((left_1, right_1)) = text.split_once("{id}") {
+				if let Some((left_2, right_2)) = left_1.split_once("{value}") {
+					insert!(buffer: left_2, [blue; "[[maps."], [yellow: id], [blue; ".custom-paths]]"], right_2);
+					show_located_path(tags, located);
+					return insert!(buffer; right_1)
+				} else if let Some((left_2, right_2)) = right_1.split_once("{value}") {
+					insert!(buffer: left_1);
+					show_located_path(tags, located);
+					return insert!(buffer; left_2, [blue; "[[maps."], [yellow: id], [blue; ".custom-paths]]"], right_2)
+				}
+			}
+			insert!(buffer: "Unable to parse ", [blue; "[[maps."], [yellow: id], [blue; ".custom-paths]]"], " with value ");
+			show_located_path(tags, located);
+		}
+		pathing::Error::BadNaming { id, map_id, error } => {
+			failed(id);
+			let text = i18n("Bad {naming} found for plural type map {id}");
 			
 		}
-		pathing::Error::BadNaming { id, map_id, error } => todo!(),
 		pathing::Error::NoSubdirectory { id, map_id, file_id, at, available } => todo!(),
 		pathing::Error::NoPaths { id } => todo!(),
 		pathing::Error::ConflictingPath { previous, current } => todo!(),
 	}
 }
 
-fn show_located_path(Tags { buffer, yellow, blue, .. }: &Tags, path: aquarelle::path::Located) {
+fn show_located_path(Tags { buffer, yellow, blue, .. }: &Tags, path: &aquarelle::path::Located) {
 	if let aquarelle::path::Location::None = path.location {
 		return insert!(buffer; [yellow: &path.path])
 	}

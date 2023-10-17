@@ -7,11 +7,11 @@
 use std::{collections::BTreeMap, fmt::Write, rc::Rc};
 use compact_str::CompactString;
 use palette::{FromColor, Srgba, rgb::channels::Rgba};
-use rhai::{FLOAT as float, INT as int, plugin::*};
+use rhai::{FLOAT as float, INT as int, plugin::*, packages::Package};
 use crate::{role, scheme, set, Value};
 
 type Fallible<T> = Result<T, Box<EvalAltResult>>;
-type SmartString = smartstring::SmartString<smartstring::LazyCompact>;
+pub type SmartString = smartstring::SmartString<smartstring::LazyCompact>;
 
 struct Modules {
 	  std: rhai::packages::StandardPackage,
@@ -64,7 +64,7 @@ pub fn naming_engine(
 	
 	let mut engine = Engine::new_raw();
 	engine
-		.register_global_module(MODULES.with(|modules| rhai::packages::Package::as_shared_module(&modules.std)))
+		.register_global_module(MODULES.with(|modules| modules.std.as_shared_module()))
 		.register_global_module(module.into())
 		
 		.register_fn("scheme", move |context: NativeCallContext, index: &str| -> Fallible<_> {
@@ -83,7 +83,7 @@ pub fn engine(path: &std::path::Path) -> Engine {
 	MODULES.with(|modules| engine
 		.set_module_resolver(rhai::module_resolvers::FileModuleResolver::new_with_path(path))
 		
-		.register_global_module(rhai::packages::Package::as_shared_module(&modules.std))
+		.register_global_module(modules.std.as_shared_module())
 		.register_global_module(Rc::clone(&modules.base))
 		
 		.register_static_module(  "rgb", Rc::clone(&modules.rgb))
@@ -124,8 +124,8 @@ pub fn cfg_module(id: ImmutableString, options: BTreeMap<CompactString, Value>) 
 		))?;
 		
 		match value {
-			Value::Boolean (value) => Ok((*value).into()),
-			Value::Integer (value) => Ok((*value).into()),
+			Value::Bool (value) => Ok((*value).into()),
+			Value::Int (value) => Ok((*value).into()),
 			Value::Float   (value) => Ok((*value).into()),
 			Value::String  (value) => Ok(value.clone().into()),
 			Value::Set     { set } => Ok((set.to_str()).into()),
@@ -234,6 +234,12 @@ mod map {
 		else         { write!(&mut string, "{:08x}", (rgba as u32) << 24 | rgba as u32 >> 8).unwrap() }
 		
 		string.into()
+	}
+	
+	pub fn to_css_filter(rgba: int) -> ImmutableString {
+		let palette::Srgb { red, green, blue, .. } = Srgba::from_u32::<Rgba>(rgba as _).color;
+		let rgb = crate::css_filter::Rgb { red: red as _, green: green as _, blue: blue as _ };
+		crate::css_filter::Solver { rgb }.solve().to_css_filter()
 	}
 }
 

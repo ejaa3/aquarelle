@@ -55,6 +55,9 @@ fn shadow() { const L = this.luma(); 0xFF.fade(2 ** -L + 0.2 * L - 0.6).out() }
 	--gnome-toolbar-border-color: ${main.upper.area.shadow()};
 	--gnome-toolbar-icon-fill: ${main.lower.text.fade(0.9).out()};
 	
+	/* Elements */
+	--gnome-border-color: ${main.lower.like.shadow()};
+	
 	/* Buttons */
 	--gnome-button-background: ${main.lower.text.fade(0.1).out()};
 	--gnome-button-hover-background: ${main.lower.text.fade(0.2).out()};

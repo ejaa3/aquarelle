@@ -62,7 +62,7 @@ fn print_scheme_errors() -> io::Result<()> {
 	let stdout = &mut io::stdout();
 	
 	writeln!(stdout, "=== START ===")?;
-	for error in scheme_errors(&path(), &Value::Integer(0), &Value::Float(0.0)) {
+	for error in scheme_errors(&path(), &Value::Int(0), &Value::Float(0.0)) {
 		aquarelle::warn(stdout, true)?;
 		error.show(stdout)?;
 	}

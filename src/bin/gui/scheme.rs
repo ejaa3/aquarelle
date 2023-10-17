@@ -5,7 +5,7 @@
  */
 
 use std::rc::Rc;
-use declarative::{builder_mode, view};
+use declarative::{construct, view};
 use glib::subclass::types::ObjectSubclassIsExt;
 use gtk::{glib, traits::{BoxExt, ListItemExt}, prelude::GObjectPropertyExpressionExt};
 use palette::{FromColor, Srgba, rgb::channels::Rgba};
@@ -86,21 +86,21 @@ mod imp {
 	impl glib::subclass::object::ObjectImpl for Object { }
 }
 
-#[view(ref item {
-	gtk::Box #set_child(Some(&#)) !{
+#[view[ ref item {
+	set_child: Some(&_) @ gtk::Box {
 		orientation: gtk::Orientation::Vertical
 		~spacing: 12
 		
-		adw::Bin #append(&#) !{
+		append: &_ @ adw::Bin {
 			css_classes: ["card"]
 			halign: gtk::Align::Center
 			width_request: SVG_WIDTH
 			height_request: SVG_HEIGHT
 			
-			adw::Bin thumbnail #child(&#) !{
+			child: &_ @ adw::Bin thumbnail {
 				css_classes: ["card"]
 				
-				gtk::Image #child(&#) !{
+				child: &_ @ gtk::Image {
 					icon_name: icons::OBJECT_SELECT
 					pixel_size: 14
 					halign: gtk::Align::End
@@ -108,14 +108,14 @@ mod imp {
 				}
 			}
 		}
-		gtk::Label name #append(&#) !{
+		append: &_ @ gtk::Label name {
 			css_classes: ["caption-heading"]
 			ellipsize: gtk::pango::EllipsizeMode::End
 			justify: gtk::Justification::Center
 			lines: 2
 		}
 	}
-	property_expression: "item" 'back !{
+	property_expression: "item" 'back {
 		chain_closure::<String>: glib::closure! {
 			|_: Option<glib::Object>, scheme: Option<Object>| scheme
 				.map(|scheme| scheme.borrow().data.name.to_string())
@@ -123,7 +123,7 @@ mod imp {
 		}
 		~~bind: &name, "label", gtk::Widget::NONE
 	}
-	property_expression: "item" 'back !{
+	property_expression: "item" 'back {
 		chain_closure::<String>: glib::closure! {
 			|_: Option<glib::Object>, scheme: Option<Object>| scheme
 				.map(|scheme| scheme.borrow().css_id.clone())
@@ -131,7 +131,7 @@ mod imp {
 		}
 		~~bind: &thumbnail, "name", gtk::Widget::NONE
 	}
-})]
+} ]]
 
 pub fn factory_setup(_: &gtk::SignalListItemFactory, list_item: &glib::Object) {
 	let item = glib::Cast::downcast_ref::<gtk::ListItem>(list_item).unwrap();

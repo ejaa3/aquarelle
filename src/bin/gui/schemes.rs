@@ -8,7 +8,7 @@ use std::{cell::Ref, rc::Rc};
 use adw::{gdk, gio, glib, prelude::*};
 use aquarelle::{cache, config, Value};
 use compact_str::CompactString;
-use declarative::{builder_mode, clone, view};
+use declarative::{clone, construct, view};
 use crate::{log, log::Log, namespaces, scheme, themes, utils, i18n, send};
 
 const SCHEME: &str = "scheme";
@@ -54,15 +54,15 @@ impl Schemes<'_> {
 #[view {
 	pub struct Template { pub tx: glib::Sender<Msg> }
 	
-	gtk::Box pub root: !{
+	gtk::Box pub root {
 		hexpand: true
 		orientation: gtk::Orientation::Vertical
 		~/width_request: 324
 		
-		gtk::SearchBar #append(&#) !{
+		append: &_ @ gtk::SearchBar {
 			key_capture_widget: window
 			
-			gtk::SearchEntry #child(&#) !{
+			child: &_ @ gtk::SearchEntry {
 				~placeholder_text: i18n("Search")
 				
 				connect_search_changed: clone![name_filter; move |this| {
@@ -71,69 +71,69 @@ impl Schemes<'_> {
 				}]
 			}
 		}
-		gtk::ScrolledWindow #append(&#) !{
+		append: &_ @ gtk::ScrolledWindow {
 			vexpand: true
 			
-			adw::ClampScrollable #child(&#) !{
+			child: &_ @ adw::ClampScrollable {
 				maximum_size: 5 * (scheme::SVG_WIDTH + 2 * 18) // 2 = left / right, 18 = padding
 				
-				gtk::GridView #child(&#) !{
+				child: &_ @ gtk::GridView {
 					name: "thumbnail-grid"
 					max_columns: 5
 					
-					gtk::SingleSelection single #model(&#) !{
+					model: &_ @ gtk::SingleSelection single {
 						autoselect: false
 						
-						~gtk::FilterListModel #model(&#) !{
-							gtk::StringFilter #filter(&#) !{
+						~model: &_ @ gtk::FilterListModel {
+							filter: &_ @ gtk::StringFilter {
 								'bind set_search: (!selected.namespace.is_empty()).then_some(&selected.namespace)
 								
-								gtk::ClosureExpression::new::<String>(
+								expression: &gtk::ClosureExpression::new::<String>(
 									gtk::Expression::NONE, glib::closure! {
 										|scheme: scheme::Object| scheme.borrow().namespace_id.to_string()
 									}
-								) #expression(&#) { }
+								)
 							}
-							gtk::FilterListModel #model(&#) !{
-								gtk::StringFilter #filter(&#) !{
+							model: &_ @ gtk::FilterListModel {
+								filter: &_ @ gtk::StringFilter {
 									'bind set_search: (!selected.group.is_empty()).then_some(&selected.group)
 									
-									gtk::ClosureExpression::new::<String>(
+									expression: &gtk::ClosureExpression::new::<String>(
 										gtk::Expression::NONE, glib::closure! {
 											|scheme: scheme::Object| scheme.borrow().theme_id.to_string()
 										}
-									) #expression(&#) { }
+									)
 								}
-								gtk::FilterListModel show_model #model(&#) !{
-									gtk::FilterListModel #model(&#) !{
+								model: &_ @ gtk::FilterListModel show_model {
+									model: &_ @ gtk::FilterListModel {
 										model: &get_schemes(&cache, &tags, &root.display())
 										
-										gtk::StringFilter name_filter #filter(&#) !{
+										filter: &_ @ gtk::StringFilter name_filter {
 											ignore_case: true
 											match_mode: gtk::StringFilterMatchMode::Substring
 											
-											gtk::ClosureExpression::new::<String>(
+											expression: &gtk::ClosureExpression::new::<String>(
 												gtk::Expression::NONE, glib::closure! {
 													|scheme: scheme::Object| scheme.borrow().data.name.to_string()
 												}
-											) #expression(&#) { }
+											)
 										}
 									}
 								}
 							}
-							@update_filters = move |selected: Ref<namespaces::Selection>| bindings!()
+							'consume update_filters = move |selected: Ref<namespaces::Selection>| bindings!()
 						}
 						connect_selected_item_notify: clone![tx; move |_| send!(Msg::SelectScheme => tx)]
 					}
-					gtk::SignalListItemFactory #factory(&#) {
+					factory: &_ @ gtk::SignalListItemFactory {
 						connect_setup: scheme::factory_setup
-					}
+					}!
 				}
 			}
 		}
 	}
 	ref window {
-		settings.create_action(show::SETTING) #add_action(&#) {
+		add_action: &_ @ settings.create_action(show::SETTING) {
 			connect_state_notify: move |this| {
 				let show = this.state().unwrap();
 				let show = show.str().unwrap();
@@ -160,7 +160,7 @@ impl Schemes<'_> {
 			send!(Msg::Shutdown => tx);
 			glib::Propagation::Proceed
 		}]
-		settings.create_action(appearance::SETTING) #add_action(&#) {
+		add_action: &_ @ settings.create_action(appearance::SETTING) {
 			connect_state_notify: clone![tx; move |this|
 				match this.state().unwrap().str().unwrap() {
 					"Default"  => send!(Msg::UseDefaultAppearance => tx),
@@ -260,13 +260,15 @@ fn set_appearance(
 	
 	const     ACCENT: CompactString = CompactString::new_inline("accent");
 	const DIM_HEADER: CompactString = CompactString::new_inline("dim-header");
+	const CUSTOM_CSS: CompactString = CompactString::new_inline("custom-css");
 	const       MAIN: CompactString = CompactString::new_inline("main");
 	
 	let success = aquarelle::mapping::Ready {
 		map, id: config::APP_ID, map_id,
 		options: [
 			(    ACCENT, Value::Set { set: aquarelle::Set::Any }),
-			(DIM_HEADER, Value::Boolean(true))
+			(DIM_HEADER, Value::Bool(true)),
+			(CUSTOM_CSS, Value::String(Default::default())),
 		].into(),
 		   name: Default::default(),
 		display: Default::default(),

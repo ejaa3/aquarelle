@@ -7,7 +7,7 @@
 use std::{cell::RefCell, rc::Rc, thread::LocalKey};
 use adw::{gtk::pango, gio, glib, prelude::*};
 use aquarelle::{cache, Value};
-use declarative::{builder_mode, clone, view};
+use declarative::{clone, construct, view};
 use crate::{icons, log, log::Log, namespaces, scheme, schemes, i18n, send};
 
 pub type SelectedScheme = Rc<RefCell<Option<scheme::Object>>>;
@@ -27,13 +27,13 @@ impl Themes<'_> {
 #[view {
 	pub struct Template { }
 	
-	gtk::Revealer pub buttons: !{
+	gtk::Revealer pub buttons {
 		transition_type: gtk::RevealerTransitionType::SwingRight
 		
-		gtk::Stack stack #child(&#) !{
+		child: &_ @ gtk::Stack stack {
 			~transition_type: gtk::StackTransitionType::SlideLeftRight
 			
-			gtk::Button next #add_child(&#) !{
+			add_child: &_ @ gtk::Button next {
 				~icon_name: icons::GO_NEXT
 				
 				connect_clicked: clone![root; move |_| {
@@ -41,7 +41,7 @@ impl Themes<'_> {
 				}]
 			}
 			
-			gtk::Button previous #add_child(&#) !{
+			add_child: &_ @ gtk::Button previous {
 				~icon_name: icons::GO_PREVIOUS
 				
 				connect_clicked: clone![root; move |_| {
@@ -51,24 +51,22 @@ impl Themes<'_> {
 		}
 	}
 	
-	adw::Leaflet pub root: !{
+	adw::Leaflet pub root {
 		can_navigate_back: true
 		can_navigate_forward: true
 		~transition_type: adw::LeafletTransitionType::Slide
 		
-		bind_property: "folded", &buttons, "reveal-child" 'back !{ sync_create; }
+		bind_property: "folded", &buttons, "reveal-child" 'back { sync_create; }
 		
-		namespaces::pane(window) pane {
-			#append(&#.root) 'back { set_name: Some("pane") }
+		append: &_.root @ namespaces::pane(window) pane {
 			root.set_hexpand: false
+			vbox.append: &_ @ adw::PreferencesGroup group { }
 			
-			adw::PreferencesGroup group #vbox.append(&#) { }
-			
-			gtk::CheckButton #vbox.prepend(&#) !{
+			vbox.prepend: &_ @ gtk::CheckButton {
 				active: true
 				label: i18n("_Do not filter by namespace or theme")
 				~use_underline: true
-				@namespaces::populate(&#, &tags, &cache, &group, &selection, &tx)
+				namespaces::populate: &_, &tags, &cache, &group, &selection, &tx
 				
 				connect_toggled: clone![schemes.tx; move |this| if this.is_active() {
 					let mut selected = selection.borrow_mut();
@@ -78,18 +76,18 @@ impl Themes<'_> {
 				}]
 			}
 			
-			crate::colors::start() colors #vbox.append(&#.root) { }
+			vbox.append: &_.root @ crate::colors::start() colors { }
 			
-			adw::PreferencesGroup option_group #vbox.append(&#) !{
+			vbox.append: &_ @ adw::PreferencesGroup option_group {
 				title: i18n("Shared options")
 				description: i18n("Bindable to dynamic schemes")
 				
-				gtk::MenuButton #header_suffix(&#) !{
+				header_suffix: &_ @ gtk::MenuButton {
 					css_classes: ["circular"]
 					icon_name: icons::LIST_ADD
 					valign: gtk::Align::Center
 					
-					gio::Menu #menu_model(&#) {
+					menu_model: &_ @ gio::Menu {
 						append: Some(&i18n("Boolean")       ), Some("win.boolean")
 						append: Some(&i18n("Integer")       ), Some("win.integer")
 						append: Some(&i18n("Decimal number")), Some("win.float")
@@ -97,15 +95,13 @@ impl Themes<'_> {
 						append: Some(&i18n("Color Set")     ), Some("win.set")
 						append: Some(&i18n("Color Role")    ), Some("win.role")
 						freeze;
-					}
+					}!
 				}
 			}
-		}
+		} 'back { set_name: Some("pane") }!
 		
-		gtk::Separator #append(&#) 'back { set_navigatable: false }
-		
-		schemes::Schemes schemes ~{
-			#append(&#.root) 'back { set_name: Some("schemes") }
+		append: &gtk::Separator::default() 'back { set_navigatable: false }!
+		append: &_.root @ schemes::Schemes schemes {
 			cache: Rc::clone(&cache)
 			scheme: Rc::clone(&scheme)
 			selection: Rc::clone(&selection)
@@ -113,7 +109,7 @@ impl Themes<'_> {
 			tags: tags.clone()
 			themes: tx.clone()
 			window;
-		}
+		}? 'back { set_name: Some("schemes") }!
 		
 		connect_visible_child_notify: clone![stack, next, previous;
 			move |this| match this.visible_child_name().as_deref() {
@@ -166,91 +162,89 @@ fn start(Themes { cache, selection, settings, tags, window }: Themes) -> Templat
 	Template { root, buttons }
 }
 
-#[view {
-	adw::EntryRow root !{
-		title: match value {
-			Value::Boolean (_) => i18n("Boolean"),
-			Value::Integer (_) => i18n("Integer"),
-			Value::Float   (_) => i18n("Decimal number"),
-			Value::String  (_) => i18n("Text"),
-			Value::Set    {..} => i18n("Color Set"),
-			Value::Role   {..} => i18n("Color Role"),
-			Value::Binding (_) | Value::Bind(_) => unreachable!()
-		}
-		~text: id
+#[view[ adw::EntryRow root {
+	title: match value {
+		Value::Bool (_) => i18n("Boolean"),
+		Value::Int (_) => i18n("Integer"),
+		Value::Float   (_) => i18n("Decimal number"),
+		Value::String  (_) => i18n("Text"),
+		Value::Set    {..} => i18n("Color Set"),
+		Value::Role   {..} => i18n("Color Role"),
+		Value::Binding (_) | Value::Bind(_) => unreachable!()
+	}
+	~text: id
+	
+	add_suffix: &_ @ gtk::Box {
+		if let Value::Bool(..) = value
+			{ set_spacing: 6 } else { add_css_class: "linked" }
 		
-		gtk::Box #add_suffix(&#) {
-			if let Value::Boolean(..) = value
-				{ set_spacing: 6 } else { add_css_class: "linked" }
-			
-			gtk::Button #append(&#) !{
-				if let Value::Boolean(..) = value { add_css_class: "flat" }
-				icon_name: icons::USER_TRASH
+		append: &_ @ gtk::Button {
+			if let Value::Bool(..) = value { add_css_class: "flat" }
+			icon_name: icons::USER_TRASH
+			valign: gtk::Align::Center
+		}
+		
+		match value {
+			Value::Bool(value) => append: &_ @ gtk::Switch {
+				active: *value
 				valign: gtk::Align::Center
 			}
-			
-			match value {
-				Value::Boolean(value) => gtk::Switch #append(&#) !{
-					active: *value
-					valign: gtk::Align::Center
+			Value::Int(value) => append: &_ @ gtk::SpinButton {
+				climb_rate: 1.0
+				valign: gtk::Align::Center
+				value: *value as f64
+				width_chars: 4
+				
+				adjustment: &_ @ gtk::Adjustment {
+					lower: rhai::INT::MIN as f64
+					upper: rhai::INT::MAX as f64
+					step_increment: 1.0
 				}
-				Value::Integer(value) => gtk::SpinButton #append(&#) !{
-					climb_rate: 1.0
-					valign: gtk::Align::Center
-					value: *value as f64
-					width_chars: 4
-					
-					gtk::Adjustment #adjustment(&#) !{
-						lower: rhai::INT::MIN as f64
-						upper: rhai::INT::MAX as f64
-						step_increment: 1.0
-					}
-				}
-				Value::Float(value) => gtk::SpinButton #append(&#) !{
-					climb_rate: 1.0
-					digits: 2
-					valign: gtk::Align::Center
-					value: *value as f64
-					width_chars: 6
-					
-					gtk::Adjustment #adjustment(&#) !{
-						lower: rhai::FLOAT::MIN as f64
-						upper: rhai::FLOAT::MAX as f64
-						step_increment: 1.0
-					}
-				}
-				Value::String(value) => gtk::Button #append(&#) !{
-					valign: gtk::Align::Center
-					
-					gtk::Label #child(&#) !{
-						ellipsize: pango::EllipsizeMode::End
-						label: value.as_str()
-						max_width_chars: 11
-						single_line_mode: true
-						
-						pango::AttrList #attributes(&#) {
-							pango::FontDescription mut {
-								#insert(pango::AttrFontDesc::new(&#))
-								set_weight: pango::Weight::Book
-							}
-						}
-					}
-				}
-				Value::Set { set } => gtk::DropDown #append(&#) !{
-					selected: *set as u32
-					valign: gtk::Align::Center
-					@with_list(&#, &SETS)
-				}
-				Value::Role { role } => gtk::DropDown #append(&#) !{
-					selected: *role as u32
-					valign: gtk::Align::Center
-					@with_list(&#, &ROLES)
-				}
-				Value::Binding(_) | Value::Bind(_) => { }
 			}
+			Value::Float(value) => append: &_ @ gtk::SpinButton {
+				climb_rate: 1.0
+				digits: 2
+				valign: gtk::Align::Center
+				value: *value as f64
+				width_chars: 6
+				
+				adjustment: &_ @ gtk::Adjustment {
+					lower: rhai::FLOAT::MIN as f64
+					upper: rhai::FLOAT::MAX as f64
+					step_increment: 1.0
+				}
+			}
+			Value::String(value) => append: &_ @ gtk::Button {
+				valign: gtk::Align::Center
+				
+				child: &_ @ gtk::Label {
+					ellipsize: pango::EllipsizeMode::End
+					label: value.as_str()
+					max_width_chars: 11
+					single_line_mode: true
+					
+					attributes: &_ @ pango::AttrList {
+						insert: pango::AttrFontDesc::new(&_) @
+							pango::FontDescription mut {
+								set_weight: pango::Weight::Book
+							}!
+					}!
+				}
+			}
+			Value::Set { set } => append: &_ @ gtk::DropDown {
+				selected: *set as u32
+				valign: gtk::Align::Center
+				with_list: &_, &SETS
+			}
+			Value::Role { role } => append: &_ @ gtk::DropDown {
+				selected: *role as u32
+				valign: gtk::Align::Center
+				with_list: &_, &ROLES
+			}
+			Value::Binding(_) | Value::Bind(_) => { }
 		}
-	}
-}]
+	}!
+} ]]
 
 fn option_row(id: &str, value: &Value) -> adw::EntryRow {
 	expand_view_here! { }

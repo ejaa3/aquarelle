@@ -7,7 +7,7 @@
 const   main = cfg::scheme("main");
 const accent = cfg::option("accent");
 
-fn left(home, scale) {
+private fn left(home, scale) {
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 87 29" width="${87 * scale}" height="${29 * scale}">
 		<path fill=${global::main.lower.text.fade(0.2).out()} d="M13,2C1,2 1,13.5 1,13.5 1,13.5 1,25 13,25H28V2Z"/>
 		<path fill=${global::main.lower.like.shadow(0.5)} d="M1,13.5C1,13.5 1,25 13,25h15v4H13C1,29 1,13.5 1,13.5Z"/>
@@ -25,7 +25,7 @@ fn left(home, scale) {
 	</svg>`
 }
 
-fn left_150(home) {
+private fn left_150(home) {
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 44">
 		<path fill=${global::main.lower.text.fade(0.2).out()} d="M18.5 2A17.5 17.5 0 0 0 1 19.5A17.5 17.5 0 0 0 18.5 37L43 37L43 2L18.5 2z"/>
 		<path fill=${global::main.lower.like.shadow(0.5)} d="M1 19.5L1 25.5A17.5 17.5 0 0 0 18.5 43L43 43L43 37L18.5 37A17.5 17.5 0 0 1 1 19.5z"/>
@@ -43,7 +43,7 @@ fn left_150(home) {
 	</svg>`
 }
 
-fn right(end, scale) {
+private fn right(end, scale) {
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 29" width="${84 * scale}" height="${29 * scale}">
 		<path fill=${global::main.lower.text.fade(0.2).out()} d="m15,2c12,0 12,11.5 12,11.5 0,0 0,11.5 -12,11.5H0V2Z"/>
 		<path fill=${global::main.lower.like.shadow(0.5)} d="M27,13.5C27,13.5 27,25 15,25H0v4H15C27,29 27,13.5 27,13.5Z"/>
@@ -61,7 +61,7 @@ fn right(end, scale) {
 	</svg>`
 }
 
-fn right_150(end) {
+private fn right_150(end) {
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126 44">
 		<path fill=${global::main.lower.text.fade(0.2).out()} d="M24.5,2A17.5,17.5 0 0 1 42,19.5 17.5,17.5 0 0 1 24.5,37H0V2Z"/>
 		<path fill=${global::main.lower.like.shadow(0.5)} d="m42,19.5v6A17.5,17.5 0 0 1 24.5,43H0V37H24.5A17.5,17.5 0 0 0 42,19.5Z"/>
@@ -79,28 +79,7 @@ fn right_150(end) {
 	</svg>`
 }
 
-export const knob_bg_large = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 34">
-	<path fill="yellow" d="M0 0L0 1L1 1L1 0L0 0zM31 31L31 34L32 34L32 31L31 31z"/>
-	<path fill="magenta" d="M1 0L1 1L3 1L3 0L1 0zM1 1L0 1L0 3L1 3L1 1zM31 29L31 31L32 31L32 29L31 29zM29 33L29 34L31 34L31 33L29 33z"/>
-	<circle fill=${main.lower.like.shadow(0.5)} cx="16" cy="18" r="15"/>
-	<circle fill=${main.lower.area.out()} stroke=${lab::mix(main.lower.like, main.lower.text, main.border).out()} cx="16" cy="16" r="14.5"/>
-</svg>`;
-
-export const knob_bg_large_150 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 47 50">
-	<path fill="yellow" d="M0,0V1H1V0Zm46,46v4h1v-4z"/>
-	<path fill="magenta" d="M1,0V1H5V0ZM1,1H0v4h1zm45,41v4h1v-4zm-4,7v1h4v-1z"/>
-	<circle fill=${main.lower.like.shadow(0.5)} cx="23.5" cy="26.5" r="22.5"/>
-	<circle fill=${main.lower.area.out()} stroke=${lab::mix(main.lower.like, main.lower.text, main.border).out()} cx="23.5" cy="23.5" r="22"/>
-</svg>`;
-
-export const knob_bg_large_200 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62 66">
-	<path fill="yellow" d="M0,0V1H1V0Zm61,61v5h1v-5z"/>
-	<path fill="magenta" d="M1,0V1H5V0ZM1,1H0v4h1zm60,56v4h1v-4zm-4,8v1h4v-1z"/>
-	<circle fill=${main.lower.like.shadow(0.5)} cx="31" cy="35" r="30"/>
-	<circle fill=${main.lower.area.out()} stroke=${lab::mix(main.lower.like, main.lower.text, main.border).out()} cx="31" cy="31" r="29.5"/>
-</svg>`;
-
-fn pause(on, scale) {
+private fn pause(on, scale) {
 	const data = switchable(on);
 	
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 87 29" width="${87 * scale}" height="${29 * scale}">
@@ -117,7 +96,7 @@ fn pause(on, scale) {
 	</svg>`
 }
 
-fn pause_150(on) {
+private fn pause_150(on) {
 	const data = switchable(on);
 	
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 44">
@@ -134,7 +113,7 @@ fn pause_150(on) {
 	</svg>`
 }
 
-fn play(synk, on, scale) {
+private fn play(synk, on, scale) {
 	const data = switchable(on);
 	
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 99 35" width="${99 * scale}" height="${35 * scale}">
@@ -154,7 +133,7 @@ fn play(synk, on, scale) {
 	</svg>`
 }
 
-fn play_150(synk, on) {
+private fn play_150(synk, on) {
 	const data = switchable(on);
 	
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 53">
@@ -174,7 +153,7 @@ fn play_150(synk, on) {
 	</svg>`
 }
 
-fn record(mode, on, scale) {
+private fn record(mode, on, scale) {
 	const set = global::main[if on { "red" } else { "lower" }];
 	
 	const colors = if on {
@@ -218,7 +197,7 @@ fn record(mode, on, scale) {
 	</svg>`
 }
 
-fn repeat(on, scale) {
+private fn repeat(on, scale) {
 	const set = global::main[if on { global::accent } else { "lower" }];
 	
 	const colors = if on {
@@ -252,7 +231,7 @@ fn repeat(on, scale) {
 	</svg>`
 }
 
-fn repeat_150(on) {
+private fn repeat_150(on) {
 	const set = global::main[if on { global::accent } else { "lower" }];
 	
 	const colors = if on {
@@ -286,7 +265,7 @@ fn repeat_150(on) {
 	</svg>`
 }
 
-fn stop(scale) {
+private fn stop(scale) {
 	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 87 29" width="${87 * scale}" height="${29 * scale}">
 		<path fill=${global::main.lower.text.fade(0.2).out()} d="M14,2C2,2 2,13.5 2,13.5 2,13.5 2,25 14,25H29V2Z"/>
 		<path fill=${global::main.lower.like.shadow(0.5)} d="M2,13.5C2,13.5 2,25 14,25h15v4H14C2,29 2,13.5 2,13.5Z"/>
@@ -301,15 +280,97 @@ fn stop(scale) {
 	</svg>`
 }
 
-export const stop_150 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 44">
-	<path fill=${main.lower.text.fade(0.2).out()} d="M21 2A18 18 0 0 0 3 20A18 18 0 0 0 21 38L43 38L43 2L21 2z"/>
-	<path fill=${main.lower.like.shadow(0.5)} d="m3,20v6A18,18 0 0 0 21,44H43V38H21A18,18 0 0 1 3,20Z"/>
-	
-	<path fill=${main.lower.text.fade(0.3).out()} d="M65,2A18,18 0 0 0 47,20 18,18 0 0 0 65,38H87V2Z"/>
-	<path fill=${main.lower.like.shadow(0.75)} d="m47,20v6A18,18 0 0 0 65,44H87V38H65A18,18 0 0 1 47,20Z"/>
-	
-	<path fill=${main.lower.text.fade(0.4).out()} d="m109,2a18,18 0 0 0 -18,18 18,18 0 0 0 18,18h22V2Z"/>
-	<path fill=${main.lower.like.shadow(1)} d="m91,20v6a18,18 0 0 0 18,18h22V38H109A18,18 0 0 1 91,20Z"/>
-	
-	<path fill=${main.lower.text.out()} d="M18 13L18 27L31 27L31 13L18 13zM62 13L62 27L75 27L75 13L62 13zM106 13L106 27L119 27L119 13L106 13z"/>
-</svg>`;
+export const map = #{
+	transport_bg: rectangle(main.lower.like, 6, 5),
+	transport_bpm: rectangle(main.lower.like, 6, 10),
+	transport_bpm_bg: rectangle(main.lower.like, 6, 10),
+	transport_end: right(true, 1),
+	transport_end_150: right_150(true),
+	transport_end_200: right(true, 2),
+	transport_home: left(true, 1),
+	transport_home_150: left_150(true),
+	transport_home_200: left(true, 2),
+	transport_knob_bg_large: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 34">
+		<path fill="yellow" d="M0 0L0 1L1 1L1 0L0 0zM31 31L31 34L32 34L32 31L31 31z"/>
+		<path fill="magenta" d="M1 0L1 1L3 1L3 0L1 0zM1 1L0 1L0 3L1 3L1 1zM31 29L31 31L32 31L32 29L31 29zM29 33L29 34L31 34L31 33L29 33z"/>
+		<circle fill=${main.lower.like.shadow(0.5)} cx="16" cy="18" r="15"/>
+		<circle fill=${main.lower.area.out()} stroke=${lab::mix(main.lower.like, main.lower.text, main.border).out()} cx="16" cy="16" r="14.5"/>
+	</svg>`,
+	transport_knob_bg_large_150: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 47 50">
+		<path fill="yellow" d="M0,0V1H1V0Zm46,46v4h1v-4z"/>
+		<path fill="magenta" d="M1,0V1H5V0ZM1,1H0v4h1zm45,41v4h1v-4zm-4,7v1h4v-1z"/>
+		<circle fill=${main.lower.like.shadow(0.5)} cx="23.5" cy="26.5" r="22.5"/>
+		<circle fill=${main.lower.area.out()} stroke=${lab::mix(main.lower.like, main.lower.text, main.border).out()} cx="23.5" cy="23.5" r="22"/>
+	</svg>`,
+	transport_knob_bg_large_200: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62 66">
+		<path fill="yellow" d="M0,0V1H1V0Zm61,61v5h1v-5z"/>
+		<path fill="magenta" d="M1,0V1H5V0ZM1,1H0v4h1zm60,56v4h1v-4zm-4,8v1h4v-1z"/>
+		<circle fill=${main.lower.like.shadow(0.5)} cx="31" cy="35" r="30"/>
+		<circle fill=${main.lower.area.out()} stroke=${lab::mix(main.lower.like, main.lower.text, main.border).out()} cx="31" cy="31" r="29.5"/>
+	</svg>`,
+	transport_next: right(false, 1),
+	transport_next_150: right_150(false),
+	transport_next_200: right(false, 2),
+	transport_pause: pause(false, 1),
+	transport_pause_on: pause(true, 1),
+	transport_pause_150: pause_150(false),
+	transport_pause_on_150: pause_150(true),
+	transport_pause_200: pause(false, 2),
+	transport_pause_on_200: pause(true, 2),
+	transport_play: play(false, false, 1),
+	transport_play_on: play(false, true, 1),
+	transport_play_sync: play(true, false, 1),
+	transport_play_sync_on: play(true, true, 1),
+	transport_play_150: play_150(false, false),
+	transport_play_on_150: play_150(false, true),
+	transport_play_sync_150: play_150(true, false),
+	transport_play_sync_on_150: play_150(true, true),
+	transport_play_200: play(false, false, 2),
+	transport_play_on_200: play(false, true, 2),
+	transport_play_sync_200: play(true, false, 2),
+	transport_play_sync_on_200: play(true, true, 2),
+	transport_playspeedbg: rectangle(main.lower.like, 6, 10),
+	transport_previous: left(false, 1),
+	transport_previous_150: left_150(false),
+	transport_previous_200: left(false, 2),
+	transport_record: record("none", false, 1),
+	transport_record_on: record("none", true, 1),
+	transport_record_item: record("item", false, 1),
+	transport_record_item_on: record("item", true, 1),
+	transport_record_loop: record("loop", false, 1),
+	transport_record_loop_on: record("loop", true, 1),
+	transport_record_150: record("none", false, 1.5), // WARNING not pixel perfect
+	transport_record_on_150: record("none", true, 1.5), // WARNING not pixel perfect
+	transport_record_item_150: record("item", false, 1.5), // WARNING not pixel perfect
+	transport_record_item_on_150: record("item", true, 1.5), // WARNING not pixel perfect
+	transport_record_loop_150: record("loop", false, 1.5), // WARNING not pixel perfect
+	transport_record_loop_on_150: record("loop", true, 1.5), // WARNING not pixel perfect
+	transport_record_200: record("none", false, 2),
+	transport_record_on_200: record("none", true, 2),
+	transport_record_item_200: record("item", false, 2),
+	transport_record_item_on_200: record("item", true, 2),
+	transport_record_loop_200: record("loop", false, 2),
+	transport_record_loop_on_200: record("loop", true, 2),
+	transport_repeat_off: repeat(false, 1),
+	transport_repeat_on: repeat(true, 1),
+	transport_repeat_off_150: repeat_150(false),
+	transport_repeat_on_150: repeat_150(true),
+	transport_repeat_off_200: repeat(false, 2),
+	transport_repeat_on_200: repeat(true, 2),
+	transport_status_bg: rectangle(main.lower.like, 6, 10),
+	transport_status_bg_err: rectangle(main.red.like.fade(0.2), 6, 10),
+	transport_stop: stop(1),
+	transport_stop_150: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 44">
+		<path fill=${main.lower.text.fade(0.2).out()} d="M21 2A18 18 0 0 0 3 20A18 18 0 0 0 21 38L43 38L43 2L21 2z"/>
+		<path fill=${main.lower.like.shadow(0.5)} d="m3,20v6A18,18 0 0 0 21,44H43V38H21A18,18 0 0 1 3,20Z"/>
+		
+		<path fill=${main.lower.text.fade(0.3).out()} d="M65,2A18,18 0 0 0 47,20 18,18 0 0 0 65,38H87V2Z"/>
+		<path fill=${main.lower.like.shadow(0.75)} d="m47,20v6A18,18 0 0 0 65,44H87V38H65A18,18 0 0 1 47,20Z"/>
+		
+		<path fill=${main.lower.text.fade(0.4).out()} d="m109,2a18,18 0 0 0 -18,18 18,18 0 0 0 18,18h22V2Z"/>
+		<path fill=${main.lower.like.shadow(1)} d="m91,20v6a18,18 0 0 0 18,18h22V38H109A18,18 0 0 1 91,20Z"/>
+		
+		<path fill=${main.lower.text.out()} d="M18 13L18 27L31 27L31 13L18 13zM62 13L62 27L75 27L75 13L62 13zM106 13L106 27L119 27L119 13L106 13z"/>
+	</svg>`,
+	transport_stop_200: stop(2),
+}

@@ -8,7 +8,7 @@ use std::{cell::RefCell, rc::Rc};
 use adw::{glib, prelude::*};
 use aquarelle::cache;
 use compact_str::CompactString;
-use declarative::{builder_mode, clone, view};
+use declarative::{clone, construct, view};
 use crate::{log, log::Log, utils, send};
 
 pub type SharedSelection = Rc<RefCell<Selection>>;
@@ -25,24 +25,24 @@ pub struct Selection {
 #[view {
 	pub struct Pane { }
 	
-	gtk::ScrolledWindow pub root: !{
+	gtk::ScrolledWindow pub root {
 		'bind set_width_request: utils::resize(window.allocated_width(), 324.0, 0.2)
 		
-		adw::Clamp #child(&#) !{
+		child: &_ @ adw::Clamp {
 			margin_bottom: 12
 			margin_end: 12
 			margin_start: 12
 			margin_top: 12
 			maximum_size: 324
 			
-			gtk::Box pub vbox: #child(&#) !{
+			child: &_ @ gtk::Box pub vbox {
 				orientation: gtk::Orientation::Vertical
 				spacing: 12
 			}
 		}
 	}
 	ref window {
-		connect_default_width_notify: @{ clone![root]; move |window| bindings!() }
+		connect_default_width_notify: { clone![root]; move |window| bindings!() }
 	}
 }]
 
@@ -51,22 +51,20 @@ pub fn pane(window: &adw::ApplicationWindow) -> Pane {
 	Pane { root, vbox }
 }
 
-#[view {
-	adw::ExpanderRow root !{
-		title: format!("{name}<span face='monospace' size='90%' alpha='55%'>: {id}</span>")
-		title_lines: 1
-		subtitle: about
-		~subtitle_lines: 1
+#[view[ adw::ExpanderRow root {
+	title: format!("{name}<span face='monospace' size='90%' alpha='55%'>: {id}</span>")
+	title_lines: 1
+	subtitle: about
+	~subtitle_lines: 1
+	
+	add_prefix: &_ @ gtk::CheckButton {
+		group: radio
+		~valign: gtk::Align::Center
 		
-		gtk::CheckButton #add_prefix(&#) !{
-			group: radio
-			~valign: gtk::Align::Center
-			
-			connect_toggled: clone![tx; move |this|
-				if this.is_active() { send!(true => tx) }]
-		}
+		connect_toggled: clone![tx; move |this|
+			if this.is_active() { send!(true => tx) }]
 	}
-}]
+} ]]
 
 fn namespace(
 	    about: & str,
@@ -96,35 +94,32 @@ fn namespace(
 	(root, tx)
 }
 
-#[view {
-	adw::ActionRow root !{
-		title: format!("{name}<span face='monospace' size='90%' alpha='55%'>: {id}</span>")
-		title_lines: 1
-		subtitle: about
-		subtitle_lines: 1
-		~activatable_widget: &prefix
+#[view[ adw::ActionRow root {
+	title: format!("{name}<span face='monospace' size='90%' alpha='55%'>: {id}</span>")
+	title_lines: 1
+	subtitle: about
+	subtitle_lines: 1
+	~activatable_widget: &prefix
+	
+	add_prefix: &_ @ gtk::CheckButton prefix {
+		group: radio
+		~valign: gtk::Align::Center
 		
-		gtk::CheckButton prefix #add_prefix(&#) !{
-			group: radio
-			~valign: gtk::Align::Center
-			
-			connect_toggled: move |this| if this.is_active() {
-				let mut selected = selection.borrow_mut();
-				selected.group.clone_from(&id);
-				send!(false => tx)
-			}
+		connect_toggled: move |this| if this.is_active() {
+			let mut selected = selection.borrow_mut();
+			selected.group.clone_from(&id);
+			send!(false => tx)
 		}
 	}
-}]
+} ]]
 
-fn group(
-	    about: & str,
-	 expander: & adw::ExpanderRow,
-	       id:   CompactString,
-	     name: & str,
-	    radio: & gtk::CheckButton,
-	selection:   SharedSelection,
-	       tx:   glib::Sender<bool>,
+fn group(about: & str,
+      expander: & adw::ExpanderRow,
+            id:   CompactString,
+          name: & str,
+         radio: & gtk::CheckButton,
+     selection:   SharedSelection,
+            tx:   glib::Sender<bool>,
 ) {
 	expand_view_here! { }
 	expander.add_row(&root)

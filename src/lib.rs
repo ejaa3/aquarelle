@@ -16,6 +16,7 @@ pub mod pathing;
 pub mod scheme;
 pub mod theme;
 
+mod css_filter;
 mod map;
 mod script;
 
@@ -87,8 +88,8 @@ pub struct Optional {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
-	Boolean (bool),
-	Integer (rhai::INT),
+	Bool (bool),
+	Int (rhai::INT),
 	Float   (rhai::FLOAT),
 	String  (rhai::ImmutableString),
 	Set     {  set: Set },
@@ -100,8 +101,8 @@ pub enum Value {
 impl Value {
 	const fn has_same_type(&self, other: &Value) -> bool {
 		match (self, other) {
-			(Value::Boolean (..), Value::Boolean (..)) |
-			(Value::Integer (..), Value::Integer (..)) |
+			(Value::Bool (..), Value::Bool (..)) |
+			(Value::Int (..), Value::Int (..)) |
 			(Value::Float   (..), Value::Float   (..)) |
 			(Value::String  (..), Value::String  (..)) |
 			(Value::Set     {..}, Value::Set     {..}) |
@@ -112,8 +113,8 @@ impl Value {
 	
 	pub const fn type_str(&self) -> &'static str {
 		match self {
-			Value::Boolean (..) => "boolean",
-			Value::Integer (..) => "integer",
+			Value::Bool (..) => "boolean",
+			Value::Int (..) => "integer",
 			Value::Float   (..) => "float",
 			Value::String  (..) => "string",
 			Value::Set     {..} => "color-set",
