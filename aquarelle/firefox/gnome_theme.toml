@@ -1,21 +1,22 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Firefox GNOME Theme (v166)'
- type = 'text-file'
-about = 'Style sheet that remaps <a href="https://github.com/rafaelmardojai/firefox-gnome-theme">Firefox GNOME theme</a> colors.'
+name = 'Firefox GNOME Theme (v166)'
+type = 'text-file' # md
+about = '''
+Custom colors for [Firefox GNOME theme](https://github.com/rafaelmardojai/firefox-gnome-theme).
+'''
 
-[schemes]
-main = { name = 'Main Color Scheme' }
+schemes.main.name = 'Main'
 
 [options]
- accent = { default.set = 'any', name = 'Accent Color Set' }
-private = { default.set = 'magenta', name = 'Private Color Set' }
+accent  = { name = 'Accent' , default.set = 'any' }
+private = { name = 'Private', default.set = 'magenta' }
 
 [options.dim-header]
-   name = 'Inactive header bar colors'
-  about = 'Use another color for the header bar when the window is out of focus'
+name = 'Inactive header bar colors'
+about = 'Use another color for the header bar when the window is out of focus'
 default = true
 
 [suggested-paths]

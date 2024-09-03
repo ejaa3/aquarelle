@@ -1,11 +1,11 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-use adw::traits::{ActionRowExt, PreferencesGroupExt};
-use aquarelle::scheme::Sets;
+use adw::prelude::{ActionRowExt, PreferencesGroupExt};
+use aquarelle::scheme::Data;
 use declarative::{construct, view};
 use crate::{utils::rgba, i18n};
 
@@ -15,210 +15,210 @@ use crate::{utils::rgba, i18n};
 	pub struct Component<R> { pub refresh: R }
 	
 	adw::PreferencesGroup pub root {
-		~title: i18n("Scheme colors")
-		
+		title: i18n("Scheme colors")
+		~
 		add: &_ @ adw::ActionRow {
 			title: i18n("Lower")
 			title_lines: 1
 			subtitle: i18n("Surface color")
-			~subtitle_lines: 1
-			
+			subtitle_lines: 1
+			~
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.lower.like)
+				'bind set_rgba: &rgba(scheme.lower.like)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.lower.area)
+				'bind set_rgba: &rgba(scheme.lower.area)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.lower.text)
+				'bind set_rgba: &rgba(scheme.lower.text)
 			}
 		}
 		add: &_ @ adw::ActionRow {
 			title: i18n("Upper")
 			title_lines: 1
 			subtitle: i18n("Surface color")
-			~subtitle_lines: 1
-			
+			subtitle_lines: 1
+			~
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.upper.like)
+				'bind set_rgba: &rgba(scheme.upper.like)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.upper.area)
+				'bind set_rgba: &rgba(scheme.upper.area)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.upper.text)
+				'bind set_rgba: &rgba(scheme.upper.text)
 			}
 		}
 		add: &_ @ adw::ActionRow {
 			title: i18n("Red")
 			title_lines: 1
 			subtitle: i18n("Accent color")
-			~subtitle_lines: 1
-			
+			subtitle_lines: 1
+			~
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.red.like)
+				'bind set_rgba: &rgba(scheme.red.like)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.red.area)
+				'bind set_rgba: &rgba(scheme.red.area)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.red.text)
+				'bind set_rgba: &rgba(scheme.red.text)
 			}
 		}
 		add: &_ @ adw::ActionRow {
 			title: i18n("Yellow")
 			title_lines: 1
 			subtitle: i18n("Accent color")
-			~subtitle_lines: 1
-			
+			subtitle_lines: 1
+			~
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.yellow.like)
+				'bind set_rgba: &rgba(scheme.yellow.like)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.yellow.area)
+				'bind set_rgba: &rgba(scheme.yellow.area)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.yellow.text)
+				'bind set_rgba: &rgba(scheme.yellow.text)
 			}
 		}
 		add: &_ @ adw::ActionRow {
 			title: i18n("Green")
 			title_lines: 1
 			subtitle: i18n("Accent color")
-			~subtitle_lines: 1
-			
+			subtitle_lines: 1
+			~
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.green.like)
+				'bind set_rgba: &rgba(scheme.green.like)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.green.area)
+				'bind set_rgba: &rgba(scheme.green.area)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.green.text)
+				'bind set_rgba: &rgba(scheme.green.text)
 			}
 		}
 		add: &_ @ adw::ActionRow {
 			title: i18n("Cyan")
 			title_lines: 1
 			subtitle: i18n("Accent color")
-			~subtitle_lines: 1
-			
+			subtitle_lines: 1
+			~
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.cyan.like)
+				'bind set_rgba: &rgba(scheme.cyan.like)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.cyan.area)
+				'bind set_rgba: &rgba(scheme.cyan.area)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.cyan.text)
+				'bind set_rgba: &rgba(scheme.cyan.text)
 			}
 		}
 		add: &_ @ adw::ActionRow {
 			title: i18n("Blue")
 			title_lines: 1
 			subtitle: i18n("Accent color")
-			~subtitle_lines: 1
-			
+			subtitle_lines: 1
+			~
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.blue.like)
+				'bind set_rgba: &rgba(scheme.blue.like)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.blue.area)
+				'bind set_rgba: &rgba(scheme.blue.area)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.blue.text)
+				'bind set_rgba: &rgba(scheme.blue.text)
 			}
 		}
 		add: &_ @ adw::ActionRow {
 			title: i18n("Magenta")
 			title_lines: 1
 			subtitle: i18n("Accent color")
-			~subtitle_lines: 1
-			
+			subtitle_lines: 1
+			~
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.magenta.like)
+				'bind set_rgba: &rgba(scheme.magenta.like)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.magenta.area)
+				'bind set_rgba: &rgba(scheme.magenta.area)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.magenta.text)
+				'bind set_rgba: &rgba(scheme.magenta.text)
 			}
 		}
 		add: &_ @ adw::ActionRow {
 			title: i18n("Any")
 			title_lines: 1
 			subtitle: i18n("Accent color")
-			~subtitle_lines: 1
-			
+			subtitle_lines: 1
+			~
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.any.like)
+				'bind set_rgba: &rgba(scheme.any.like)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.any.area)
+				'bind set_rgba: &rgba(scheme.any.area)
 			}
 			add_suffix: &_ @ gtk::ColorDialogButton {
 				dialog: &dialog
 				valign: gtk::Align::Center
-				'bind set_rgba: &rgba(sets.any.text)
+				'bind set_rgba: &rgba(scheme.any.text)
 			}
 		}
 	}
 }]
 
-pub fn start() -> Component<impl Fn(&Sets)> {
+pub fn start() -> Component<impl Fn(&Data)> {
 	expand_view_here! { }
-	Component { root, refresh: move |sets: &Sets| bindings!() }
+	Component { root, refresh: move |scheme: &Data| bindings!() }
 }

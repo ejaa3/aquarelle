@@ -1,16 +1,17 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Firefox'
- type = 'text-file'
-about = 'Style sheet for <a href="https://www.mozilla.org/en-US/firefox">Firefox</a> Web Browser.'
+name = 'Firefox'
+type = 'text-file' # md
+about = '''
+Style sheet for [Firefox Web Browser](https://mozilla.org/en-US/firefox).
+'''
 
-[schemes]
-main = { name = 'Main Color Scheme' }
+schemes.main.name = 'Main'
 
 [options]
- accent = { default.set = 'any', name = 'Accent Color Set' }
+accent = { name = 'Accent', default.set = 'any' }
 
 [suggested-paths]
 default = { default = 'firefox/userContent.css' }

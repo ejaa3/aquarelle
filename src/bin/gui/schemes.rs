@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -43,7 +43,7 @@ pub struct Schemes<'a> {
 	pub selection: namespaces::SharedSelection,
 	pub  settings: gio::Settings,
 	pub      tags: utils::Tags,
-	pub    themes: glib::Sender<namespaces::Msg>,
+	pub    themes: async_channel::Sender<namespaces::Msg>,
 	pub    window: &'a adw::ApplicationWindow,
 }
 
@@ -52,19 +52,18 @@ impl Schemes<'_> {
 }
 
 #[view {
-	pub struct Template { pub tx: glib::Sender<Msg> }
+	pub struct Template { pub tx: async_channel::Sender<Msg> }
 	
 	gtk::Box pub root {
-		hexpand: true
 		orientation: gtk::Orientation::Vertical
-		~/width_request: 324
+		hexpand: true ~>
 		
 		append: &_ @ gtk::SearchBar {
 			key_capture_widget: window
 			
 			child: &_ @ gtk::SearchEntry {
-				~placeholder_text: i18n("Search")
-				
+				placeholder_text: i18n("Search")
+				~
 				connect_search_changed: clone![name_filter; move |this| {
 					let text = this.text();
 					name_filter.set_search(if text.is_empty() { None } else { Some(&text) });
@@ -84,7 +83,7 @@ impl Schemes<'_> {
 					model: &_ @ gtk::SingleSelection single {
 						autoselect: false
 						
-						~model: &_ @ gtk::FilterListModel {
+						model: &_ @ gtk::FilterListModel {
 							filter: &_ @ gtk::StringFilter {
 								'bind set_search: (!selected.namespace.is_empty()).then_some(&selected.namespace)
 								
@@ -122,7 +121,7 @@ impl Schemes<'_> {
 								}
 							}
 							'consume update_filters = move |selected: Ref<namespaces::Selection>| bindings!()
-						}
+						} ~
 						connect_selected_item_notify: clone![tx; move |_| send!(Msg::SelectScheme => tx)]
 					}
 					factory: &_ @ gtk::SignalListItemFactory {
@@ -173,7 +172,7 @@ impl Schemes<'_> {
 }]
 
 pub fn start(Schemes { cache, scheme, selection, settings, tags, themes, window }: Schemes) -> Template {
-	let (tx, rx) = glib::MainContext::channel(glib::Priority::DEFAULT);
+	let (tx, rx) = async_channel::bounded(1);
 	
 	expand_view_here! { }
 	
@@ -224,9 +223,8 @@ pub fn start(Schemes { cache, scheme, selection, settings, tags, themes, window 
 		}
 	});
 	
-	rx.attach(None, move |msg| {
-		update_state(msg);
-		match msg { Msg::Shutdown => glib::ControlFlow::Break, _ => glib::ControlFlow::Continue }
+	glib::spawn_future_local(async move {
+		while let Ok(msg) = rx.recv().await { update_state(msg); }
 	});
 	
 	Template { root, tx }
@@ -258,10 +256,10 @@ fn set_appearance(
 	let (map_id, map) = namespace.map("adwaita", bin)
 		.log(|_| log::critical, log::namespace_error, namespace_id, &tags, true)?;
 	
-	const     ACCENT: CompactString = CompactString::new_inline("accent");
-	const DIM_HEADER: CompactString = CompactString::new_inline("dim-header");
-	const CUSTOM_CSS: CompactString = CompactString::new_inline("custom-css");
-	const       MAIN: CompactString = CompactString::new_inline("main");
+	const     ACCENT: CompactString = CompactString::const_new("accent");
+	const DIM_HEADER: CompactString = CompactString::const_new("dim-header");
+	const CUSTOM_CSS: CompactString = CompactString::const_new("custom-css");
+	const       MAIN: CompactString = CompactString::const_new("main");
 	
 	let success = aquarelle::mapping::Ready {
 		map, id: config::APP_ID, map_id,
@@ -278,7 +276,7 @@ fn set_appearance(
 		replica: (Default::default(), aquarelle::arrangement::Replica::Copy),
 	}.perform().log(|_| log::critical, log::mapping_error, (), &tags, true)?;
 	
-	tags.refresh(&data.sets);
+	tags.refresh(&data);
 	css.load_from_data(&success.text.unwrap());
 	None
 }
@@ -296,12 +294,12 @@ fn get_schemes(cache: &cache::Cache, tags: &utils::Tags, display: &gdk::Display)
 				.log(|_| log::error, log::namespace_error, at, &tags, true)?;
 			
 			Some(theme.schemes.iter().filter_map(move |(id, scheme)| {
-				let static_scheme = scheme.data(at, &cache, &Default::default(), &theme.options) // TODO Safety
+				let data = scheme.data(at, &cache, &Default::default()) // TODO Safety
 					.map_err(move |error| aquarelle::theme::Error::Scheme { id, error })
 					.log(|_| log::error, log::theme_error, (), &tags, true)?;
 				
 				let metadata = scheme::Object::new(
-					Rc::clone(static_scheme), at.clone(), theme_id.clone(), id.clone(), &display
+					Rc::clone(data), at.clone(), theme_id.clone(), id.clone(), &display
 				);
 				scheme.metadata.set(Box::new(metadata.clone())).unwrap();
 				Some(metadata)

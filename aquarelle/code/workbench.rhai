@@ -1,12 +1,12 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import "../lib" as lib;
 
-// Schemes:
+// schemes:
 
 const common = cfg::scheme("common");
 const main   = cfg::scheme("main");
@@ -25,19 +25,19 @@ const title  = cfg::scheme("title-bar");
 const notify  = cfg::scheme("notification");
 const welcome = cfg::scheme("welcome-page");
 
-// Numeric constants:
+// numeric constants:
 
-const      DIM = 0.75;
-const    HOVER = 0.1;
+const ACTIVE   = 2.0 / 3;
 const INACTIVE = 1.0 / 3;
-const   ACTIVE = 2.0 / 3;
+const DIM      = 0.75;
+const HOVER    = 0.1;
 
-// Sets:
+// sets:
 
 const accent   = cfg::option("accent");
 const emphasis = cfg::option("emphasis");
 
-// Roles:
+// roles:
 
 const hard = if editor.dark() { "area" } else { "like" };
 const soft = if editor.dark() { "like" } else { "area" };
@@ -45,7 +45,7 @@ const soft = if editor.dark() { "like" } else { "area" };
 const bright = if cfg::option("terminal-bold") { "area" } else { "like" };
 const normal = if cfg::option("terminal-bold") { "like" } else { "area" };
 
-// Colors:
+// colors:
 
 const status_shadow = if status.dark() {
 	lab::mix(editor.lower.area, 0xFF, lib::shadow(editor.lower.area)).out()
@@ -54,7 +54,7 @@ const status_shadow = if status.dark() {
 const status_text = lab::lighten(if status.dark()
 	{ status.lower.text } else { status.lower.like }, 0.25);
 
-// Shortcuts:
+// shortcuts:
 
 fn out() { `"#${this.to_hex_rgba(true)}"` }
 
@@ -70,50 +70,42 @@ fn status(set) {
 }
 
 fn raise(set, role, bias) {
-	switch this.dark() {
-		true => lab::lighten(this[set][role], bias),
-		   _ => lab::darken (this[set][role], bias)
-	}
+	if this.dark() { lab::lighten(this[set][role], bias) }
+	else { lab::darken(this[set][role], bias) }
 }
 
 fn lower(set, role, bias) {
-	switch this.dark() {
-		true => lab::darken (this[set][role], bias),
-		   _ => lab::lighten(this[set][role], bias)
-	}
+	if this.dark() { lab::darken(this[set][role], bias) }
+	else { lab::lighten(this[set][role], bias) }
 }
 
 fn alternate() {
 	if this.lower.like.luma() != this.lower.area.luma()
-		{ this.lower.like } else { this.upper.area }
+		{ this.lower.like } else { this.upper.like }
 } // HACK better solarized
 
-fn dev(text) { const devel = cfg::option("devel"); if devel { text } }
+fn dev(text) { } // json
+// fn dev(text) { text }
 
 export const colors = `{
 	"activityBar.activeBackground": ${bar.lower.area.out()},
 	"activityBar.activeBorder": ${lab::mix(bar.lower.area, bar.lower.text, 0.5).out()},
 	"activityBar.activeFocusBorder": ${bar.lower.text.out()},
-	"activityBar.background": ${bar.upper.area.out()},
+	"activityBar.background": ${bar.upper.like.out()},
 	"activityBar.border": ${bar.lower.like.shadow()},
-	"activityBar.dropBorder": ${lab::mix(bar.upper.area, bar.lower.text, 0.5).out()},
+	"activityBar.dropBorder": ${lab::mix(bar.upper.like, bar.lower.text, 0.5).out()},
 	"activityBar.foreground": ${bar.lower.text.out()},
-	"activityBar.inactiveForeground": ${bar.lower.text.fade(bar.dim).out()},
+	"activityBar.inactiveForeground": ${bar.lower.text.fade(0.625).out()},
 	
 	"activityBarBadge.background": ${bar[emphasis].area.out()},
 	"activityBarBadge.foreground": ${bar[emphasis].text.out()},
 	
-	// REMOVE
-	// "activityBarItem.settingsProfilesBackground": ${bar.lower.text.fade(1.5 * HOVER).out()},
-	// "activityBarItem.settingsProfilesForeground": ${bar.lower.text.fade(DIM).out()},
-	// "activityBarItem.settingsProfilesHoverForeground": ${bar.lower.text.out()},
-	
 	"badge.background": ${side[accent].area.out()},
-	"badge.foreground": ${side[accent].text.out()},
+	"badge.foreground": ${side[accent].text.out()}, ${dev(`
 	
-	${dev(`"banner.background": "#7f0000",`) /* FIXME */}
-	${dev(`"banner.foreground": "#ff7F7F",`) /* FIXME */}
-	${dev(`"banner.iconForeground": "#ff0000",`) /* FIXME */}
+	"banner.background": "#7f0000",
+	"banner.foreground": "#ff7F7F",
+	"banner.iconForeground": "#ff0000",`)}
 	
 	"bookmarks.lineBackground": ${editor.yellow.like.fade(0.1).out()},
 	"bookmarks.lineBorder": ${editor.yellow.like.fade(0.1).out()},
@@ -123,28 +115,28 @@ export const colors = `{
 	"breadcrumb.background": ${nav.alternate().out()},
 	"breadcrumb.focusForeground": ${nav.lower.text.out()},
 	"breadcrumb.foreground": ${nav.lower.text.fade(DIM).out()},
-	"breadcrumbPicker.background": ${common.upper.like.out()},
+	"breadcrumbPicker.background": ${common.upper.area.out()},
 	
 	"button.background": ${common[emphasis].area.out()},
-	// "button.border": ${common[emphasis].area.fade(common.border).out()},
+	// "button.border": ${common[emphasis].area.fade(0.25).out()},
 	"button.foreground": ${common[emphasis].text.out()},
 	"button.hoverBackground": ${lab::mix(common[emphasis].area, common[emphasis].text, HOVER).out()},
 	"button.secondaryBackground": ${notify.lower.text.fade(0.15).out()},
 	"button.secondaryForeground": ${notify.lower.text.out()},
 	"button.secondaryHoverBackground": ${notify.lower.text.fade(0.2).out()},
-	"button.separator": ${common[emphasis].text.fade(common.dim).out()},
+	"button.separator": ${common[emphasis].text.fade(0.625).out()}, ${dev(`
 	
-	${dev(`"charts.blue": "#ff0000",`) /* FIXME */}
-	${dev(`"charts.foreground": "#ff0000",`) /* FIXME */}
-	${dev(`"charts.green": "#ff0000",`) /* FIXME */}
-	${dev(`"charts.lines": "#ff0000",`) /* FIXME */}
-	${dev(`"charts.orange": "#ff0000",`) /* FIXME */}
-	${dev(`"charts.purple": "#ff0000",`) /* FIXME */}
-	${dev(`"charts.red": "#ff0000",`) /* FIXME */}
-	${dev(`"charts.yellow": "#ff0000",`) /* FIXME */}
+	"charts.blue": "#ff0000",
+	"charts.foreground": "#ff0000",
+	"charts.green": "#ff0000",
+	"charts.lines": "#ff0000",
+	"charts.orange": "#ff0000",
+	"charts.purple": "#ff0000",
+	"charts.red": "#ff0000",
+	"charts.yellow": "#ff0000",`)}
 	
-	"checkbox.background": ${side.upper.like.out()},
-	"checkbox.border": ${lab::mix(side.upper.like, side.upper.text, side.border).out()},
+	"checkbox.background": ${side.upper.area.out()},
+	"checkbox.border": ${lab::mix(side.upper.area, side.upper.text, 0.25).out()},
 	"checkbox.foreground": ${side.upper.text.out()},
 	"checkbox.selectBackground": "#F00", // BUG
 	"checkbox.selectBorder": "#FFF", // BUG
@@ -161,71 +153,74 @@ export const colors = `{
 	// TODO "contrastActiveBorder": "$ {main.lower.text.fade(cfg::option("contrast-active-border"))}",
 	// TODO "contrastBorder": "$ {main.lower.text.fade(cfg::option("contrast-border"))}",
 	
-	${dev(`"debugConsole.errorForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugConsole.infoForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugConsole.sourceForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugConsole.warningForeground": "#ff0000",`) /* FIXME */}
+	${dev(`
+	"debugConsole.errorForeground": "#ff0000",
+	"debugConsole.infoForeground": "#ff0000",
+	"debugConsole.sourceForeground": "#ff0000",
+	"debugConsole.warningForeground": "#ff0000",
 	
-	${dev(`"debugConsoleInputIcon.foreground": "#ff0000",`) /* FIXME */}
+	"debugConsoleInputIcon.foreground": "#ff0000",
 	
-	${dev(`"debugExceptionWidget.background": "#ff0000",`) /* FIXME */}
-	${dev(`"debugExceptionWidget.border": "#ff0000",`) /* FIXME */}
+	"debugExceptionWidget.background": "#ff0000",
+	"debugExceptionWidget.border": "#ff0000",
 	
-	${dev(`"debugIcon.breakpointCurrentStackframeForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.breakpointDisabledForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.breakpointForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.breakpointStackframeForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.breakpointUnverifiedForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.continueForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.disconnectForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.pauseForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.restartForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.startForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.stepBackForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.stepIntoForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.stepOutForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.stepOverForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugIcon.stopForeground": "#ff0000",`) /* FIXME */}
+	"debugIcon.breakpointCurrentStackframeForeground": "#ff0000",
+	"debugIcon.breakpointDisabledForeground": "#ff0000",
+	"debugIcon.breakpointForeground": "#ff0000",
+	"debugIcon.breakpointStackframeForeground": "#ff0000",
+	"debugIcon.breakpointUnverifiedForeground": "#ff0000",
+	"debugIcon.continueForeground": "#ff0000",
+	"debugIcon.disconnectForeground": "#ff0000",
+	"debugIcon.pauseForeground": "#ff0000",
+	"debugIcon.restartForeground": "#ff0000",
+	"debugIcon.startForeground": "#ff0000",
+	"debugIcon.stepBackForeground": "#ff0000",
+	"debugIcon.stepIntoForeground": "#ff0000",
+	"debugIcon.stepOutForeground": "#ff0000",
+	"debugIcon.stepOverForeground": "#ff0000",
+	"debugIcon.stopForeground": "#ff0000",
 	
-	${dev(`"debugTokenExpression.boolean": "#ff0000",`) /* FIXME */}
-	${dev(`"debugTokenExpression.error": "#ff0000",`) /* FIXME */}
-	${dev(`"debugTokenExpression.name": "#ff0000",`) /* FIXME */}
-	${dev(`"debugTokenExpression.number": "#ff0000",`) /* FIXME */}
-	${dev(`"debugTokenExpression.string": "#ff0000",`) /* FIXME */}
-	${dev(`"debugTokenExpression.value": "#ff0000",`) /* FIXME */}
+	"debugTokenExpression.boolean": "#ff0000",
+	"debugTokenExpression.error": "#ff0000",
+	"debugTokenExpression.name": "#ff0000",
+	"debugTokenExpression.number": "#ff0000",
+	"debugTokenExpression.string": "#ff0000",
+	"debugTokenExpression.value": "#ff0000",`)}
 	
-	"debugToolBar.background": ${editor.upper.like.out()},
+	"debugToolBar.background": ${editor.upper.area.out()},
 	// "debugToolBar.border": "#0000",
 	
-	${dev(`"debugView.exceptionLabelBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugView.exceptionLabelForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugView.stateLabelBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugView.stateLabelForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"debugView.valueChangedHighlight": "#ff0000",`) /* FIXME */}
+	${dev(`
+	"debugView.exceptionLabelBackground": "#ff0000",
+	"debugView.exceptionLabelForeground": "#ff0000",
+	"debugView.stateLabelBackground": "#ff0000",
+	"debugView.stateLabelForeground": "#ff0000",
+	"debugView.valueChangedHighlight": "#ff0000",`)}
 	
 	"descriptionForeground": ${common.lower.text.fade(ACTIVE).out()}, // or side.~
 	
-	${dev(`"diffEditor.border": "#ff0000",`) /* FIXME */}
-	${dev(`"diffEditor.diagonalFill": "#ff0000",`) /* FIXME */}
-	${dev(`"diffEditor.insertedLineBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"diffEditor.insertedTextBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"diffEditor.insertedTextBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"diffEditor.removedLineBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"diffEditor.removedTextBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"diffEditor.removedTextBorder": "#ff0000",`) /* FIXME */}
+	${dev(`
+	"diffEditor.border": "#ff0000",
+	"diffEditor.diagonalFill": "#ff0000",
+	"diffEditor.insertedLineBackground": "#ff0000",
+	"diffEditor.insertedTextBackground": "#ff0000",
+	"diffEditor.insertedTextBorder": "#ff0000",
+	"diffEditor.removedLineBackground": "#ff0000",
+	"diffEditor.removedTextBackground": "#ff0000",
+	"diffEditor.removedTextBorder": "#ff0000",
 	
-	${dev(`"diffEditorGutter.insertedLineBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"diffEditorGutter.removedLineBackground": "#ff0000",`) /* FIXME */}
+	"diffEditorGutter.insertedLineBackground": "#ff0000",
+	"diffEditorGutter.removedLineBackground": "#ff0000",
 	
-	${dev(`"diffEditorOverview.insertedForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"diffEditorOverview.removedForeground": "#ff0000",`) /* FIXME */}
+	"diffEditorOverview.insertedForeground": "#ff0000",
+	"diffEditorOverview.removedForeground": "#ff0000",`)}
 	
 	"disabledForeground": ${common.lower.text.out()}, // No alpha?
 	
-	"dropdown.background": ${side.upper.like.out()},
-	"dropdown.border": ${lab::mix(side.upper.like, side.upper.text, side.border).out()},
+	"dropdown.background": ${side.upper.area.out()},
+	"dropdown.border": ${lab::mix(side.upper.area, side.upper.text, 0.25).out()},
 	"dropdown.foreground": ${side.upper.text.out()},
-	"dropdown.listBackground": ${side.upper.like.out()},
+	"dropdown.listBackground": ${side.upper.area.out()},
 	
 	"editor.background": ${editor.lower.area.out()},
 	"editor.findMatchBackground": ${editor.cyan.like.fade(0.15).out()},
@@ -233,30 +228,30 @@ export const colors = `{
 	"editor.findMatchHighlightBackground": ${editor.magenta.like.fade(0.3).out()},
 	"editor.findMatchHighlightBorder": ${editor.magenta.like.fade(0.3).out()},
 	"editor.findRangeHighlightBackground": ${editor.raise("lower", "area", 0.04).out()},
-	"editor.findRangeHighlightBorder": ${editor.lower.text.fade(0.1).out()},
-	${dev(`"editor.focusedStackFrameHighlightBackground": "#ff0000",`) /* FIXME */}
+	"editor.findRangeHighlightBorder": ${editor.lower.text.fade(0.1).out()}, ${dev(`
+	"editor.focusedStackFrameHighlightBackground": "#ff0000",`)}
 	"editor.foldBackground": ${editor.blue.like.fade(0.1).out()},
 	"editor.foreground": ${editor.lower.text.out()},
 	"editor.hoverHighlightBackground": ${editor[accent].like.fade(0.2).out()},
-	"editor.inactiveSelectionBackground": ${editor.lower.text.fade(0.1).out()},
-	${dev(`"editor.inlineValuesBackground": "#007f00",`) /* FIXME */}
-	${dev(`"editor.inlineValuesForeground": "#7fff7f",`) /* FIXME */}
+	"editor.inactiveSelectionBackground": ${editor.lower.text.fade(0.1).out()}, ${dev(`
+	"editor.inlineValuesBackground": "#007f00",
+	"editor.inlineValuesForeground": "#7fff7f",`)}
 	"editor.lineHighlightBackground": ${editor.lower.text.fade(0.1).out()},
-	"editor.lineHighlightBorder": "#0000",
-	${dev(`"editor.linkedEditingBackground": "#ff0000",`) /* FIXME */}
+	"editor.lineHighlightBorder": "#0000", ${dev(`
+	"editor.linkedEditingBackground": "#ff0000",`)}
 	"editor.rangeHighlightBackground": ${editor.blue.like.fade(0.1).out()},
 	"editor.rangeHighlightBorder": ${editor.blue.like.fade(0.1).out()},
 	"editor.selectionBackground": ${editor.lower.text.fade(0.15).out()},
 	"editor.selectionForeground": ${editor[accent].like.out()},
 	"editor.selectionHighlightBackground": ${editor.cyan.like.fade(0.15).out()},
-	"editor.selectionHighlightBorder": ${editor.cyan.like.fade(0.15).out()},
-	${dev(`"editor.snippetFinalTabstopHighlightBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"editor.snippetFinalTabstopHighlightBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"editor.snippetTabstopHighlightBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"editor.snippetTabstopHighlightBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"editor.stackFrameHighlightBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"editor.symbolHighlightBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"editor.symbolHighlightBorder": "#ff0000",`) /* FIXME */}
+	"editor.selectionHighlightBorder": ${editor.cyan.like.fade(0.15).out()}, ${dev(`
+	"editor.snippetFinalTabstopHighlightBackground": "#ff0000",
+	"editor.snippetFinalTabstopHighlightBorder": "#ff0000",
+	"editor.snippetTabstopHighlightBackground": "#ff0000",
+	"editor.snippetTabstopHighlightBorder": "#ff0000",
+	"editor.stackFrameHighlightBackground": "#ff0000",
+	"editor.symbolHighlightBackground": "#ff0000",
+	"editor.symbolHighlightBorder": "#ff0000",`)}
 	"editor.wordHighlightBackground": ${editor.yellow.like.fade(0.2).out()},
 	"editor.wordHighlightBorder": ${editor.yellow.like.fade(0.2).out()},
 	"editor.wordHighlightTextBackground": ${editor.yellow.like.fade(0.2).out()},
@@ -289,62 +284,62 @@ export const colors = `{
 	"editorBracketPairGuide.background5": ${editor.yellow[hard].fade(INACTIVE).out()},
 	"editorBracketPairGuide.background6": ${editor.any.area.fade(INACTIVE).out()},
 	
-	"editorCodeLens.foreground": ${editor.lower.text.fade(0.75).out()},
+	"editorCodeLens.foreground": ${editor.lower.text.fade(0.75).out()}, ${dev(`
 	
-	${dev(`"editorCommentsWidget.rangeActiveBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorCommentsWidget.rangeActiveBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"editorCommentsWidget.rangeBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorCommentsWidget.rangeBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"editorCommentsWidget.resolvedBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"editorCommentsWidget.unresolvedBorder": "#ff0000",`) /* FIXME */}
+	"editorCommentsWidget.rangeActiveBackground": "#ff0000",
+	"editorCommentsWidget.rangeActiveBorder": "#ff0000",
+	"editorCommentsWidget.rangeBackground": "#ff0000",
+	"editorCommentsWidget.rangeBorder": "#ff0000",
+	"editorCommentsWidget.resolvedBorder": "#ff0000",
+	"editorCommentsWidget.unresolvedBorder": "#ff0000",`)}
 	
 	"editorCursor.background": ${editor.lower.area.out()},
 	"editorCursor.foreground": ${editor.lower.text.out()},
 	
 	"editorError.background": ${editor.red.like.fade(0.15).out()},
 	"editorError.border": "#0000",
-	"editorError.foreground": ${editor.red.area.out()},
+	"editorError.foreground": ${editor.red.area.out()}, ${dev(`
 	
-	${dev(`"editorGhostText.background": "#ff0000",`) /* FIXME */}
-	${dev(`"editorGhostText.border": "#ff0000",`) /* FIXME */}
-	${dev(`"editorGhostText.foreground": "#ff0000",`) /* FIXME */}
+	"editorGhostText.background": "#ff0000",
+	"editorGhostText.border": "#ff0000",
+	"editorGhostText.foreground": "#ff0000",`)}
 	
 	"editorGroup.border": ${common.lower.like.shadow()},
-	"editorGroup.dropBackground": ${common[emphasis].area.fade(0.2).out()},
-	${dev(`"editorGroup.dropIntoPromptBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorGroup.dropIntoPromptBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"editorGroup.dropIntoPromptForeground": "#ff0000",`) /* FIXME */}
-	"editorGroup.emptyBackground": ${common.alternate().out()},
-	${dev(`"editorGroup.focusedEmptyBorder": "#00ff00",`) /* FIXME */}
+	"editorGroup.dropBackground": ${common[emphasis].area.fade(0.2).out()}, ${dev(`
+	"editorGroup.dropIntoPromptBackground": "#ff0000",
+	"editorGroup.dropIntoPromptBorder": "#ff0000",
+	"editorGroup.dropIntoPromptForeground": "#ff0000",`)}
+	"editorGroup.emptyBackground": ${common.alternate().out()}, ${dev(`
+	"editorGroup.focusedEmptyBorder": "#00ff00",`)}
 	
 	"editorGroupHeader.border": "#FFFFFF07",
 	"editorGroupHeader.noTabsBackground": ${tab.lower.like.out()},
 	"editorGroupHeader.tabsBackground": ${tab.lower.like.out()},
-	"editorGroupHeader.tabsBorder": ${tab.lower.like.shadow()},
+	"editorGroupHeader.tabsBorder": ${tab.lower.like.shadow()}, ${dev(`
 	
-	${dev(`"editorGutter.addedBackground": "#ff0000",`) /* FIXME */}
-	"editorGutter.background": ${editor.raise("lower", "area", 0.04).out()},
-	${dev(`"editorGutter.commentGlyphForground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorGutter.commentRangeForeground": "#ff0000",`) /* FIXME */}
+	"editorGutter.addedBackground": "#ff0000",`)}
+	"editorGutter.background": ${editor.raise("lower", "area", 0.04).out()}, ${dev(`
+	"editorGutter.commentGlyphForground": "#ff0000",
+	"editorGutter.commentRangeForeground": "#ff0000",`)}
 	"editorGutter.deletedBackground": ${editor.red.area.out()},
-	"editorGutter.foldingControlForeground": ${editor.lower.text.fade(editor.dim).out()},
+	"editorGutter.foldingControlForeground": ${editor.lower.text.fade(0.625).out()},
 	"editorGutter.modifiedBackground": ${editor.blue.area.out()},
 	
 	"editorHint.border": ${editor.lower.area.shadow()},
-	"editorHint.foreground": ${editor.lower.text.fade(editor.dim).out()},
+	"editorHint.foreground": ${editor.lower.text.fade(0.625).out()},
 	
 	"editorHoverWidget.background": ${editor.raise("lower", "area", 0.04).out()},
-	"editorHoverWidget.border": ${editor.lower.text.fade(editor.border).out()},
-	"editorHoverWidget.foreground": ${editor.lower.text.out()},
-	${dev(`"editorHoverWidget.highlightForeground": "#00ff00",`) /* FIXME */}
+	"editorHoverWidget.border": ${editor.lower.text.fade(0.25).out()},
+	"editorHoverWidget.foreground": ${editor.lower.text.out()}, ${dev(`
+	"editorHoverWidget.highlightForeground": "#00ff00",`)}
 	"editorHoverWidget.statusBarBackground": ${editor.alternate().out()},
 	
-	"editorIndentGuide.activeBackground": ${editor.lower.text.fade(ACTIVE).out()},
-	"editorIndentGuide.background": ${editor.lower.text.fade(INACTIVE).out()},
+	"editorIndentGuide.activeBackground1": ${editor.lower.text.fade(ACTIVE).out()},
+	"editorIndentGuide.background1": ${editor.lower.text.fade(INACTIVE).out()}, ${dev(`
 	
-	${dev(`"editorInfo.background": "#ff0000",`) /* FIXME */}
-	${dev(`"editorInfo.border": "#ff0000",`) /* FIXME */}
-	${dev(`"editorInfo.foreground": "#ff0000",`) /* FIXME */}
+	"editorInfo.background": "#ff0000",
+	"editorInfo.border": "#ff0000",
+	"editorInfo.foreground": "#ff0000",`)}
 	
 	"editorInlayHint.background": ${editor.cyan.area.fade(0.1).out()},
 	"editorInlayHint.foreground": ${editor.cyan.area.out()},
@@ -353,67 +348,66 @@ export const colors = `{
 	"editorInlayHint.typeBackground": ${editor.blue.area.fade(0.1).out()},
 	"editorInlayHint.typeForeground": ${editor.blue.area.out()},
 	
-	"editorLightBulb.foreground": ${editor.yellow.area.out()},
+	"editorLightBulb.foreground": ${editor.yellow.area.out()}, ${dev(`
 	
-	${dev(`"editorLightBulbAutoFix.foreground": "#ff0000",`) /* FIXME */}
+	"editorLightBulbAutoFix.foreground": "#ff0000",`)}
 	
-	"editorLineNumber.activeForeground": ${editor.lower.text.out()},
-	${dev(`"editorLineNumber.dimmedForeground": "#ff0000",`) /* FIXME */}
-	"editorLineNumber.foreground": ${editor.lower.text.fade(editor.dim).out()},
+	"editorLineNumber.activeForeground": ${editor.lower.text.out()}, ${dev(`
+	"editorLineNumber.dimmedForeground": "#ff0000",`)}
+	"editorLineNumber.foreground": ${editor.lower.text.fade(0.625).out()},
 	
-	"editorLink.activeForeground": ${editor.lower.text.out()},
+	"editorLink.activeForeground": ${editor.lower.text.out()}, ${dev(`
 	
-	${dev(`"editorMarkerNavigation.background": "#ff0000",`) /* FIXME */}
+	"editorMarkerNavigation.background": "#ff0000",
 	
-	${dev(`"editorMarkerNavigationError.background": "#ff0000",`) /* FIXME */}
-	${dev(`"editorMarkerNavigationError.headerBackground": "#ff0000",`) /* FIXME */}
+	"editorMarkerNavigationError.background": "#ff0000",
+	"editorMarkerNavigationError.headerBackground": "#ff0000",
 	
-	${dev(`"editorMarkerNavigationInfo.background": "#ff0000",`) /* FIXME */}
-	${dev(`"editorMarkerNavigationInfo.headerBackground": "#ff0000",`) /* FIXME */}
+	"editorMarkerNavigationInfo.background": "#ff0000",
+	"editorMarkerNavigationInfo.headerBackground": "#ff0000",
 	
-	${dev(`"editorMarkerNavigationWarning.background": "#ff0000",`) /* FIXME */}
-	${dev(`"editorMarkerNavigationWarning.headerBackground": "#ff0000",`) /* FIXME */}
+	"editorMarkerNavigationWarning.background": "#ff0000",
+	"editorMarkerNavigationWarning.headerBackground": "#ff0000",
 	
-	${dev(`"editorOverviewRuler.addedForeground": "#ff0000",`) /* FIXME */}
+	"editorOverviewRuler.addedForeground": "#ff0000",`)}
 	"editorOverviewRuler.background": ${editor.raise("lower", "area", 0.04).out()},
-	"editorOverviewRuler.border": ${editor.raise("lower", "area", 0.04).shadow()},
-	${dev(`"editorOverviewRuler.bracketMatchForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.commonContentForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.currentContentForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.deletedForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.errorForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.findMatchForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.incomingContentForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.infoForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.modifiedForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.rangeHighlightForeground": "#ff0000",`) /* FIXME */}
-	"editorOverviewRuler.selectionHighlightForeground": ${editor.yellow.area.out()},
-	${dev(`"editorOverviewRuler.warningForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.wordHighlightForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.wordHighlightStrongForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"editorOverviewRuler.wordHighlightTextForeground": "#ff0000",`) /* FIXME */}
+	"editorOverviewRuler.border": ${editor.raise("lower", "area", 0.04).shadow()}, ${dev(`
+	"editorOverviewRuler.bracketMatchForeground": "#ff0000",
+	"editorOverviewRuler.commonContentForeground": "#ff0000",
+	"editorOverviewRuler.currentContentForeground": "#ff0000",
+	"editorOverviewRuler.deletedForeground": "#ff0000",
+	"editorOverviewRuler.errorForeground": "#ff0000",
+	"editorOverviewRuler.findMatchForeground": "#ff0000",
+	"editorOverviewRuler.incomingContentForeground": "#ff0000",
+	"editorOverviewRuler.infoForeground": "#ff0000",
+	"editorOverviewRuler.modifiedForeground": "#ff0000",
+	"editorOverviewRuler.rangeHighlightForeground": "#ff0000",`)}
+	"editorOverviewRuler.selectionHighlightForeground": ${editor.yellow.area.out()}, ${dev(`
+	"editorOverviewRuler.warningForeground": "#ff0000",
+	"editorOverviewRuler.wordHighlightForeground": "#ff0000",
+	"editorOverviewRuler.wordHighlightStrongForeground": "#ff0000",
+	"editorOverviewRuler.wordHighlightTextForeground": "#ff0000",
 	
-	${dev(`"editorPane.background": "#00ff00",`) /* FIXME */}
+	"editorPane.background": "#00ff00",`)}
 	
-	"editorRuler.foreground": ${editor.lower.text.fade(editor.border).out()},
+	"editorRuler.foreground": ${editor.lower.text.fade(0.25).out()}, ${dev(`
 	
-	${dev(`"editorStickyScroll.background": "#ff0000",`) /* FIXME */}
-	
-	${dev(`"editorStickyScrollHover.background": "#ff0000",`) /* FIXME */}
+	"editorStickyScroll.background": "#ff0000",
+	"editorStickyScrollHover.background": "#ff0000",`)}
 	
 	"editorSuggestWidget.background": ${editor.raise("lower", "area", 0.04).out()},
-	"editorSuggestWidget.border": ${editor.blue.area.fade(editor.dim).out()},
+	"editorSuggestWidget.border": ${editor.blue.area.fade(0.625).out()},
 	"editorSuggestWidget.focusHighlightForeground": ${editor[accent].text.out()},
 	"editorSuggestWidget.foreground": ${editor.lower.text.out()},
 	"editorSuggestWidget.highlightForeground": ${editor[accent].like.out()},
 	"editorSuggestWidget.selectedBackground": ${editor[accent].area.out()},
 	"editorSuggestWidget.selectedForeground": ${editor[accent].text.out()},
-	"editorSuggestWidget.selectedIconForeground": ${editor[accent].text.out()},
+	"editorSuggestWidget.selectedIconForeground": ${editor[accent].text.out()}, ${dev(`
 	
-	${dev(`"editorSuggestWidgetStatus.foreground": "#00ff00",`) /* FIXME */}
+	"editorSuggestWidgetStatus.foreground": "#00ff00",
 	
-	${dev(`"editorUnicodeHighlight.background": "#00ff00",`) /* FIXME */}
-	${dev(`"editorUnicodeHighlight.border": "#ffff00",`) /* FIXME */}
+	"editorUnicodeHighlight.background": "#00ff00",
+	"editorUnicodeHighlight.border": "#ffff00",`)}
 	
 	"editorUnnecessaryCode.border": ${editor.lower.area.shadow()},
 	"editorUnnecessaryCode.opacity": "#0000009F",
@@ -422,10 +416,10 @@ export const colors = `{
 	"editorWarning.border": "#0000",
 	"editorWarning.foreground": ${editor.yellow.area.out()},
 	
-	"editorWhitespace.foreground": ${editor.lower.text.fade(editor.dim / 2).out()},
+	"editorWhitespace.foreground": ${editor.lower.text.fade(0.375).out()},
 	
 	"editorWidget.background": ${editor.raise("lower", "area", 0.04).out()},
-	"editorWidget.border": ${editor.lower.text.fade(editor.border).out()},
+	"editorWidget.border": ${editor.lower.text.fade(0.25).out()},
 	"editorWidget.foreground": ${editor.lower.text.out()},
 	"editorWidget.resizeBorder": ${editor.lower.text.fade(0.5).out()},
 	
@@ -434,47 +428,47 @@ export const colors = `{
 	"errorLens.errorBackground": ${editor.red.like.fade(0.15).out()},
 	"errorLens.errorBackgroundLight": ${editor.red.like.fade(0.15).out()},
 	"errorLens.errorForeground": ${editor.red.like.out()},
-	"errorLens.errorForegroundLight": ${editor.red.like.out()},
+	"errorLens.errorForegroundLight": ${editor.red.like.out()}, ${dev(`
 	
-	${dev(`"errorLens.errorMessageBackground": "#ff0000",`) /* FIXME */}
+	"errorLens.errorMessageBackground": "#ff0000",
 	
-	${dev(`"errorLens.hintBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.hintBackgroundLight": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.hintForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.hintForegroundLight": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.hintMessageBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.infoBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.infoBackgroundLight": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.infoForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.infoForegroundLight": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.infoMessageBackground": "#ff0000",`) /* FIXME */}
+	"errorLens.hintBackground": "#ff0000",
+	"errorLens.hintBackgroundLight": "#ff0000",
+	"errorLens.hintForeground": "#ff0000",
+	"errorLens.hintForegroundLight": "#ff0000",
+	"errorLens.hintMessageBackground": "#ff0000",
+	"errorLens.infoBackground": "#ff0000",
+	"errorLens.infoBackgroundLight": "#ff0000",
+	"errorLens.infoForeground": "#ff0000",
+	"errorLens.infoForegroundLight": "#ff0000",
+	"errorLens.infoMessageBackground": "#ff0000",
 	
-	${dev(`"errorLens.statusBarErrorForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.statusBarHintForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.statusBarIconErrorForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.statusBarIconWarningForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.statusBarInfoForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"errorLens.statusBarWarningForeground": "#ff0000",`) /* FIXME */}
+	"errorLens.statusBarErrorForeground": "#ff0000",
+	"errorLens.statusBarHintForeground": "#ff0000",
+	"errorLens.statusBarIconErrorForeground": "#ff0000",
+	"errorLens.statusBarIconWarningForeground": "#ff0000",
+	"errorLens.statusBarInfoForeground": "#ff0000",
+	"errorLens.statusBarWarningForeground": "#ff0000",`)}
 	
 	"errorLens.warningBackground": ${editor.yellow.like.fade(0.1).out()},
 	"errorLens.warningBackgroundLight": ${editor.yellow.like.fade(0.1).out()},
 	"errorLens.warningForeground": ${editor.yellow.like.out()},
-	"errorLens.warningForegroundLight": ${editor.yellow.like.out()},
-	${dev(`"errorLens.warningMessageBackground": "#ff0000",`) /* FIXME */}
+	"errorLens.warningForegroundLight": ${editor.yellow.like.out()}, ${dev(`
+	"errorLens.warningMessageBackground": "#ff0000",
 	
-	${dev(`"extensionBadge.remoteBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"extensionBadge.remoteForeground": "#ff0000",`) /* FIXME */}
+	"extensionBadge.remoteBackground": "#ff0000",
+	"extensionBadge.remoteForeground": "#ff0000",
 	
-	${dev(`"extensionButton.background": "#ff0000",`) /* FIXME */}
-	${dev(`"extensionButton.foreground": "#ff0000",`) /* FIXME */}
-	${dev(`"extensionButton.hoverBackground": "#ff0000",`) /* FIXME */}
+	"extensionButton.background": "#ff0000",
+	"extensionButton.foreground": "#ff0000",
+	"extensionButton.hoverBackground": "#ff0000",`)}
 	"extensionButton.prominentBackground": ${common[emphasis].area.out()},
 	"extensionButton.prominentForeground": ${common[emphasis].text.out()},
-	"extensionButton.prominentHoverBackground": ${lab::mix(common[emphasis].area, common[emphasis].text, HOVER).out()},
-	${dev(`"extensionButton.separator": "#ff0000",`) /* FIXME */}
+	"extensionButton.prominentHoverBackground": ${lab::mix(common[emphasis].area, common[emphasis].text, HOVER).out()}, ${dev(`
+	"extensionButton.separator": "#ff0000",
 	
-	${dev(`"extensionIcon.preReleaseForeground": ${common.red.area.out()},`) /* FIXME strange */}
-	${dev(`"extensionIcon.sponsorForeground": "#ff0000",`) /* FIXME */}
+	"extensionIcon.preReleaseForeground": ${common.red.area.out()},
+	"extensionIcon.sponsorForeground": "#ff0000",`)}
 	"extensionIcon.starForeground": ${common.yellow.area.out()},
 	"extensionIcon.verifiedForeground": ${common.green.area.out()},
 	
@@ -482,41 +476,41 @@ export const colors = `{
 	
 	"foreground": ${common.lower.text.out()},
 	
-	"gitDecoration.addedResourceForeground": ${side.cyan.like.out()},
-	${dev(`"gitDecoration.conflictingResourceForeground": "#ff0000",`) /* FIXME */}
+	"gitDecoration.addedResourceForeground": ${side.cyan.like.out()}, ${dev(`
+	"gitDecoration.conflictingResourceForeground": "#ff0000",`)}
 	"gitDecoration.deletedResourceForeground": ${side.red.like.out()},
 	"gitDecoration.ignoredResourceForeground": ${side.lower.text.fade(DIM).out()},
 	"gitDecoration.modifiedResourceForeground": ${side.magenta.like.out()},
 	"gitDecoration.renamedResourceForeground": ${side.any.like.out()},
 	"gitDecoration.stageDeletedResourceForeground": ${side.red.like.out()},
-	"gitDecoration.stageModifiedResourceForeground": ${side.blue.like.out()},
-	${dev(`"gitDecoration.submoduleResourceForeground": "#ff0000",`) /* FIXME */}
+	"gitDecoration.stageModifiedResourceForeground": ${side.blue.like.out()}, ${dev(`
+	"gitDecoration.submoduleResourceForeground": "#ff0000",`)}
 	"gitDecoration.untrackedResourceForeground": ${side.green.like.out()},
 	
 	"icon.foreground": ${common.lower.text.out()},
 	
 	"input.background": ${common.lower("lower", "area", 0.04).out()},
-	"input.border": ${common.lower.text.fade(common.border).out()},
+	"input.border": ${common.lower.text.fade(0.25).out()},
 	"input.foreground": ${common.lower.text.out()},
-	"input.placeholderForeground": ${common.lower.text.fade(common.dim).out()},
+	"input.placeholderForeground": ${common.lower.text.fade(0.625).out()},
 	
 	"inputOption.activeBackground": ${editor[emphasis].like.fade(0.15).out()},
 	"inputOption.activeBorder": ${editor[emphasis].like.fade(0.15).out()},
 	"inputOption.activeForeground": ${editor[emphasis].like.out()},
-	"inputOption.hoverBackground": ${editor.lower.text.fade(0.15).out()},
+	"inputOption.hoverBackground": ${editor.lower.text.fade(0.15).out()}, ${dev(`
 	
-	${dev(`"inputValidation.errorBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"inputValidation.errorBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"inputValidation.errorForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"inputValidation.infoBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"inputValidation.infoBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"inputValidation.infoForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"inputValidation.warningBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"inputValidation.warningBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"inputValidation.warningForeground": "#ff0000",`) /* FIXME */}
+	"inputValidation.errorBackground": "#ff0000",
+	"inputValidation.errorBorder": "#ff0000",
+	"inputValidation.errorForeground": "#ff0000",
+	"inputValidation.infoBackground": "#ff0000",
+	"inputValidation.infoBorder": "#ff0000",
+	"inputValidation.infoForeground": "#ff0000",
+	"inputValidation.warningBackground": "#ff0000",
+	"inputValidation.warningBorder": "#ff0000",
+	"inputValidation.warningForeground": "#ff0000",
 	
-	${dev(`"interactive.activeCodeBorder": "#00ff00",`) /* FIXME */}
-	${dev(`"interactive.inactiveCodeBorder": "#ff0000",`) /* FIXME */}
+	"interactive.activeCodeBorder": "#00ff00",
+	"interactive.inactiveCodeBorder": "#ff0000",`)}
 	
 	"keybindingLabel.background": ${common.lower.text.fade(0.1).out()},
 	"keybindingLabel.border": ${common.lower.like.shadow()},
@@ -527,8 +521,8 @@ export const colors = `{
 	
 	"list.activeSelectionBackground": ${common[accent].area.out()},
 	"list.activeSelectionForeground": ${common[accent].text.out()},
-	"list.activeSelectionIconForeground": ${common[accent].text.out()},
-	${dev(`"list.deemphasizedForeground": "#00ff00",`) /* FIXME */}
+	"list.activeSelectionIconForeground": ${common[accent].text.out()}, ${dev(`
+	"list.deemphasizedForeground": "#00ff00",`)}
 	"list.dropBackground": ${common[accent].area.fade(0.3).out()},
 	"list.errorForeground": ${common.red.like.out()},
 	"list.filterMatchBackground": ${editor.magenta.like.fade(0.3).out()},
@@ -542,51 +536,51 @@ export const colors = `{
 	"list.hoverBackground": ${common.lower.text.fade(HOVER).out()},
 	"list.hoverForeground": ${common.lower.text.out()},
 	"list.inactiveFocusBackground": ${common[emphasis].like.fade(0.1).out()},
-	"list.inactiveFocusOutline": ${common[emphasis].like.fade(common.border).out()},
+	"list.inactiveFocusOutline": ${common[emphasis].like.fade(0.25).out()},
 	"list.inactiveSelectionBackground": ${common[emphasis].like.fade(0.1).out()},
 	"list.inactiveSelectionForeground": ${common[emphasis].like.out()},
-	"list.inactiveSelectionIconForeground": ${common[emphasis].like.out()},
-	${dev(`"list.invalidItemForeground": "#ffff00",`) /* FIXME */}
+	"list.inactiveSelectionIconForeground": ${common[emphasis].like.out()}, ${dev(`
+	"list.invalidItemForeground": "#ffff00",`)}
 	"list.warningForeground": ${common.yellow.like.out()},
 	
-	"listFilterWidget.background": ${side.upper.area.out()},
-	${dev(`"listFilterWidget.noMatchesOutline": "#00ff00",`) /* FIXME */}
-	${dev(`"listFilterWidget.outline": "#ffff00",`) /* FIXME */}
+	"listFilterWidget.background": ${side.upper.like.out()}, ${dev(`
+	"listFilterWidget.noMatchesOutline": "#00ff00",
+	"listFilterWidget.outline": "#ffff00",`)}
 	"listFilterWidget.shadow": "#0000005F",
 	
-	"menu.background": ${menu.upper.like.out()},
+	"menu.background": ${menu.upper.area.out()},
 	"menu.border": "#0000",
 	"menu.foreground": ${menu.upper.text.out()},
 	"menu.selectionBackground": ${menu.upper.text.fade(HOVER).out()},
 	"menu.selectionBorder": ${menu.upper.text.fade(HOVER).out()},
 	"menu.selectionForeground": ${menu.upper.text.out()},
-	"menu.separatorBackground": ${menu.upper.like.shadow()},
+	"menu.separatorBackground": ${menu.upper.area.shadow()},
 	
 	"menubar.selectionBackground": ${title.lower.text.fade(HOVER).out()},
-	"menubar.selectionBorder": ${title.lower.text.fade(title.border).out()},
-	"menubar.selectionForeground": ${title.lower.text.out()},
+	"menubar.selectionBorder": ${title.lower.text.fade(0.25).out()},
+	"menubar.selectionForeground": ${title.lower.text.out()}, ${dev(`
 	
-	${dev(`"merge.border": "#ff0000",`) /* FIXME */}
-	${dev(`"merge.commonContentBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"merge.commonHeaderBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"merge.currentContentBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"merge.currentHeaderBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"merge.incomingContentBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"merge.incomingHeaderBackground": "#ff0000",`) /* FIXME */}
+	"merge.border": "#ff0000",
+	"merge.commonContentBackground": "#ff0000",
+	"merge.commonHeaderBackground": "#ff0000",
+	"merge.currentContentBackground": "#ff0000",
+	"merge.currentHeaderBackground": "#ff0000",
+	"merge.incomingContentBackground": "#ff0000",
+	"merge.incomingHeaderBackground": "#ff0000",
 	
-	${dev(`"mergeEditor.change.background": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.change.word.background": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.changeBase.background": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.changeBase.word.background": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.conflict.handled.minimapOverViewRuler": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.conflict.handledFocused.border": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.conflict.handledUnfocused.border": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.conflict.input1.background": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.conflict.input2.background": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.conflict.unhandled.minimapOverViewRuler": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.conflict.unhandledFocused.border": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.conflict.unhandledUnfocused.border": "#ff0000",`) /* FIXME */}
-	${dev(`"mergeEditor.conflictingLines.background": "#ff0000",`) /* FIXME */}
+	"mergeEditor.change.background": "#ff0000",
+	"mergeEditor.change.word.background": "#ff0000",
+	"mergeEditor.changeBase.background": "#ff0000",
+	"mergeEditor.changeBase.word.background": "#ff0000",
+	"mergeEditor.conflict.handled.minimapOverViewRuler": "#ff0000",
+	"mergeEditor.conflict.handledFocused.border": "#ff0000",
+	"mergeEditor.conflict.handledUnfocused.border": "#ff0000",
+	"mergeEditor.conflict.input1.background": "#ff0000",
+	"mergeEditor.conflict.input2.background": "#ff0000",
+	"mergeEditor.conflict.unhandled.minimapOverViewRuler": "#ff0000",
+	"mergeEditor.conflict.unhandledFocused.border": "#ff0000",
+	"mergeEditor.conflict.unhandledUnfocused.border": "#ff0000",
+	"mergeEditor.conflictingLines.background": "#ff0000",`)}
 	
 	"minimap.background": ${editor.raise("lower", "area", 0.04).out()},
 	"minimap.errorHighlight": ${editor.red.like.out()},
@@ -594,45 +588,45 @@ export const colors = `{
 	"minimap.foregroundOpacity": "#000F",
 	"minimap.selectionHighlight": ${editor.lower.text.fade(0.375).out()},
 	"minimap.selectionOccurrenceHighlight": ${editor.yellow.area.out()},
-	"minimap.warningHighlight": ${editor.yellow.like.out()},
+	"minimap.warningHighlight": ${editor.yellow.like.out()}, ${dev(`
 	
-	${dev(`"minimapGutter.addedBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"minimapGutter.deletedBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"minimapGutter.modifiedBackground": "#ff0000",`) /* FIXME */}
+	"minimapGutter.addedBackground": "#ff0000",
+	"minimapGutter.deletedBackground": "#ff0000",
+	"minimapGutter.modifiedBackground": "#ff0000",`)}
 	"minimapSlider.activeBackground": ${editor.lower.text.fade(0.2).out()},
 	"minimapSlider.background": ${editor.lower.text.fade(0.1).out()},
-	"minimapSlider.hoverBackground": ${editor.lower.text.fade(0.15).out()},
+	"minimapSlider.hoverBackground": ${editor.lower.text.fade(0.15).out()}, ${dev(`
 	
-	${dev(`"notebook.cellBorderColor": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.cellEditorBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.cellHoverBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.cellInsertionIndicator": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.cellStatusBarItemHoverBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.cellToolbarSeparator": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.editorBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.focusedCellBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.focusedCellBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.focusedEditorBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.inactiveFocusedCellBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.inactiveSelectedCellBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.outputContainerBackgroundColor": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.outputContainerBorderColor": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.selectedCellBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.selectedCellBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"notebook.symbolHighlightBackground": "#ff0000",`) /* FIXME */}
+	"notebook.cellBorderColor": "#ff0000",
+	"notebook.cellEditorBackground": "#ff0000",
+	"notebook.cellHoverBackground": "#ff0000",
+	"notebook.cellInsertionIndicator": "#ff0000",
+	"notebook.cellStatusBarItemHoverBackground": "#ff0000",
+	"notebook.cellToolbarSeparator": "#ff0000",
+	"notebook.editorBackground": "#ff0000",
+	"notebook.focusedCellBackground": "#ff0000",
+	"notebook.focusedCellBorder": "#ff0000",
+	"notebook.focusedEditorBorder": "#ff0000",
+	"notebook.inactiveFocusedCellBorder": "#ff0000",
+	"notebook.inactiveSelectedCellBorder": "#ff0000",
+	"notebook.outputContainerBackgroundColor": "#ff0000",
+	"notebook.outputContainerBorderColor": "#ff0000",
+	"notebook.selectedCellBackground": "#ff0000",
+	"notebook.selectedCellBorder": "#ff0000",
+	"notebook.symbolHighlightBackground": "#ff0000",
 	
-	${dev(`"notebookEditorOverviewRuler.runningCellForeground": "#ff0000",`) /* FIXME */}
+	"notebookEditorOverviewRuler.runningCellForeground": "#ff0000",
 	
-	${dev(`"notebookScrollbarSlider.activeBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"notebookScrollbarSlider.background": "#ff0000",`) /* FIXME */}
-	${dev(`"notebookScrollbarSlider.hoverBackground": "#ff0000",`) /* FIXME */}
+	"notebookScrollbarSlider.activeBackground": "#ff0000",
+	"notebookScrollbarSlider.background": "#ff0000",
+	"notebookScrollbarSlider.hoverBackground": "#ff0000",
 	
-	${dev(`"notebookStatusErrorIcon.foreground": "#ff0000",`) /* FIXME */}
-	${dev(`"notebookStatusRunningIcon.foreground": "#ff0000",`) /* FIXME */}
-	${dev(`"notebookStatusSuccessIcon.foreground": "#ff0000",`) /* FIXME */}
+	"notebookStatusErrorIcon.foreground": "#ff0000",
+	"notebookStatusRunningIcon.foreground": "#ff0000",
+	"notebookStatusSuccessIcon.foreground": "#ff0000",`)}
 	
 	// "notificationCenter.border": "#0000",
-	"notificationCenterHeader.background": ${notify.upper.area.out()},
+	"notificationCenterHeader.background": ${notify.upper.like.out()},
 	"notificationCenterHeader.foreground": ${notify.lower.text.out()},
 	
 	"notificationLink.foreground": ${notify.blue.like.out()},
@@ -644,31 +638,31 @@ export const colors = `{
 	"notificationsErrorIcon.foreground": ${notify.red.like.out()},
 	"notificationsInfoIcon.foreground": ${notify.cyan.like.out()},
 	"notificationsWarningIcon.foreground": ${notify.yellow.like.out()},
-	"notificationToast.border": ${notify.lower.text.fade(notify.border).out()},
+	"notificationToast.border": ${notify.lower.text.fade(0.25).out()},
 	
 	"panel.background": ${side.lower.like.out()},
 	"panel.border": ${side.lower.like.shadow()},
-	"panel.dropBorder": ${lab::mix(side.lower.like, side.lower.text, 0.5).out()},
+	"panel.dropBorder": ${lab::mix(side.lower.like, side.lower.text, 0.5).out()}, ${dev(`
 	
-	${dev(`"panelInput.border": "#00ff00",`) /* FIXME */}
+	"panelInput.border": "#00ff00",
 	
-	${dev(`"panelSection.border": "#00ffff",`) /* FIXME */}
-	${dev(`"panelSection.dropBackground": "#0000ff",`) /* FIXME */}
+	"panelSection.border": "#00ffff",
+	"panelSection.dropBackground": "#0000ff",
 	
-	${dev(`"panelSectionHeader.background": "#00007f",`) /* FIXME */}
-	${dev(`"panelSectionHeader.border": "#ffff00",`) /* FIXME */}
-	${dev(`"panelSectionHeader.foreground": "#ffff7f",`) /* FIXME */}
+	"panelSectionHeader.background": "#00007f",
+	"panelSectionHeader.border": "#ffff00",
+	"panelSectionHeader.foreground": "#ffff7f",`)}
 	
 	"panelTitle.activeBorder": ${side[accent].area.out()},
 	"panelTitle.activeForeground": ${side.lower.text.out()},
-	"panelTitle.inactiveForeground": ${side.lower.text.fade(side.dim).out()},
+	"panelTitle.inactiveForeground": ${side.lower.text.fade(0.625).out()},
 	
 	"peekView.border": ${editor[emphasis].area.fade(0.5).out()},
 	"peekViewEditor.background": ${editor.lower("lower", "area", 0.2).out()},
 	"peekViewEditor.matchHighlightBackground": ${editor[accent].like.fade(0.15).out()},
 	"peekViewEditor.matchHighlightBorder": ${editor[accent].like.fade(0.25).out()},
-	"peekViewEditorGutter.background": ${editor.lower.area.out()},
-	${dev(`"peekViewEditorStickyScroll.background": "#ff0000",`) /* FIXME */}
+	"peekViewEditorGutter.background": ${editor.lower.area.out()}, ${dev(`
+	"peekViewEditorStickyScroll.background": "#ff0000",`)}
 	"peekViewResult.background": ${editor.raise("lower", "area", 0.04).out()},
 	"peekViewResult.fileForeground": ${editor.lower.text.out()},
 	"peekViewResult.lineForeground": ${editor[emphasis].area.out()},
@@ -680,75 +674,75 @@ export const colors = `{
 	"peekViewTitleLabel.foreground": ${editor[emphasis].area.out()},
 	
 	"pickerGroup.border": ${common.lower.like.shadow()}, // TODO test
-	"pickerGroup.foreground": ${common[accent].like.out()},
+	"pickerGroup.foreground": ${common[accent].like.out()}, ${dev(`
 	
-	${dev(`"ports.iconRunningProcessForeground": "#ff0000",`) /* FIXME */}
+	"ports.iconRunningProcessForeground": "#ff0000",`)}
 	
 	"problemsErrorIcon.foreground": ${side.red.like.out()},
 	"problemsInfoIcon.foreground": ${side.cyan.like.out()},
-	"problemsWarningIcon.foreground": ${side.yellow.like.out()},
+	"problemsWarningIcon.foreground": ${side.yellow.like.out()}, ${dev(`
 	
-	${dev(`"profileBadge.background": "#ff0000",`) /* FIXME */}
-	${dev(`"profileBadge.foreground": "#ff0000",`) /* FIXME */}
+	"profileBadge.background": "#ff0000",
+	"profileBadge.foreground": "#ff0000",`)}
 	
 	"progressBar.background": ${common[accent].area.out()}, // NOTE or notification?
 	
-	"quickInput.background": ${common.upper.like.out()},
+	"quickInput.background": ${common.upper.area.out()},
 	"quickInput.foreground": ${common.upper.text.out()},
 	"quickInputList.focusBackground": ${common[accent].area.out()},
 	"quickInputList.focusForeground": ${common[accent].text.out()},
 	"quickInputList.focusIconForeground": ${common[accent].text.out()},
-	"quickInputTitle.background": ${lab::lighten(common.upper.like, 0.06).out()},
+	"quickInputTitle.background": ${lab::lighten(common.upper.area, 0.06).out()}, ${dev(`
 	
-	${dev(`"rust_analyzer.syntaxTreeBorder": "#ff0000",`) /* FIXME */}
+	"rust_analyzer.syntaxTreeBorder": "#ff0000",`)}
 	
-	"sash.hoverBorder": ${common[accent].area.out()},
-	${dev(`"scm.providerBorder": "#ff00ff",`) /* FIXME */}
+	"sash.hoverBorder": ${common[accent].area.out()}, ${dev(`
+	"scm.providerBorder": "#ff00ff",`)}
 	
 	"scrollbar.shadow": "#0000005F",
 	"scrollbarSlider.activeBackground": ${editor.lower.text.fade(0.25).out()},
 	"scrollbarSlider.background": ${editor.lower.text.fade(0.15).out()},
-	"scrollbarSlider.hoverBackground": ${editor.lower.text.fade(0.2).out()},
+	"scrollbarSlider.hoverBackground": ${editor.lower.text.fade(0.2).out()}, ${dev(`
 	
-	${dev(`"searchEditor.findMatchBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"searchEditor.findMatchBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"searchEditor.textInputBorder": "#ff0000",`) /* FIXME */}
+	"searchEditor.findMatchBackground": "#ff0000",
+	"searchEditor.findMatchBorder": "#ff0000",
+	"searchEditor.textInputBorder": "#ff0000",`)}
 	
 	"selection.background": ${common.blue.area.fade(0.4).out()},
 	
 	"settings.checkboxBackground": ${editor.lower.like.out()},
-	"settings.checkboxBorder": ${editor.lower.text.fade(editor.border).out()},
+	"settings.checkboxBorder": ${editor.lower.text.fade(0.25).out()},
 	"settings.checkboxForeground": ${editor[accent].like.out()},
 	"settings.dropdownBackground": ${editor.lower.text.fade(0.1).out()},
 	"settings.dropdownBorder": ${editor.lower.text.fade(0.1).out()},
-	"settings.dropdownForeground": ${editor.lower.text.out()},
-	${dev(`"settings.dropdownListBorder": "#ffff00",`) /* FIXME */}
+	"settings.dropdownForeground": ${editor.lower.text.out()}, ${dev(`
+	"settings.dropdownListBorder": "#ffff00",`)}
 	"settings.focusedRowBackground": ${editor[emphasis].like.fade(0.1).out()},
 	"settings.focusedRowBorder": ${editor[emphasis].like.fade(0.15).out()},
-	"settings.headerBorder": ${editor.lower.text.fade(editor.border).out()},
+	"settings.headerBorder": ${editor.lower.text.fade(0.25).out()},
 	"settings.headerForeground": ${editor[accent].like.out()},
 	"settings.modifiedItemIndicator": ${editor[emphasis].area.out()},
 	"settings.numberInputBackground": ${editor.lower.text.fade(0.1).out()},
 	"settings.numberInputBorder": ${editor.lower.text.fade(0.1).out()},
 	"settings.numberInputForeground": ${editor.lower.text.out()},
 	"settings.rowHoverBackground": ${editor.lower.text.fade(0.05).out()},
-	"settings.sashBorder": ${editor.lower.text.fade(editor.border).out()},
-	${dev(`"settings.settingsHeaderHoverForeground": "#ff0000",`) /* FIXME */}
+	"settings.sashBorder": ${editor.lower.text.fade(0.25).out()}, ${dev(`
+	"settings.settingsHeaderHoverForeground": "#ff0000",`)}
 	"settings.textInputBackground": ${editor.lower.text.fade(0.1).out()},
 	"settings.textInputBorder": ${editor.lower.text.fade(0.1).out()},
 	"settings.textInputForeground": ${editor.lower.text.out()},
 	
 	"sideBar.background": ${side.lower.like.out()},
-	"sideBar.border": ${side.lower.like.shadow()},
-	${dev(`"sideBar.dropBackground": "#ffff00",`) /* FIXME */}
+	"sideBar.border": ${side.lower.like.shadow()}, ${dev(`
+	"sideBar.dropBackground": "#ffff00",`)}
 	"sideBar.foreground": ${side.lower.text.out()},
-	"sideBarSectionHeader.background": ${side.upper.area.out()},
-	"sideBarSectionHeader.border": ${side.upper.area.shadow()},
+	"sideBarSectionHeader.background": ${side.upper.like.out()},
+	"sideBarSectionHeader.border": ${side.upper.like.shadow()},
 	"sideBarSectionHeader.foreground": ${side.lower.text.out()},
-	"sideBarTitle.foreground": ${side.lower.text.out()},
+	"sideBarTitle.foreground": ${side.lower.text.out()}, ${dev(`
 	
-	${dev(`"sideBySideEditor.horizontalBorder": "#ffff00",`) /* FIXME */}
-	${dev(`"sideBySideEditor.verticalBorder": "#ff00dd",`) /* FIXME */}
+	"sideBySideEditor.horizontalBorder": "#ffff00",
+	"sideBySideEditor.verticalBorder": "#ff00dd",`)}
 	
 	"statusBar.background": ${status("blue").out()},
 	"statusBar.border": ${status_shadow},
@@ -761,11 +755,11 @@ export const colors = `{
 	"statusBar.noFolderBorder": ${status_shadow},
 	"statusBar.noFolderForeground": ${status_text.out()},
 	
-	"statusBarItem.activeBackground": ${status_text.fade(0.2).out()},
-	${dev(`"statusBarItem.compactHoverBackground": "#ff0000",`) /* FIXME */}
+	"statusBarItem.activeBackground": ${status_text.fade(0.2).out()}, ${dev(`
+	"statusBarItem.compactHoverBackground": "#ff0000",`)}
 	"statusBarItem.errorBackground": ${status.red.area.out()},
-	"statusBarItem.errorForeground": ${status.red.text.out()},
-	${dev(`"statusBarItem.focusBorder": "#ff0000",`) /* FIXME */}
+	"statusBarItem.errorForeground": ${status.red.text.out()}, ${dev(`
+	"statusBarItem.focusBorder": "#ff0000",`)}
 	"statusBarItem.hoverBackground": ${status_text.fade(0.1).out()},
 	"statusBarItem.prominentBackground": "#0000004F",
 	"statusBarItem.prominentForeground": ${status_text.out()},
@@ -812,30 +806,30 @@ export const colors = `{
 	"symbolIcon.unitForeground": ${side.any.text.out()},
 	"symbolIcon.variableForeground": ${side.lower.text.out()},
 	
-	"tab.activeBackground": ${tab.upper.like.out()},
+	"tab.activeBackground": ${tab.upper.area.out()},
 	"tab.activeBorder": ${tab[accent].area.out()},
-	"tab.activeBorderTop": ${lab::lighten(tab.upper.like, if tab.dark() { 0.05 } else { 0.5 }).out()},
-	"tab.activeForeground": ${tab.lower.text.out()},
-	${dev(`"tab.activeModifiedBorder": "#FF0000",`) /* FIXME */}
+	"tab.activeBorderTop": ${lab::lighten(tab.upper.area, if tab.dark() { 0.05 } else { 0.5 }).out()},
+	"tab.activeForeground": ${tab.lower.text.out()}, ${dev(`
+	"tab.activeModifiedBorder": "#FF0000",`)}
 	"tab.border": ${tab.lower.like.shadow()},
-	"tab.hoverBackground": ${tab.upper.like.fade(ACTIVE).out()},
-	"tab.hoverBorder": ${tab[emphasis].area.fade(tab.dim).out()},
+	"tab.hoverBackground": ${tab.upper.area.fade(ACTIVE).out()},
+	"tab.hoverBorder": ${tab[emphasis].area.fade(0.625).out()},
 	"tab.hoverForeground": ${tab.lower.text.out()},
-	"tab.inactiveBackground": ${tab.upper.like.fade(INACTIVE).out()},
-	"tab.inactiveForeground": ${tab.lower.text.fade(DIM).out()},
-	${dev(`"tab.inactiveModifiedBorder": "#FF0000",`) /* FIXME */}
+	"tab.inactiveBackground": ${tab.upper.area.fade(INACTIVE).out()},
+	"tab.inactiveForeground": ${tab.lower.text.fade(DIM).out()}, ${dev(`
+	"tab.inactiveModifiedBorder": "#FF0000",`)}
 	"tab.lastPinnedBorder": ${tab[emphasis].area.out()},
-	"tab.unfocusedActiveBackground": ${tab.upper.like.out()},
-	"tab.unfocusedActiveBorder": ${tab.lower.text.fade(tab.dim / 1.5).out()},
+	"tab.unfocusedActiveBackground": ${tab.upper.area.out()},
+	"tab.unfocusedActiveBorder": ${tab.lower.text.fade(0.5).out()},
 	"tab.unfocusedActiveBorderTop": "#0000",
-	"tab.unfocusedActiveForeground": ${tab.lower.text.out()},
-	${dev(`"tab.unfocusedActiveModifiedBorder": "#FF0000",`) /* FIXME */}
-	"tab.unfocusedHoverBackground": ${tab.upper.like.fade(ACTIVE).out()},
-	"tab.unfocusedHoverBorder": ${tab[emphasis].area.fade(tab.dim).out()},
+	"tab.unfocusedActiveForeground": ${tab.lower.text.out()}, ${dev(`
+	"tab.unfocusedActiveModifiedBorder": "#FF0000",`)}
+	"tab.unfocusedHoverBackground": ${tab.upper.area.fade(ACTIVE).out()},
+	"tab.unfocusedHoverBorder": ${tab[emphasis].area.fade(0.625).out()},
 	"tab.unfocusedHoverForeground": ${tab.lower.text.out()},
-	"tab.unfocusedInactiveBackground": ${tab.upper.like.fade(INACTIVE).out()},
-	"tab.unfocusedInactiveForeground": ${tab.lower.text.fade(DIM).out()},
-	${dev(`"tab.unfocusedInactiveModifiedBorder": "#FF0000",`) /* FIXME */}
+	"tab.unfocusedInactiveBackground": ${tab.upper.area.fade(INACTIVE).out()},
+	"tab.unfocusedInactiveForeground": ${tab.lower.text.fade(DIM).out()}, ${dev(`
+	"tab.unfocusedInactiveModifiedBorder": "#FF0000",`)}
 	
 	"terminal.ansiBlack": ${term.alternate().out()},
 	"terminal.ansiBlue": ${term.blue[normal].out()},
@@ -846,7 +840,7 @@ export const colors = `{
 	"terminal.ansiWhite": ${term.any[normal].out()},
 	"terminal.ansiYellow": ${term.yellow[normal].out()},
 	
-	"terminal.ansiBrightBlack": ${lab::mix(term.lower.text, term.lower.area, term.dim).out()},
+	"terminal.ansiBrightBlack": ${lab::mix(term.lower.text, term.lower.area, 0.625).out()},
 	"terminal.ansiBrightBlue": ${term.blue[bright].out()},
 	"terminal.ansiBrightCyan": ${term.cyan[bright].out()},
 	"terminal.ansiBrightGreen": ${term.green[bright].out()},
@@ -856,90 +850,90 @@ export const colors = `{
 	"terminal.ansiBrightYellow": ${term.yellow[bright].out()},
 	
 	"terminal.background": ${term.lower.area.out()},
-	"terminal.border": ${term.lower.text.fade(term.border).out()},
-	${dev(`"terminal.dropBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"terminal.findMatchBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"terminal.findMatchBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"terminal.findMatchHighlightBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"terminal.findMatchHighlightBorder": "#ff0000",`) /* FIXME */}
+	"terminal.border": ${term.lower.text.fade(0.25).out()}, ${dev(`
+	"terminal.dropBackground": "#ff0000",
+	"terminal.findMatchBackground": "#ff0000",
+	"terminal.findMatchBorder": "#ff0000",
+	"terminal.findMatchHighlightBackground": "#ff0000",
+	"terminal.findMatchHighlightBorder": "#ff0000",`)}
 	"terminal.foreground": ${term.lower.text.out()},
 	"terminal.inactiveSelectionBackground": ${term.lower.text.fade(0.1).out()},
 	"terminal.selectionBackground": ${term.lower.text.fade(0.15).out()},
 	// "terminal.selectionForeground": ${term.upper.text.out()},
-	"terminal.tab.activeBorder": ${term[accent].area.out()},
+	"terminal.tab.activeBorder": ${term[accent].area.out()}, ${dev(`
 	
-	${dev(`"terminalCommandDecoration.defaultBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"terminalCommandDecoration.errorBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"terminalCommandDecoration.successBackground": "#ff0000",`) /* FIXME */}
+	"terminalCommandDecoration.defaultBackground": "#ff0000",
+	"terminalCommandDecoration.errorBackground": "#ff0000",
+	"terminalCommandDecoration.successBackground": "#ff0000",`)}
 	"terminalCursor.background": ${term.lower.area.out()},
-	"terminalCursor.foreground": ${term.lower.text.out()},
-	${dev(`"terminalOverviewRuler.cursorForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"terminalOverviewRuler.findMatchForeground": "#ff0000",`) /* FIXME */}
+	"terminalCursor.foreground": ${term.lower.text.out()}, ${dev(`
+	"terminalOverviewRuler.cursorForeground": "#ff0000",
+	"terminalOverviewRuler.findMatchForeground": "#ff0000",
 	
-	${dev(`"testing.iconErrored": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.iconFailed": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.iconPassed": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.iconQueued": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.iconSkipped": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.iconUnset": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.message.error.decorationForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.message.error.lineBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.message.info.decorationForeground": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.message.info.lineBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.peekBorder": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.peekHeaderBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"testing.runAction": "#ff0000",`) /* FIXME */}
+	"testing.iconErrored": "#ff0000",
+	"testing.iconFailed": "#ff0000",
+	"testing.iconPassed": "#ff0000",
+	"testing.iconQueued": "#ff0000",
+	"testing.iconSkipped": "#ff0000",
+	"testing.iconUnset": "#ff0000",
+	"testing.message.error.decorationForeground": "#ff0000",
+	"testing.message.error.lineBackground": "#ff0000",
+	"testing.message.info.decorationForeground": "#ff0000",
+	"testing.message.info.lineBackground": "#ff0000",
+	"testing.peekBorder": "#ff0000",
+	"testing.peekHeaderBackground": "#ff0000",
+	"testing.runAction": "#ff0000",`)}
 	
 	"textBlockQuote.background": ${editor.lower.text.fade(0.1).out()},
 	"textBlockQuote.border": ${editor.blue.area.fade(0.5).out()},
 	"textCodeBlock.background": ${editor.lower("lower", "area", 0.2).out()},
 	"textLink.activeForeground": ${common[emphasis].like.out()},
 	"textLink.foreground": ${common.blue.like.out()},
-	"textPreformat.foreground": ${editor.yellow.like.out()},
-	${dev(`"textSeparator.foreground": "#ff0000",`) /* FIXME */}
+	"textPreformat.foreground": ${editor.yellow.like.out()}, ${dev(`
+	"textSeparator.foreground": "#ff0000",`)}
 	
-	"titleBar.activeBackground": ${title.upper.area.out()},
+	"titleBar.activeBackground": ${title.upper.like.out()},
 	"titleBar.activeForeground": ${title.lower.text.out()},
 	"titleBar.border": ${title.lower.like.shadow()},
 	"titleBar.inactiveBackground": ${
-		if cfg::option("dim-header") { title.lower.like.out() } else { title.upper.area.out() }
+		if cfg::option("dim-header") { title.lower.like.out() } else { title.upper.like.out() }
 	},
 	"titleBar.inactiveForeground": ${title.lower.text.out()},
 	
 	"toolbar.activeBackground": ${main.lower.text.fade(0.2).out()},
 	"toolbar.hoverBackground": ${main.lower.text.fade(0.1).out()},
-	"toolbar.hoverOutline": ${main.lower.text.fade(main.border).out()},
+	"toolbar.hoverOutline": ${main.lower.text.fade(0.25).out()}, ${dev(`
 	
-	${dev(`"tree.inactiveIndentGuidesStroke": "#ff0000",`) /* FIXME */}
+	"tree.inactiveIndentGuidesStroke": "#ff0000",`)}
 	"tree.indentGuidesStroke": ${side.lower.text.fade(0.5).out()},
-	"tree.tableColumnsBorder": ${main.lower.text.fade(main.border).out()},
-	${dev(`"tree.tableOddRowsBackground": "#ff0000",`) /* FIXME */}
+	"tree.tableColumnsBorder": ${main.lower.text.fade(0.25).out()}, ${dev(`
+	"tree.tableOddRowsBackground": "#ff0000",
 	
-	${dev(`"walkThrough.embeddedEditorBackground": "#ff0000",`) /* FIXME */}
-	${dev(`"walkthrough.stepTitle.foreground": "#ff0000",`) /* FIXME */}
+	"walkThrough.embeddedEditorBackground": "#ff0000",
+	"walkthrough.stepTitle.foreground": "#ff0000",
 	
-	${dev(`"welcomeOverlay.background": "#ff0000",`) /* FIXME */}
+	"welcomeOverlay.background": "#ff0000",`)}
 	"welcomePage.background": ${welcome.lower.area.out()},
-	"welcomePage.progress.background": ${welcome.upper.text.fade(welcome.dim / 2).out()},
+	"welcomePage.progress.background": ${welcome.upper.text.fade(0.375).out()},
 	"welcomePage.progress.foreground": ${welcome[accent].area.out()},
-	"welcomePage.tileBackground": ${welcome.upper.like.out()},
-	${dev(`"welcomePage.tileBorder": "#ff0000",`) /* FIXME */}
-	"welcomePage.tileHoverBackground": ${lab::mix(welcome.upper.like, welcome.upper.text, HOVER).out()},
+	"welcomePage.tileBackground": ${welcome.upper.area.out()}, ${dev(`
+	"welcomePage.tileBorder": "#ff0000",`)}
+	"welcomePage.tileHoverBackground": ${lab::mix(welcome.upper.area, welcome.upper.text, HOVER).out()}, ${dev(`
 	
-	${dev(`"widget.border": "#ff0000",`) /* FIXME */}
+	"widget.border": "#ff0000",`)}
 	"widget.shadow": "#0000005F",
 	
-${if main.dark() {
-	const active = lab::mix(main.lower.like, main.blue.area, main.dim).out();
-`	"window.activeBorder": ${active},
-	"window.inactiveBorder": ${if cfg::option("dim-border") {
-		lab::mix(main.lower.like, main.lower.text, main.border).out()
-	} else { active }},`
-} else {
-	const inactive = main.blue.area.out();
-`	"window.activeBorder": ${inactive},
-	"window.inactiveBorder": ${if cfg::option("dim-border") {
-		lab::mix(main.lower.like, main.lower.text, main.dim / 1.5).out()
-	} else { inactive }},`
-}}
+	${if main.dark() {
+		const active = lab::mix(main.lower.like, main.blue.area, 0.625).out();
+		`"window.activeBorder": ${active},
+		 "window.inactiveBorder": ${if cfg::option("dim-border") {
+			lab::mix(main.lower.like, main.lower.text, 0.25).out()
+		} else { active }},`
+	} else {
+		const inactive = main.blue.area.out();
+		`"window.activeBorder": ${inactive},
+		 "window.inactiveBorder": ${if cfg::option("dim-border") {
+			lab::mix(main.lower.like, main.lower.text, 0.5).out()
+		} else { inactive }},`
+	}}
 }`

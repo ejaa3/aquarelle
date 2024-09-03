@@ -1,41 +1,44 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 const editor = cfg::scheme("editor");
 
-fn out() { `"#${this.to_hex_rgba(true)}"` }
+fn out() { `"#${this.to_hex_rgba(true)}"` } // json
 
 export const colors = `[
 	{
 		"scope": [
-			"meta.delimiter.comma", // .rhai
+			"keyword.operator.namespace", // .rust
 			"meta.interpolation", // .rust
-			"punctuation.separator.namespace", // .xml
+			"punctuation.brackets.attribute", // .rust
+			"punctuation.definition.entity", // .ini
+			"punctuation.separator.key-value.ini",
+			"punctuation.separator.namespace", // .{rhai,xml}
+			"string.quoted.single.literal", // line.toml
+			"string.quoted.triple.literal", // .block.toml
+			"string.unquoted", // .plain.{out,in}.yaml
+			"variable.parameter", // .function.rhai
 		],
 		"settings": { "foreground": ${editor.lower.text.out()} }
 	},
-	
 	{
-		"scope": "markup.bold", // .markdown
+		"scope": [
+			"markup.bold", // .markdown
+			"punctuation.separator.dot", // .toml
+		],
 		"settings": { "foreground": ${editor.lower.text.out()}, "fontStyle": "bold" }
 	},
-	
-	{
-		"scope": "markup.italic", // .markdown
-		"settings": { "fontStyle": "italic" }
-	},
-	
 	{
 		"scope": "markup.strikethrough", // .markdown
 		"settings": { "foreground": ${editor.lower.text.out()}, "fontStyle": "strikethrough" }
 	},
-	
 	{
 		"scope": [
-			"comment",
+			"comment.block",
+			"comment.line",
 			
 			"entity.name.footnote.latex",
 			"punctuation.definition.arguments.begin.latex",
@@ -54,93 +57,99 @@ export const colors = `[
 			"punctuation.math.begin.bracket.curly.tex",
 			"punctuation.math.end.bracket.curly.tex",
 		],
-		"settings": { "foreground": ${editor.lower.text.fade(editor.dim).out()}, "fontStyle": "" }
+		"settings": { "foreground": ${editor.lower.text.fade(0.625).out()}, "fontStyle": "" }
 	},
-	
-	{
-		"scope": [
-			"constant.character.entity", // .xml
-			"entity.name.section.latex",
-			"fenced_code", // .block.language.markdown
-			"keyword.operator",
-			"punctuation.brackets.attribute", // .rust
-			"punctuation.brackets.square", // .rust
-			"punctuation.comma", // .rust
-			"punctuation.definition.attribute", // .rust
-			"punctuation.definition.list", // .begin.markdown
-			"punctuation.math.operator.tex",
-			"punctuation.section.interpolation", // .end.rhai
-			"punctuation.semi", // .rust
-			"punctuation.separator.dot", // .toml
-			"storage.modifier", // .mut.rust
-			"string.quoted.single.basic", // .line.toml
-			"variable.other.metavariable.name", // .rust
-		],
-		"settings": { "foreground": ${editor.any.like.out()} }
-	},
-	
 	{
 		"scope": [
 			"entity.name.function.macro.rules", // .rust
-			"keyword.other",
+			"invalid.illegal.tag-handle", // .yaml
+			"keyword",
+			"punctuation.definition.constant", // .xml
 			"punctuation.definition.quote", // .begin.markdown
-			"punctuation.definition.table", // .toml
+			"punctuation.eq", // .toml
+			"punctuation.separator.key-value.rhai",
 			"storage.type.function", // .rhai
-			"storage", // .type.rust
+			"storage",
 		],
 		"settings": { "foreground": ${editor.red.like.out()}, "fontStyle": "" }
 	},
-	
+	{
+		"scope": ["punctuation.definition.block"], // .sequence.item.yaml
+		"settings": { "foreground": ${editor.cyan.like.out()}, "fontStyle": "bold" }
+	},
 	{
 		"scope": [
-			"keyword.control", // .rust
-			"punctuation.brackets.angle", // .rust
+			"meta.brace", // .{curly,round}.rhai
+			"meta.function", // .rhai
+			"punctuation.brackets", // .{curly,round}.rust
 		],
+		"settings": { "foreground": ${lch::desaturate(editor.red.like, 1.0).out()} }
+	},
+	{
+		"scope": [
+			"punctuation.definition.template-expression", // .{begin,end}.js
+			"punctuation.section.interpolation", // .{begin,end}.rhai
+		],
+		"settings": { "foreground": ${lch::desaturate(editor.red.area, 1.0).out()} }
+	},
+	{
+		"scope": ["keyword.control", "punctuation.brackets.angle"], // .rust
 		"settings": { "foreground": ${editor.red.like.out()}, "fontStyle": "italic" }
 	},
-	
 	{
 		"scope": [
 			"markup.inline.raw", // .string.markdown
+			"punctuation.definition.attribute", // .rust
 			"punctuation.definition.emph.begin.latex",
 			"punctuation.definition.emph.end.latex",
 			"punctuation.definition.textbf.begin.latex",
 			"punctuation.definition.textbf.end.latex",
-			"string",
+			"string.quoted",
 			"support.function.emph.latex",
 			"support.function.textbf.latex",
 		],
 		"settings": { "foreground": ${editor.yellow.like.out()} }
 	},
-	
+	{
+		"scope": ["punctuation.definition.string"],
+		"settings": { "foreground": ${editor.yellow.area.out()} }
+	},
 	{
 		"scope": [
 			"entity.name.function.macro", // .rust
+			"entity.name.tag.namespace", // .xml
 			"entity.name.type.lifetime", // .rust
+			"entity.other.attribute-name.namespace", // .xml
+			"keyword.operator.access", // .dot.rust
+			"meta.attribute", // .rust
 			"punctuation.definition.lifetime", // .rust
+			"punctuation.definition.mapping", // .{begin,end}.yaml
 			"punctuation.definition.string.begin.tex",
 			"punctuation.definition.string.end.tex",
+			"punctuation.definition.table", // .inline.toml
+			// "punctuation.separator.key-value.mapping", // .yaml
+			"punctuation.separator.mapping", // .yaml
+			"punctuation.separator.table", // .inline.toml
 			"storage.modifier.lifetime", // .rust
 			"string.interpolated", // .rhai
-			"string.quoted.single.literal", // line.toml
 			"string.unquoted.cdata", // .xml
 			"support.variable", // .meson
 			"variable.language.self.rust",
-			"variable.other.constant", // .rhai
-			// "markup.fenced_code", // .block.markdown
 		],
 		"settings": { "foreground": ${editor.green.like.out()} }
 	},
-	
 	{
 		"scope": [
+			"constant.character.entity", // .xml
 			"entity.name.section", // .markdown
-			"entity.name.tag.namespace", // .xml
 			"entity.name.type", // .rust
-			"entity.other.attribute-name.namespace", // .xml
-			"meta.function-call", // .method.with-arguments.rhai
+			"meta.brace.square", // .rhai
+			"punctuation.definition.array", // .{table,}.toml
+			"punctuation.definition.sequence", // .{begin,end}.yaml
+			"punctuation.separator.array", // .toml
+			"punctuation.separator.sequence", // .yaml
 			"support.function", // .builtin.meson
-			"support.type.property-name.table", // .toml
+			"variable.language", // .this.rhai
 			"variable.other.metavariable.specifier", // .rust
 		],
 		"settings": { "foreground": ${editor.cyan.like.out()} }
@@ -150,22 +159,21 @@ export const colors = `[
 		"scope": "punctuation.definition.heading", // .markdown,
 		"settings": { "foreground": ${editor.cyan.area.out()} }
 	},
-	
 	{
 		"scope": [
 			"constant.other.general.math.tex",
 			"entity.name.function", // .rust
-			"entity.name.tag", // .localname.xml
+			"entity.name.tag", // .{localname,}.xml
+			"keyword.other.definition", // .ini
+			"meta.function-call.method.with-arguments", // .rhai
+			"meta.group.braces.round.function", // .arguments.rhai.rhai
 			"punctuation.definition.interpolation", // .rust
 			"string.other.link", // .title.markdown
 			"support.type.property-name", // .toml
-			"variable.language", // .this.rhai
-			"variable.other.object", // .rhai
 			"variable.parameter.function.keyword", // .meson
 		],
 		"settings": { "foreground": ${editor.blue.like.out()} }
 	},
-	
 	{
 		"scope": [
 			"punctuation.definition.footnote.begin.latex",
@@ -173,11 +181,10 @@ export const colors = `[
 			"support.function.footnote.latex",
 			
 			"markup.underline.link", // .markdown
-			"meta.tag", // .xml
+			"punctuation.support.type.property-name", // .{begin,end}.json
 		],
 		"settings": { "foreground": ${editor.blue.area.out()} }
 	},
-	
 	{
 		"scope": [
 			"constant",
@@ -185,17 +192,48 @@ export const colors = `[
 			"entity.other", // .attribute-name.localname.xml
 			"keyword.other.crate", // .rust
 			"markup.quote", // .markdown
-			"meta.group.braces.square", // (rhai)
+			"meta.embedded.block.ini",
+			"support.type.property-name.array", // .toml
+			"support.type.property-name.table", // .toml
 			"variable.parameter.function.latex",
 		],
 		"settings": { "foreground": ${editor.magenta.like.out()} }
 	},
-	
 	{
 		"scope": "punctuation.definition.tag", // .xml
 		"settings": { "foreground": ${editor.magenta.area.out()} }
-	}
-]`;
+	},
+	{
+		"scope": [
+			"constant.other", // .{caps.rust,time.datetime.offset.toml}
+			"entity.name.section.latex",
+			"entity.name.type.anchor", // .yaml
+			"keyword.operator",
+			"meta.delimiter.comma", // .rhai
+			"punctuation.brackets.square", // .rust
+			"punctuation.comma", // .rust
+			"punctuation.definition.list", // .begin.markdown
+			"punctuation.math.operator.tex",
+			"punctuation.semi", // .rust
+			"punctuation.separator.parameter", // .function.rhai
+			"string.unquoted.cdata", // .xml
+			"support.other", // .directive.reserved.yaml
+			"variable.other.alias", // .yaml
+			"variable.other.constant", // .rhai
+			"variable.other.metavariable.name", // .rust
+			"variable.other.object", // .rhai
+		],
+		"settings": { "foreground": ${editor.any.like.out()} }
+	},
+	{
+		"scope": ["fenced_code"], // .block.language
+		"settings": { "foreground": ${editor.any.area.out()} }
+	},
+	{
+		"scope": "markup.italic", // .markdown
+		"settings": { "foreground": ${editor.any.like.out()}, "fontStyle": "italic" }
+	},
+]`; // json
 
 export const semantic_colors = `{
 	"boolean": ${editor.green.like.out()},

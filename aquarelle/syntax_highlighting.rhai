@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -10,7 +10,7 @@ const dark = main.lower.text.luma() > main.lower.like.luma();
 const hard = if dark { "area" } else { "like" };
 const soft = if dark { "like" } else { "area" };
 
-fn out() { `"#${this.to_hex_argb(true)}"` }
+fn out() { `"#${this.to_hex_argb(true)}"` } // json
 
 `{
 	"metadata": {
@@ -26,7 +26,7 @@ fn out() { `"#${this.to_hex_argb(true)}"` }
 		"CurrentLineNumber": ${main.lower.text.out()},
 		"IconBorder": ${main.lower.like.out()},
 		"IndentationLine": ${main.lower.text.fade(1.0 / 3).out()},
-		"LineNumbers": ${main.lower.text.fade(main.dim).out()},
+		"LineNumbers": ${main.lower.text.fade(0.625).out()},
 		"MarkBookmark": ${main.blue.like.out()},
 		"MarkBreakpointActive": "#8b0607", ${/* FIXME */}
 		"MarkBreakpointDisabled": "#820683", ${/* FIXME */}
@@ -40,13 +40,13 @@ fn out() { `"#${this.to_hex_argb(true)}"` }
 		"SearchHighlight": ${main.magenta.like.fade(0.3).out()},
 		"Separator": "${if dark { "#5F000000" } else { "#1F000000" }}",
 		"SpellChecking": ${main.red.like.out()},
-		"TabMarker": ${main.lower.text.fade(main.dim / 2).out()},
+		"TabMarker": ${main.lower.text.fade(0.375).out()},
 		"TemplateBackground": "#31363b", ${/* FIXME */}
 		"TemplateFocusedPlaceholder": "#123723", ${/* FIXME */}
 		"TemplatePlaceholder": "#123723", ${/* FIXME */}
 		"TemplateReadOnlyPlaceholder": "#4d1f24", ${/* FIXME */}
 		"TextSelection": ${main.lower.text.fade(0.15).out()},
-		"WordWrapMarker": ${main.lower.text.fade(main.border).out()}
+		"WordWrapMarker": ${main.lower.text.fade(0.25).out()}
 	},
 	
 	"text-styles": {
@@ -78,7 +78,7 @@ fn out() { `"#${this.to_hex_argb(true)}"` }
 		},
 		"Comment": {
 			"selected-text-color": ${main.lower.text.out()},
-			"text-color": ${main.lower.text.fade(main.dim).out()}
+			"text-color": ${main.lower.text.fade(0.625).out()}
 		},
 		"CommentVar": {
 			"selected-text-color": ${main.lower.text.out()},

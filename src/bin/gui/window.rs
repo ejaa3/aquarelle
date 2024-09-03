@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -22,7 +22,7 @@ const ABOUT    : &str = "win.about";
 
 #[view {
 	adw::BreakpointCondition::new_length(
-		adw::BreakpointConditionLengthType::MaxWidth, 360.0 * 1.75, adw::LengthUnit::Sp
+		adw::BreakpointConditionLengthType::MaxWidth, 360.0 * 1.5, adw::LengthUnit::Sp
 	) max_width { }
 	
 	adw::ApplicationWindow window {
@@ -31,32 +31,31 @@ const ABOUT    : &str = "win.about";
 		default_width: settings.int(WINDOW_WIDTH)
 		height_request: 360
 		width_request: 360
-		~/title: i18n("Aquarelle")
+		title: i18n("Aquarelle") ~>
 		
 		#[cfg(debug_assertions)]
 		add_css_class: "devel"
 		
 		add_breakpoint: _ @ adw::Breakpoint::new(max_width) {
-			add_setter: &bar, "reveal", &true.to_value()
-			add_setter: &header_bar, "title-widget", &gtk::Widget::NONE.to_value()
+			add_setter: &bar, "reveal", Some(&true.to_value())
+			add_setter: &themes.root, "collapsed", Some(&true.to_value())
+			add_setter: &header_bar, "title-widget", Some(&gtk::Widget::NONE.to_value())
 		}
 		
 		set_content: Some(&_) @ gtk::Box {
-			~orientation: gtk::Orientation::Vertical
-			
+			orientation: gtk::Orientation::Vertical
+			~
 			append: &_ @ adw::HeaderBar header_bar {
-				centering_policy: adw::CenteringPolicy::Strict
-				
-				~title_widget: &_ @ adw::ViewSwitcher {
+				title_widget: &_ @ adw::ViewSwitcher {
 					stack: &stack
 					policy: adw::ViewSwitcherPolicy::Wide
-				}
+				} ~
 				
 				pack_start: &_ @ gtk::ToggleButton {
 					icon_name: icons::DOCK_BOTTOM
 					action_name: SHOW_LOG
 					// Translators: Button tooltip (keyboard shortcut).
-					~tooltip_text: i18n("Show log (F12)")
+					tooltip_text: i18n("Show log (F12)") ~
 					bind_property: "active", &log, "visible" 'back { bidirectional; sync_create; }
 				}
 				
@@ -69,13 +68,13 @@ const ABOUT    : &str = "win.about";
 					// Translators: Main menu button tooltip (keyboard shortcut).
 					tooltip_text: i18n("Menu (F10)")
 					
-					~menu_model: &_ @ gio::Menu common_menu {
+					menu_model: &_ @ gio::Menu common_menu {
 						append: Some(&i18n("_Clear Log")), Some(CLEAR_LOG)
 						append: Some(&i18n("_Keyboard Shortcuts")), Some(SHORTCUTS)
 						// Translators: Translate as "About [application name]"
 						append: Some(&i18n("About A_quarelle")), Some(ABOUT)
 						freeze;
-					}!
+					}! ~
 					
 					add_controller: utils::shortcut("F10", "activate")
 					'bind set_visible: view != "themes"
@@ -86,7 +85,7 @@ const ABOUT    : &str = "win.about";
 					// Translators: Main menu button tooltip (keyboard shortcut).
 					tooltip_text: i18n("Menu (F10)")
 					
-					~menu_model: &_ @ gio::Menu {
+					menu_model: &_ @ gio::Menu {
 						append_section: Some(&i18n("Show")), &_ @ gio::Menu {
 							append: Some(&i18n(  "_All schemes")), Some(schemes::show::ALL)
 							append: Some(&i18n("_Light schemes")), Some(schemes::show::LIGHT)
@@ -99,7 +98,7 @@ const ABOUT    : &str = "win.about";
 						}!
 						append_section: None, &common_menu
 						freeze;
-					}!
+					}! ~
 					
 					add_controller: utils::shortcut("F10", "activate")
 					'bind set_visible: view == "themes"
@@ -134,12 +133,12 @@ const ABOUT    : &str = "win.about";
 			
 			append: &_ @ adw::Bin handle {
 				name: "handle"
-				~height_request: 5
+				height_request: 5 ~
 				set_cursor_from_name: Some("ns-resize")
 				
 				add_controller: _ @ gtk::GestureDrag {
-					~propagation_phase: gtk::PropagationPhase::Capture
-					
+					propagation_phase: gtk::PropagationPhase::Capture
+					~
 					connect_drag_update: clone! {
 						content, log, min_height = content.preferred_size().0.height();
 						move |_this, _x, y| {
@@ -155,7 +154,7 @@ const ABOUT    : &str = "win.about";
 				height_request: settings.int(LOG_HEIGHT)
 				name: "log"
 				
-				~child: &_ @ gtk::TextView {
+				child: &_ @ gtk::TextView {
 					editable: false
 					monospace: true
 					wrap_mode: gtk::WrapMode::Word
@@ -173,7 +172,7 @@ const ABOUT    : &str = "win.about";
 						
 						emit_by_name::<()>: "changed", &[]
 					}
-				}
+				} ~
 				
 				bind_property: "visible", &handle, "visible" 'back { sync_create; }
 				
@@ -196,7 +195,7 @@ const ABOUT    : &str = "win.about";
 		
 		help_overlay; 'back {
 			'bind set_view_name: Some(view) // BUG not working
-			~~unwrap;
+			unwrap; ~~
 		}
 		
 		add_action: &_ @ settings.create_action(LAST_VIEW) {
@@ -216,21 +215,21 @@ const ABOUT    : &str = "win.about";
 				// Translators: "Aquarelle" is the application name, but translate it as the English word it is.
 				application_name: i18n("Aquarelle")
 				comments: i18n("Theming software")
-				copyright: "© 2022 Eduardo Javier Alvarado Aarón"
+				copyright: "© 2024 Eduardo Javier Alvarado Aarón"
 				developer_name: "Eduardo Javier Alvarado Aarón"
 				issue_url: "https://github.com/ejaa3/aquarelle/issues"
 				license_type: gtk::License::Agpl30Only
-				support_url: "https://matrix.to/#/#aquarelle:matrix.org"
+				support_url: "https://github.com/ejaa3/aquarelle"
 				translator_credits: i18n("translator-credits")
 				version: config::VERSION
 			}
 		}
 		
-		connect_maximized_notify: |this| {
+		/* connect_maximized_notify: |this| {
 			glib::idle_add_local_once(clone![this; move || this.notify("default-width")]);
 		}
 		
-		connect_show: |this| this.notify("maximized")
+		connect_show: |this| this.notify("maximized") */
 		
 		connect_close_request: clone![settings, log; move |this| {
 			settings.set(WINDOW_WIDTH, this.default_width()).unwrap_or_else(
@@ -247,7 +246,7 @@ const ABOUT    : &str = "win.about";
 	}
 	
 	ref app {
-		set_accels_for_action: SHOW_LOG, &["F12"]
+		set_accels_for_action: SHOW_LOG , &["F12"]
 		set_accels_for_action: CLEAR_LOG, &["<Ctrl>K"]
 		
 		set_accels_for_action: schemes::show::ALL  , &["<Ctrl>1"]
@@ -268,7 +267,7 @@ pub fn start(app: &adw::Application) {
 	let buffer = tags.buffer.clone(); // WARNING clone workaround
 	
 	let cache = Rc::new(cache::Cache::new(|error| {
-		(if let cache::ScanError::Path { local: true, .. } = error
+		(if let cache::ScanError::Path { user: true, .. } = error
 			{ log::warning } else { log::error }) (&tags, true);
 		
 		log::scan_error(&tags, error, ())

@@ -1,11 +1,10 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const   main = cfg::scheme("main");
-const accent = cfg::option("accent");
+const pane = main.raise("lower", "like", 0.03);
 
 private fn out() {
 	let rgb = rgb::coords(this);
@@ -15,12 +14,9 @@ private fn out() {
 private fn shadow(factor) {
 	const L = this.luma();
 	lab::mix(this, 0, (2 ** -L + 0.2 * L - 0.6) * factor).out()
-}
+} // ini
 
-const pane = main.raise("lower", "like", 0.03);
-
-export const INI = `
-[color theme]
+export const INI = `[color theme]
 col_main_bg2 = ${main.lower.like.out() /* Main window/transport background */}
 col_main_text2 = ${main.lower.text.out() /* Main window/transport text */}
 col_main_textshadow = ${rgb(0, 255, 0).out() /* Main window text shadow (ignored if too close to text color) */}
@@ -45,7 +41,7 @@ io_3dhl = 8882049
 io_3dsh = 13487563
 genlist_bg = ${main.lower.area.out() /* Window list background */}
 genlist_fg = ${main.lower.text.out() /* Window list foreground */}
-genlist_grid = ${lab::mix(main.lower.area, main.lower.text, main.border).out() /* Window list grid lines */}
+genlist_grid = ${lab::mix(main.lower.area, main.lower.text, 0.25).out() /* Window list grid lines */}
 genlist_selbg = ${main[accent].area.out() /* Window list selected row */}
 genlist_selfg = ${main[accent].text.out() /* Window list selected text */}
 genlist_seliabg = ${main.lower.like.out() /* Window list selected row (inactive) */}
@@ -55,36 +51,37 @@ genlist_hilite_sel = 16761024
 col_buttonbg = 0
 col_tcp_text = ${main.lower.text.out() /* Track panel text */}
 col_tcp_textsel = ${main.lower.text.out() /* Track panel (selected) text */}
-col_seltrack = ${main.upper.area.out() /* Selected track control panel background */}
+col_seltrack = ${main.upper.like.out() /* Selected track control panel background */}
 col_seltrack2 = ${- 2 ** 31 + main.lower.like.out() /* Unselected track control panel background */}
-tcplocked_color = ${main.blue.like.out() /* Locked track control panel overlay color */}
-tcplocked_drawmode = 147456
+tcplocked_color = ${main.lower.like.out() /* Locked track control panel overlay color */}
+tcplocked_drawmode = 166912
 col_tracklistbg = ${main.lower.like.out() /* Empty track list area */}
 col_mixerbg = ${main.lower.like.out() /* Empty mixer list area */}
 col_arrangebg = ${lab::darken(main.lower.area, if main.is_dark() { 0.15 } else { 0.075 }).out() /* Empty arrange view area */}
 arrange_vgrid = ${rgb(0, 0, 255).out() /* Empty arrange view area vertical grid shading */}
 col_fadearm = 3936710
-col_fadearm2 = 8890385
-col_fadearm3 = 1143208
-col_tl_fg = ${lab::mix(pane, main.lower.text, main.dim).out() /* Timeline foreground */}
-col_tl_fg2 = ${lab::mix(pane, main.lower.text, main.dim / 2).out() /* Timeline foreground (secondary markings) */}
+col_fadearm2 = 4744192
+col_fadearm3 = 20608
+col_tl_fg = ${lab::mix(pane, main.lower.text, 0.625).out() /* Timeline foreground */}
+col_tl_fg2 = ${lab::mix(pane, main.lower.text, 0.375).out() /* Timeline foreground (secondary markings) */}
 col_tl_bg = ${pane.out() /* Timeline background */}
 col_tl_bgsel = ${main[accent].area.out() /* Timeline selection color */}
-timesel_drawmode = 147456
+timesel_drawmode = 139264
 col_tl_bgsel2 = ${main.lower.area.shadow(1) /* Timeline background (in loop points) */}
 col_trans_bg = ${main.lower.like.out() /* Transport status background */}
-col_trans_fg = ${lab::mix(main.lower.like, main.lower.text, main.dim).out() /* Transport status text */}
+col_trans_fg = ${lab::mix(main.lower.like, main.lower.text, 0.625).out() /* Transport status text */}
 playrate_edited = ${main[accent].area.out() /* Project play rate control when not 1.0 */}
+selitem_dot = 16777215
 col_mi_label = 2894892
 col_mi_label_sel = 0
 col_mi_label_float = ${main.lower.text.out() /* Floating media item label */}
 col_mi_label_float_sel = ${main[accent].like.out() /* Floating media item label (selected) */}
-col_mi_bg = ${main.raise("upper", "area", 0.1).out() /* Media item background (odd tracks) */}
-col_mi_bg2 = ${main.raise("upper", "area", 0.1).out() /* Media item background (even tracks) */}
-col_tr1_itembgsel = ${main.raise("upper", "area", 0.2).out() /* Media item background selected (odd tracks) */}
-col_tr2_itembgsel = ${main.raise("upper", "area", 0.2).out() /* Media item background selected (even tracks) */}
+col_mi_bg = ${main.raise("upper", "like", 0.1).out() /* Media item background (odd tracks) */}
+col_mi_bg2 = ${main.raise("upper", "like", 0.1).out() /* Media item background (even tracks) */}
+col_tr1_itembgsel = ${main.raise("upper", "like", 0.2).out() /* Media item background selected (odd tracks) */}
+col_tr2_itembgsel = ${main.raise("upper", "like", 0.2).out() /* Media item background selected (even tracks) */}
 itembg_drawmode = 196608
-${if main.is_dark() {`
+${if main.is_dark() { `
 col_tr1_peaks = ${main.lower.area.shadow(2) /* Media item peaks (odd tracks) */}
 col_tr2_peaks = ${main.lower.area.shadow(2) /* Media item peaks (even tracks) */}
 col_tr1_ps2 = ${main.lower.text.out() /* Media item peaks when selected (odd tracks) */}
@@ -93,32 +90,32 @@ col_peaksedge = ${main.lower.area.shadow(1) /* Media item peaks edge highlight (
 col_peaksedge2 = ${main.lower.area.shadow(1) /* Media item peaks edge highlight (even tracks) */}
 col_peaksedgesel = ${main.lower.area.shadow(1) /* Media item peaks edge highlight when selected (odd tracks) */}
 col_peaksedgesel2 = ${main.lower.area.shadow(1) /* Media item peaks edge highlight when selected (even tracks) */}`
-} else {`
-col_tr1_peaks = ${main.raise("upper", "area", 0.2).shadow(1) /* Media item peaks (odd tracks) */}
-col_tr2_peaks = ${main.raise("upper", "area", 0.2).shadow(1) /* Media item peaks (even tracks) */}
+} else { `
+col_tr1_peaks = ${main.raise("upper", "like", 0.2).shadow(1) /* Media item peaks (odd tracks) */}
+col_tr2_peaks = ${main.raise("upper", "like", 0.2).shadow(1) /* Media item peaks (even tracks) */}
 col_tr1_ps2 = ${main.lower.area.shadow(1) /* Media item peaks when selected (odd tracks) */}
 col_tr2_ps2 = ${main.lower.area.shadow(1) /* Media item peaks when selected (even tracks) */}
-col_peaksedge = ${main.raise("upper", "area", 0.2).shadow(2) /* Media item peaks edge highlight (odd tracks) */}
-col_peaksedge2 = ${main.raise("upper", "area", 0.2).shadow(2) /* Media item peaks edge highlight (even tracks) */}
+col_peaksedge = ${main.raise("upper", "like", 0.2).shadow(2) /* Media item peaks edge highlight (odd tracks) */}
+col_peaksedge2 = ${main.raise("upper", "like", 0.2).shadow(2) /* Media item peaks edge highlight (even tracks) */}
 col_peaksedgesel = ${main.lower.text.out() /* Media item peaks edge highlight when selected (odd tracks) */}
 col_peaksedgesel2 = ${main.lower.text.out() /* Media item peaks edge highlight when selected (even tracks) */}`
 }}
 cc_chase_drawmode = 147456
 col_peaksfade = 10997760
 col_peaksfade2 = 5767376
-${if main.is_dark() {`
+${if main.is_dark() { `
 col_mi_fades = ${main.lower.area.shadow(1) /* Media item fade/volume controls */}
 fadezone_color = ${main.lower.area.shadow(1) /* Media item fade quiet zone fill color */}`
-} else {`
-col_mi_fades = ${main.raise("upper", "area", 0.2).shadow(2) /* Media item fade/volume controls */}
-fadezone_color = ${main.raise("upper", "area", 0.2).shadow(2) /* Media item fade quiet zone fill color */}`
+} else { `
+col_mi_fades = ${main.raise("upper", "like", 0.2).shadow(2) /* Media item fade/volume controls */}
+fadezone_color = ${main.raise("upper", "like", 0.2).shadow(2) /* Media item fade quiet zone fill color */}`
 }}
-fadezone_drawmode = 147456
+fadezone_drawmode = 140800
 fadearea_color = 6291456
 fadearea_drawmode = 131072
 col_mi_fade2 = ${ // Media item edges of controls
 	if main.is_dark() { main.lower.area.shadow(1) }
-	else { main.raise("upper", "area", 0.2).shadow(2) }
+	else { main.raise("upper", "like", 0.2).shadow(2) } // TODO review after item_bg
 }
 col_mi_fade2_drawmode = 2539520
 item_grouphl = ${main.blue.area.out() /* Media item edge when selected via grouping */}
@@ -138,16 +135,21 @@ col_tr1_bg = ${main.lower.area.out() /* Track background (odd tracks) */}
 col_tr2_bg = ${main.raise("lower", "area", 0.02).out() /* Track background (even tracks) */}
 selcol_tr1_bg = ${main.raise("lower", "area", 0.04).out() /* Selected track background (odd tracks) */}
 selcol_tr2_bg = ${main.raise("lower", "area", 0.04).out() /* Selected track background (even tracks) */}
+track_lane_tabcol = 5726295
+track_lanesolo_tabcol = 2542025
+track_lanesolo_text = 13158600
+track_lane_gutter = 8421504
+track_lane_gutter_drawmode = 147456
 col_tr1_divline = ${main.lower.area.shadow(1) /* Track divider line (odd tracks) */}
 col_tr2_divline = ${main.lower.area.shadow(1) /* Track divider line (even tracks) */}
 col_envlane1_divline = ${main.lower.area.shadow(1) /* Envelope lane divider line (odd tracks) */}
 col_envlane2_divline = ${main.raise("lower", "area", 0.02).shadow(1) /* Envelope lane divider line (even tracks) */}
-mute_overlay_col = ${main.upper.area.shadow(1) /* Muted/unsoloed track/item overlay color */}
+mute_overlay_col = ${main.upper.like.shadow(1) /* Muted/unsoloed track/item overlay color */}
 mute_overlay_mode = 163840
-inactive_take_overlay_col = ${main.upper.area.shadow(1) /* Inactive take overlay color */}
+inactive_take_overlay_col = ${main.upper.like.shadow(1) /* Inactive take overlay color */}
 inactive_take_overlay_mode = 163840
-locked_overlay_col = ${main.cyan.area.out() /* Locked track/item overlay color */}
-locked_overlay_mode = 196612
+locked_overlay_col = ${main[accent].area.out() /* Locked track/item overlay color */}
+locked_overlay_mode = 163843
 marquee_fill = 7241856
 marquee_drawmode = 170494
 marquee_outline = 16777215
@@ -158,18 +160,24 @@ areasel_fill = 12642591
 areasel_drawmode = 137217
 areasel_outline = 13236992
 areasel_outlinemode = 180224
+linkedlane_fill = 52223
+linkedlane_fillmode = 134145
+linkedlane_outline = 10808831
+linkedlane_outlinemode = 180224
+linkedlane_unsynced = 16762368
+linkedlane_unsynced_mode = 163840
 col_cursor = ${main.magenta.area.out() /* Edit cursor */}
 col_cursor2 = ${main.magenta.area.out() /* Edit cursor (alternate) */}
 playcursor_color = ${main.yellow.area.out() /* Edit cursor */}
 playcursor_drawmode = 163840
-${if main.is_dark() {`
+${if main.is_dark() { `
 col_gridlines2 = 0
 col_gridlines2dm = 180224
 col_gridlines3 = 0
 col_gridlines3dm = 163840
 col_gridlines = 0
 col_gridlines1dm = 147456`
-} else {`
+} else { `
 col_gridlines2 = ${main.lower.text.out() /* Grid lines (start of measure) */}
 col_gridlines2dm = 163840
 col_gridlines3 = ${main.lower.text.out() /* Grid lines (start of beats) */}
@@ -191,12 +199,15 @@ ts_lane_text = ${main.lower.text.out() /* Time signature lane text */}
 timesig_sel_bg = ${lab::mix(main.lower.like, main[accent].area, 0.2).out() /* Time signature marker selected background */}
 col_routinghl1 = ${main.lower.text.out() /* Routing matrix row highlight */}
 col_routinghl2 = ${main.lower.text.out() /* Routing matrix column highlight */}
+col_routingact = 4259648
 col_vudoint = 0
 col_vuclip = ${main.red.area.out() /* VU meter clip indicator */}
 col_vutop = ${main.yellow.area.out() /* VU meter top */}
 col_vumid = ${main.green.area.out() /* VU meter middle */}
 col_vubot = ${main.cyan.area.out() /* VU meter bottom */}
 col_vuintcol = ${main.lower.area.out() /* VU meter interlace/edge color */}
+vu_gr_bgcol = 2105376
+vu_gr_fgcol = 57568
 col_vumidi = ${main.lower.like.shadow(1) /* VU meter midi activity */}
 col_vuind1 = 2105376
 col_vuind2 = 10240
@@ -221,15 +232,15 @@ mcp_list_scrollbar_mode = 138752
 mcp_list_scrollbar_mouseover = 10469184
 mcp_list_scrollbar_mouseover_mode = 163840
 midi_rulerbg = ${main.lower.like.out() /* MIDI editor ruler background */}
-midi_rulerfg = ${lab::mix(main.lower.like, main.lower.text, main.dim).out() /* MIDI editor ruler text */}
-${if main.is_dark() {`
+midi_rulerfg = ${lab::mix(main.lower.like, main.lower.text, 0.625).out() /* MIDI editor ruler text */}
+${if main.is_dark() { `
 midi_grid2 = 0
 midi_griddm2 = 180224
 midi_grid3 = 0
 midi_griddm3 = 163840
 midi_grid1 = 0
 midi_griddm1 = 147456`
-} else {`
+} else { `
 midi_grid2 = ${main.lower.text.out() /* MIDI editor grid line (start of measure) */}
 midi_griddm2 = 163840
 midi_grid3 = ${main.lower.text.out() /* MIDI editor grid line (start of beats) */}
@@ -253,9 +264,9 @@ midi_ccbut = ${lab::mix(pane, main.lower.text, 0.5).out() /* MIDI editor CC lane
 midi_ccbut_text = ${main.lower.text.out() /* MIDI editor CC lane button text */}
 midi_ccbut_arrow = ${main.lower.text.out() /* MIDI editor CC lane button arrow */}
 midioct = ${main.lower.area.shadow(1) /* MIDI editor CC lane button arrow */}
-midi_inline_trackbg1 = ${main.raise("upper", "area", 0.07).out() /* MIDI inline background color (naturals) */}
-midi_inline_trackbg2 = ${main.raise("upper", "area", 0.13).out() /* MIDI inline background color (sharps/flats) */}
-midioct_inline = ${main.raise("upper", "area", 0.1).shadow(1) /* MIDI inline octave line color */}
+midi_inline_trackbg1 = ${main.raise("upper", "like", 0.07).out() /* MIDI inline background color (naturals) */}
+midi_inline_trackbg2 = ${main.raise("upper", "like", 0.13).out() /* MIDI inline background color (sharps/flats) */}
+midioct_inline = ${main.raise("upper", "like", 0.1).shadow(1) /* MIDI inline octave line color */}
 midi_endpt = ${main[accent].area.out() /* MIDI editor end marker */}
 midi_notebg = ${rgb(255, 0, 0).out() /* MIDI editor note, unselected (midi_note_colormap overrides) */}
 midi_notefg = ${rgb(0, 255, 255).out() /* MIDI editor note, selected (midi_note_colormap overrides) */}
@@ -265,15 +276,15 @@ midi_itemctl = 0
 midi_ofsn = ${main.lower.area.shadow(1) /* MIDI editor note (offscreen) */}
 midi_ofsnsel = ${main[accent].area.out() /* MIDI editor note (offscreen selected) */}
 midi_editcurs = ${main.magenta.area.out() /* MIDI editor cursor */}
-${if main.is_dark() {`
-midi_pkey1 = ${lab::mix(main.lower.area, main.lower.text, main.dim).out() /* MIDI piano key color (naturals background, sharps/flats text) */}
+${if main.is_dark() { `
+midi_pkey1 = ${lab::mix(main.lower.area, main.lower.text, 0.625).out() /* MIDI piano key color (naturals background, sharps/flats text) */}
 midi_pkey2 = ${main.lower.area.out() /* MIDI piano key color (sharps/flats background, naturals text) */}
-midi_pkey3 = ${lab::mix(main.lower.area, main.lower.text, main.dim).shadow(1.5) /* MIDI piano key color (selected) */}
-`} else {`
+midi_pkey3 = ${lab::mix(main.lower.area, main.lower.text, 0.625).shadow(1.5) /* MIDI piano key color (selected) */}`
+} else { `
 midi_pkey1 = ${main.lower.like.out() /* MIDI piano key color (naturals background, sharps/flats text) */}
-midi_pkey2 = ${lab::mix(main.lower.like, main.lower.text, main.dim).out() /* MIDI piano key color (sharps/flats background, naturals text) */}
-midi_pkey3 = ${main.lower.like.shadow(1.5) /* MIDI piano key color (selected) */}
-`}}
+midi_pkey2 = ${lab::mix(main.lower.like, main.lower.text, 0.625).out() /* MIDI piano key color (sharps/flats background, naturals text) */}
+midi_pkey3 = ${main.lower.like.shadow(1.5) /* MIDI piano key color (selected) */}`
+}}
 midi_noteon_flash = ${main.lower.text.out() /* MIDI piano key note-on flash */}
 midi_leftbg = ${pane.out() /* MIDI piano pane background */}
 midifont_col_light_unsel = 16777215
@@ -282,43 +293,43 @@ midifont_mode_unsel = 163840
 midifont_col_light = 16777215
 midifont_col_dark = 0
 midifont_mode = 180224
-${if main.is_dark() {`
+${if main.is_dark() { `
 score_bg = ${lab::mix(main.lower.area, main.lower.text, 0.75).out() /* MIDI notation editor background */}
 score_fg = ${main.lower.area.out() /* MIDI notation editor staff/notation/text */}
 score_sel = ${main.lower.area.out() /* MIDI notation editor selected staff/notation/text */}
 score_timesel = ${lab::mix(main.lower.area, main.lower.text, 0.875).out() /* MIDI notation editor time selection */}
-score_loop = ${main.lower.area.out() /* MIDI notation editor loop points, selected pitch */}
-`} else {`
+score_loop = ${main.lower.area.out() /* MIDI notation editor loop points, selected pitch */}`
+} else { `
 score_bg = ${main.lower.area.out() /* MIDI notation editor background */}
 score_fg = ${main.lower.text.out() /* MIDI notation editor staff/notation/text */}
 score_sel = ${main[accent].like.out() /* MIDI notation editor selected staff/notation/text */}
 score_timesel = ${lab::mix(main.lower.area, main[accent].area, 0.125).out() /* MIDI notation editor time selection */}
-score_loop = ${main[accent].area.out() /* MIDI notation editor loop points, selected pitch */}
-`}}
+score_loop = ${main[accent].area.out() /* MIDI notation editor loop points, selected pitch */}`
+}}
 midieditorlist_bg = ${main.lower.area.out() /* MIDI list editor background */}
 midieditorlist_fg = ${main.lower.text.out() /* MIDI list editor text */}
-midieditorlist_grid = ${lab::mix(main.lower.area, main.lower.text, main.border).out() /* MIDI list editor grid lines */}
+midieditorlist_grid = ${lab::mix(main.lower.area, main.lower.text, 0.25).out() /* MIDI list editor grid lines */}
 midieditorlist_selbg = ${main[accent].area.out() /* MIDI list editor selected row */}
 midieditorlist_selfg = ${main[accent].text.out() /* MIDI list editor selected text */}
 midieditorlist_seliabg = ${main.lower.like.out() /* MIDI list editor selected row (inactive) */}
 midieditorlist_seliafg = ${main[accent].like.out() /* MIDI list editor selected text (inactive) */}
-midieditorlist_bg2 = 11579562
-midieditorlist_fg2 = 4605508
-midieditorlist_selbg2 = 14277078
-midieditorlist_selfg2 = 5066059
+midieditorlist_bg2 = ${main.lower.like.out() /* MIDI list editor background (secondary) */}
+midieditorlist_fg2 = ${main.lower.text.out() /* MIDI list editor text (secondary) */}
+midieditorlist_selbg2 = ${main[accent].area.out() /* MIDI list editor selected row (secondary) */}
+midieditorlist_selfg2 = ${main[accent].text.out() /* MIDI list editor selected text (secondary) */}
 col_explorer_sel = ${main[accent].area.out() /* Media explorer selection */}
 col_explorer_seldm = 147456
 col_explorer_seledge = 0
 explorer_grid = ${main[accent].area.out() /* Media explorer grid, markers */}
 explorer_pitchtext = 16777215
-docker_shadow = ${main.upper.area.shadow(2) /* Tab control shadow */}
-docker_selface = ${lab::mix(main.upper.area, main.lower.text, main.dim).out() /* Tab control selected tab */}
-docker_unselface = ${main.upper.area.shadow(1) /* Tab control unselected tab */}
-docker_text = ${lab::mix(main.upper.area, main.lower.text, main.dim).out() /* Tab control text */}
-docker_text_sel = ${main.upper.area.shadow(1) /* Tab control text selected tab */}
-docker_bg = ${main.upper.area.out() /* Tab control background */}
-windowtab_bg = ${main.upper.area.out() /* Tab control background in windows */}
-auto_item_unsel = ${main.raise("upper", "area", 0.5).out() /* Envelope: Unselected automation item */}
+docker_shadow = ${main.upper.like.shadow(2) /* Tab control shadow */}
+docker_selface = ${lab::mix(main.upper.like, main.lower.text, 0.625).out() /* Tab control selected tab */}
+docker_unselface = ${main.upper.like.shadow(1) /* Tab control unselected tab */}
+docker_text = ${lab::mix(main.upper.like, main.lower.text, 0.625).out() /* Tab control text */}
+docker_text_sel = ${main.upper.like.shadow(1) /* Tab control text selected tab */}
+docker_bg = ${main.upper.like.out() /* Tab control background */}
+windowtab_bg = ${main.upper.like.out() /* Tab control background in windows */}
+auto_item_unsel = ${main.raise("upper", "like", 0.5).out() /* Envelope: Unselected automation item */}
 col_env1 = ${main.lower("green", "like", 0.1).out() /* Envelope: Volume (pre-FX) */}
 col_env2 = ${main.lower("green", "area", 0.1).out() /* Envelope: Volume */}
 env_trim_vol = ${main.lower("red", "like", 0.1).out() /* Envelope: Trim Volume */}
@@ -343,7 +354,7 @@ env_item_pan = ${main.lower("any", "like", 0.1).out() /* Envelope: Item take pan
 env_item_mute = ${main.lower("red", "like", 0.1).out() /* Envelope: Item take mute */}
 env_item_pitch = ${main.lower("magenta", "like", 0.1).out() /* Envelope: Item take pitch */}
 wiring_grid2 = ${main.lower.area.out() /* Wiring: Background */}
-wiring_grid = ${lab::mix(main.lower.area, main.lower.text, main.border).out() /* Wiring: Background grid lines */}
+wiring_grid = ${lab::mix(main.lower.area, main.lower.text, 0.25).out() /* Wiring: Background grid lines */}
 wiring_border = ${main.lower.like.shadow(1) /* Wiring: Box border */}
 wiring_tbg = ${main.lower.like.out() /* Wiring: Box background */}
 wiring_ticon = ${main.lower.text.out() /* Wiring: Box background */}
@@ -357,15 +368,16 @@ wiring_parent = ${main.lower("cyan", "area", 0.5).out() /* Wiring: Master/Parent
 wiring_parentwire_border = ${main.lower.area.shadow(1) /* Wiring: Master/Parent wire border */}
 wiring_parentwire_master = ${main.blue.area.out() /* Wiring: Master/Parent to master wire */}
 wiring_parentwire_folder = ${main.magenta.area.out() /* Wiring: Master/Parent to parent folder wire */}
-wiring_pin_normal = ${lab::mix(main.lower.like, main.lower.text, main.dim).out() /* Wiring: Pins normal */}
+wiring_pin_normal = ${lab::mix(main.lower.like, main.lower.text, 0.625).out() /* Wiring: Pins normal */}
 wiring_pin_connected = ${main.green.area.out() /* Wiring: Pins connected */}
 wiring_pin_disconnected = 2105408
-wiring_horz_col = ${lab::mix(main.lower.like, main.lower.text, main.dim).out() /* Wiring: Horizontal pin connections */}
+wiring_horz_col = ${lab::mix(main.lower.like, main.lower.text, 0.625).out() /* Wiring: Horizontal pin connections */}
 wiring_sendwire = ${main.red.area.out() /* Wiring: Send hanging wire */}
 wiring_hwoutwire = ${main.yellow.area.out() /* Wiring: Hardware output wire */}
 wiring_recinputwire = 8421631
 wiring_hwout = ${lab::mix(main.lower.like, main.lower.text, 0.3).out() /* Wiring: System hardware outputs */}
 wiring_recinput = ${main.lower("red", "area", 0.5).out() /* Wiring: System record inputs */}
+wiring_activity = 4259648
 autogroup = 16777215
 group_0 = 255
 group_1 = 65280
@@ -433,26 +445,25 @@ group_62 = 10551136
 group_63 = 8437600
 
 [REAPER]
-lb_font = F5FFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E73205365726966000000000000000000000000A3
-lb_font2 = F3FFFFFF00000000000000000000000090010000000000000302012243616C696272690020446C67000000000000000000000000000000000000000096
-user_font0 = 00
-user_font1 = F4FFFFFF00000000000000000000000090010000000000000302012243616C696272690000000000000000000000000000000000000000000000000060
-user_font2 = F3FFFFFF00000000000000000000000090010000000000000302012243616C69627269000000000000000000000000000000000000000000000000005F
-user_font3 = F1FFFFFF00000000000000000000000090010000000000000302012243616C69627269004C696768740000000000000000000000000000000000000055
-user_font4 = F3FFFFFF00000000000000000000000090010000000000000302012243616C696272690030365F3635000000000000000000000000000000000000008F
+lb_font = F3FFFFFF0000000000000000000000009001000000000000030201224E6F746F2053616E7300730050530053657269660000000000000000000000000D
+lb_font2 = F3FFFFFF0000000000000000000000009001000000000000030201224E6F746F2053616E730020456D6F6A690020526F74617465640000000000000005
+user_font1 = F1FFFFFF0000000000000000000000009001000000000000030201224E6F746F2053616E730000000000000000000000000000000000000000000000FC
+user_font2 = F1FFFFFF0000000000000000000000009001000000000000030201224A6574427261696E73204D6F6E6F00657874006600000000000000000000000099
+user_font3 = F1FFFFFF0000000000000000000000009001000000000000030201224E6F746F2053616E73006966006172726F770000000000000000000000000000F6
+user_font4 = F0FFFFFF00000000000000000000000090010000000000000302012243616C696272690030365F3635000000000000000000000000000000000000008C
 user_font5 = F0FFFFFF00000000000000000000000090010000000000000302012243616C69627269000000000000000000000000000000000000000000000000005C
 user_font6 = EFFFFFFF00000000000000000000000090010000000000000302012243616C69627269000000000000000000000000000000000000000000000000005B
 user_font7 = ECFFFFFF00000000000000000000000090010000000000000302012243616C696272690000000000000000000000000000000000000000000000000058
-user_font8 = FBFFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E73205365726966000000000000000000000000A9
-user_font9 = 00
+user_font8 = EBFFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E7320536572696600000000000000000000000099
+user_font9 = E8FFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E7320536572696600000000000000000000000096
 user_font10 = EBFFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E7320536572696600000000000000000000000099
 user_font11 = E8FFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E7320536572696600000000000000000000000096
 user_font12 = E5FFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E7320536572696600000000000000000000000093
 user_font13 = E3FFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E7320536572696600000000000000000000000091
-user_font14 = 00
-user_font15 = 00
-tl_font = F3FFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E73205365726966000000000000000000000000A1
-trans_font = F3FFFFFF00000000000000000000000090010000000000000302012243616C69627269004C696768740000000000000000000000000000000000000057
-mi_font = F5FFFFFF00000000000000000000000090010000000000000302012243616C69627269004C696768740020536572696600000000000000000000000072
-ui_img = Aquarelle_6.0
-`;
+user_font14 = E0FFFFFF00000000000000000000000090010000000000000302012243616C6962726900742053616E732053657269660000000000000000000000008E
+user_font15 = F1FFFFFF0000000000000000000000009001000000000000030201224E6F746F2053616E730053616E73205365726966000000000000000000000000AA
+tl_font = F3FFFFFF0000000000000000000000009001000000000000030201224672656553616E73000073000065582047797265000000000000000000000000A7
+trans_font = F3FFFFFF000000000000000000000000900100000000000003020122536F7572636520436F64652050726F004A500000000000000000000000000000A0
+mi_font = F5FFFFFF00000000000000000000000090010000000000000302012244656A6156752053616E730053007300657269660000000000000000000000000B
+ui_img = Aquarelle_7.0
+`

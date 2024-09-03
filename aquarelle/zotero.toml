@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name = 'Zotero'
+type = 'text-file' # md
+about = '''
+Style sheet for [Zotero](https://zotero.org).
+Place the file in a path like ~/.zotero/zotero/YOUR_PROFILE.default/chrome/userChrome.css
+'''
+
+schemes.main.name = 'Main'
+
+[options]
+accent = { name = 'Accent', default.set = 'any' }
+
+[suggested-paths]
+default = { default = 'zotero.css' }

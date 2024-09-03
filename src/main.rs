@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -7,69 +7,68 @@
 use std::io::{Cursor, Result, Stderr, Write};
 use aquarelle::{arrangement, cache, mapping, path, scheme, csi, location};
 use compact_str::CompactString;
-use palette::{FromColor, rgb::channels::Rgba, Srgb};
+use palette::{rgb::channels::Rgba, Srgb};
 
 fn main() -> Result<()> { std::process::exit(start()?) }
 
 #[derive(clap::Parser)]
-#[clap(name = "Aquarelle", version, about)]
+#[command(name = "Aquarelle", version, about)]
 enum Cli {
-	/// List available tools for Aquarelle
-	List { #[clap(subcommand)] subcommand: List },
+	/// List available items
+	List { #[command(subcommand)] subcommand: List },
 	
 	/// Perform an arrangement
 	Arrange {
 		/// Namespace where the arrangement is located
-		#[clap(short, long)]
+		#[arg(short, long)]
 		from: CompactString,
 		
 		/// Arrangement to apply
-		#[clap(short, long)]
+		#[arg(short, long)]
 		arrangement: String,
 		
 		/// Variant of schemes to be applied from the arrangement
-		#[clap(short, long)]
+		#[arg(short, long)]
 		schemes: CompactString,
 		
-		/// Variant of options to be bound from the arrangement
-		#[clap(short, long)]
-		options: Option<CompactString>,
-		
 		/// If set, only this map will be applied from the arrangement
-		#[clap(short, long)]
+		#[arg(short, long)]
 		map: Option<CompactString>,
 	},
 	
 	/// Print a scheme of a theme
 	Print {
 		/// Namespace where the theme is located
-		#[clap(short, long)]
+		#[arg(short, long)]
 		from: CompactString,
 		
 		/// Theme where the scheme is located
-		#[clap(short, long)]
+		#[arg(short, long)]
 		theme: CompactString,
 		
-		/// Scheme to print
-		#[clap(short, long)]
-		scheme: CompactString,
+		/// Background number for accent texts
+		#[arg(short, long, default_value = "1")]
+		bg: u8,
+		
+		/// Schemes to print
+		schemes: Vec<CompactString>,
 	},
 	
 	/// Debug a scheme
 	Debug {
 		/// Namespace where the scheme is located
-		#[clap(short, long)]
+		#[arg(short, long)]
 		from: CompactString,
 		
 		/// The scheme to debug
-		#[clap(short, long)]
+		#[arg(short, long)]
 		scheme: CompactString,
 		
-		/// If set, the resulting scheme will be printed
-		#[clap(short, long)]
-		print: bool,
+		/// Background number for accent texts
+		#[arg(short, long, default_value = "2")]
+		bg: u8,
 		
-		/// Scheme options (<option> = <value>, ...)
+		/// Scheme options in TOML
 		options: Option<CompactString>,
 	},
 }
@@ -107,13 +106,9 @@ fn start() -> Result<i32> {
 	let code = match clap::Parser::parse() {
 		Cli::List { subcommand } => list(subcommand, stderr, cache),
 		
-		Cli::Arrange { from, arrangement, schemes, options, map } => {
+		Cli::Arrange { from, arrangement, schemes, map } => {
 			let arrangement = arrangement.into();
-			
-			let result = arrangement::arrange(
-				&cache, &from, &arrangement, &schemes,
-				options.as_deref(), map.as_deref(),
-			);
+			let result = arrangement::arrange(&cache, &from, &arrangement, &schemes, map.as_deref());
 			
 			match result {
 				Ok(mappings) => show_mapping_results(stderr, mappings),
@@ -121,42 +116,41 @@ fn start() -> Result<i32> {
 			}
 		}
 		
-		Cli::Print { from, theme: theme_id, scheme } => {
+		Cli::Print { from, theme: theme_id, schemes, bg } => {
 			let (namespace, bin) = match cache.namespace(&from) {
 				Ok(namespace) => namespace, Err(error) => {
 					write!(stderr, csi!(/b:fg red; "ERROR:"! ' '))?;
 					return error.show(&mut stderr)
 				}
 			};
-			
 			let theme = match namespace.theme(&theme_id, bin) {
 				Ok(theme) => theme, Err(error) => {
 					write!(stderr, csi!(/b:fg red; "ERROR:"! ' '))?;
 					return error.show(&mut stderr, &from)
 				}
 			};
-			
-			let scheme = match theme.scheme(&scheme, &from, &cache, Default::default()) {
-				Ok(data) => data, Err(error) => {
-					write!(stderr, csi!(/b:fg red; "ERROR:"! ' '))?;
-					return error.show(&mut stderr, &theme_id)
-				}
+			for (i, scheme) in schemes.into_iter().enumerate() {
+				let scheme = match theme.scheme(&scheme, &from, &cache, Default::default()) {
+					Ok(data) => data, Err(error) => {
+						write!(stderr, csi!(/b:fg red; "ERROR:"! ' '))?;
+						return error.show(&mut stderr, &theme_id)
+					}
+				};
+				print_scheme(scheme, bg, i as _)?;
 			};
-			
-			print_scheme(scheme)?;
 			Ok(exitcode::OK)
 		}
 		
-		Cli::Debug { from, scheme, options, print } => {
+		Cli::Debug { from, scheme, options, bg } => {
 			let params = scheme::Params {
 				scheme_id: scheme,
-				namespace_id: CompactString::new_inline(""),
+				namespace_id: CompactString::const_new(""),
 			};
 			
 			let options = if let Some(options) = options {
-				match toml_edit::de::from_str(&options.replace(',', "\n")) {
+				match toml::de::from_str(&options) {
 					Ok(options) => options, Err(error) => {
-						write!(stderr, csi!(/b:fg red; "ERROR:"! "invalid toml\n" /F 7 "{}"), error)?;
+						write!(stderr, csi!(/b:fg red; "ERROR:"! "invalid TOML\n" /F 7 "{}"), error)?;
 						return Ok(exitcode::USAGE)
 					}
 				}
@@ -164,8 +158,8 @@ fn start() -> Result<i32> {
 			
 			let request = scheme::Request { params, options, data: Default::default() };
 			
-			match scheme::data(&request, &from, &cache, &Default::default(), &Default::default()) {
-				Ok(scheme) => { if print { print_scheme(scheme)?; } Ok(exitcode::OK) }
+			match scheme::data(&request, &from, &cache, &Default::default()) {
+				Ok(scheme) => { print_scheme(scheme, bg, 0)?; Ok(exitcode::OK) }
 				Err(error) => {
 					write!(stderr, csi!(/b:fg red; "ERROR:"! ' '))?;
 					error.show(&mut stderr)
@@ -189,7 +183,7 @@ fn list(command: List, mut stderr: Stderr, cache: cache::Cache) -> Result<i32> {
 				match bin.get(id) {
 					Ok(namespace) => write!(stdout, csi! {
 						"\n{} {}: " /fg green; "{:?}"! ' ' /d; "({})"!
-					}, if bin.local { "- " } else { "-" }, location(bin.local), id, namespace.name)?,
+					}, if bin.user { "-  " } else { "-" }, location(bin.user), id, namespace.name)?,
 					
 					Err(error) => {
 						aquarelle::warn(&mut errors, if let cache::Error::Io(..) = *error { false } else { true })?;
@@ -198,13 +192,16 @@ fn list(command: List, mut stderr: Stderr, cache: cache::Cache) -> Result<i32> {
 				}
 			}
 			if errors.position() == 0 { writeln!(stdout)?; }
+			
+			write!(stdout, csi!("\n  user path: " /fg blue; "{}\n"! "system path: " /fg blue; "{}"! '\n'),
+				cache::user_path().to_string_lossy(), cache::system_path().to_string_lossy())?;
 		}
 		List::Arrangements => for (at, bin) in &cache.namespaces {
 			match bin.get(at) {
 				Ok(namespace) => if !namespace.arrangements.is_empty() {
 					writeln!(stdout,
 						csi!("\nAt {} namespace " /fg magenta; "{:?}"! ":"),
-						location(bin.local), at)?;
+						location(bin.user), at)?;
 					
 					for (id, item) in &namespace.arrangements {
 						match item.get(id, bin) {
@@ -230,7 +227,7 @@ fn list(command: List, mut stderr: Stderr, cache: cache::Cache) -> Result<i32> {
 				Ok(namespace) => if !namespace.maps.is_empty() {
 					writeln!(stdout,
 						csi!("\nAt {} namespace " /fg magenta; "{:?}"! ":"),
-						location(bin.local), at)?;
+						location(bin.user), at)?;
 					
 					for (id, item) in &namespace.maps {
 						match item.get(id, bin) {
@@ -256,7 +253,7 @@ fn list(command: List, mut stderr: Stderr, cache: cache::Cache) -> Result<i32> {
 				Ok(namespace) => if !namespace.schemes.is_empty() {
 					writeln!(stdout,
 						csi!("\nAt {} namespace " /fg magenta; "{:?}"! ":"),
-						location(bin.local), at)?;
+						location(bin.user), at)?;
 					
 					for (id, item) in &namespace.schemes {
 						match item.get(id, bin) {
@@ -282,7 +279,7 @@ fn list(command: List, mut stderr: Stderr, cache: cache::Cache) -> Result<i32> {
 				Ok(namespace) => if !namespace.themes.is_empty() {
 					writeln!(stdout,
 						csi!("\nAt {} namespace " /fg magenta; "{:?}"! ":"),
-						location(bin.local), at)?;
+						location(bin.user), at)?;
 					
 					for (id, item) in &namespace.themes {
 						match item.get(id, bin) {
@@ -332,7 +329,7 @@ fn show_mapping_results<'a>(
 				
 				for mapping::IoError { error, path } in errors.iter() {
 					write!(out, csi!('\n' /6 F "for: "))?;
-					path::show_located(&mut out, &path.located)?;
+					path::show_location(&mut out, &path.location)?;
 					writeln!(out, csi! {
 						'\n' /7 F "as: " /fg cyan; "{}"! '\n' /4 F /b:fg red; "error:"! " {}"
 					}, path.buf.to_string_lossy(), error)?;
@@ -362,96 +359,55 @@ fn show_mapping_results<'a>(
 }
 
 #[cfg(feature = "cli")]
-fn print_scheme(scheme: &scheme::Static) -> Result<()> {
+fn print_scheme(scheme: &scheme::Data, bg: u8, i: u8) -> Result<()> {
 	let mut stdout = &std::io::stdout();
-	writeln!(stdout)?;
-	
-	let mix = |a: Srgb<u8>, b: Srgb<u8>, bias| // TODO optional color space
-		Srgb::from_color(palette::Mix::mix(
-			palette::Lab::from_color(a.into_format()),
-			palette::Lab::from_color(b.into_format()), bias
-		)).into_format() as Srgb<u8>;
+	write!(stdout, "{}", if i == 0 { "\n" } else { csi!(/10 U) })?;
 	
 	for (set, roles) in [
-		(aquarelle::Set::Lower , scheme.sets.lower ),
-		(aquarelle::Set::Upper , scheme.sets.upper ),
+		(aquarelle::Set::Lower, scheme.lower),
+		(aquarelle::Set::Upper, scheme.upper),
 	] {
 		let like = Srgb::from_u32::<Rgba>(roles.like);
 		let area = Srgb::from_u32::<Rgba>(roles.area);
 		let text = Srgb::from_u32::<Rgba>(roles.text);
 		
-		let dim_like = mix(like, text, scheme.dim);
-		let dim_area = mix(area, text, scheme.dim);
-		
-		let border_like = mix(like, text, scheme.border);
-		let border_area = mix(area, text, scheme.border);
-		
-		writeln!(stdout, csi! {
+		writeln!(stdout, csi! { /"{10}" F
 			/bg rgb("{1};{2};{3}"):fg rgb("{7};{8};{9}"); "{0:^9}"!
 			/bg rgb("{4};{5};{6}"):fg rgb("{7};{8};{9}"); "{0:^9}"!
-			' '
-			/bg rgb("{1};{2};{3}"):fg rgb("{10};{11};{12}"); "{0:^9}"!
-			/bg rgb("{4};{5};{6}"):fg rgb("{13};{14};{15}"); "{0:^9}"!
-			' '
-			/bg rgb("{1};{2};{3}"):fg rgb("{16};{17};{18}"); " ─── ━━━ ═══ "!
-			/bg rgb("{4};{5};{6}"):fg rgb("{19};{20};{21}"); " ─── ━━━ ═══ "!
-			
 		}, set.to_str(),
-			
 			like.red, like.green, like.blue,
 			area.red, area.green, area.blue,
-			text.red, text.green, text.blue,
-			
-			dim_like.red, dim_like.green, dim_like.blue,
-			dim_area.red, dim_area.green, dim_area.blue,
-			
-			border_like.red, border_like.green, border_like.blue,
-			border_area.red, border_area.green, border_area.blue,
+			text.red, text.green, text.blue, i * 19 + 1
 		)?
 	}
 	
-	let bg = Srgb::from_u32::<Rgba>(scheme.sets.upper.area); // TODO optional color set and role
+	let bg = Srgb::from_u32::<Rgba>(match bg {
+		1 => scheme.lower.area,
+		3 => scheme.upper.like,
+		4 => scheme.upper.area,
+		_ => scheme.lower.like,
+	});
 	
 	for (set, roles) in [
-		(aquarelle::Set::Red,     scheme.sets.red),
-		(aquarelle::Set::Yellow,  scheme.sets.yellow),
-		(aquarelle::Set::Green,   scheme.sets.green),
-		(aquarelle::Set::Cyan,    scheme.sets.cyan),
-		(aquarelle::Set::Blue,    scheme.sets.blue),
-		(aquarelle::Set::Magenta, scheme.sets.magenta),
-		(aquarelle::Set::Any   ,  scheme.sets.any),
+		(aquarelle::Set::Red,     scheme.red),
+		(aquarelle::Set::Yellow,  scheme.yellow),
+		(aquarelle::Set::Green,   scheme.green),
+		(aquarelle::Set::Cyan,    scheme.cyan),
+		(aquarelle::Set::Blue,    scheme.blue),
+		(aquarelle::Set::Magenta, scheme.magenta),
+		(aquarelle::Set::Any,     scheme.any),
 	] {
 		let like = Srgb::from_u32::<Rgba>(roles.like);
 		let area = Srgb::from_u32::<Rgba>(roles.area);
 		let text = Srgb::from_u32::<Rgba>(roles.text);
 		
-		let dim_like = mix(  bg, like, scheme.dim);
-		let dim_area = mix(area, text, scheme.dim);
-		
-		let border_like = mix(  bg, like, scheme.border);
-		let border_area = mix(area, text, scheme.border);
-		
-		writeln!(stdout, csi! {
+		writeln!(stdout, csi! { /"{13}" F
 			/bg rgb("{1};{2};{3}"):fg rgb("{4};{5};{6}");    "{0:^9}"!
 			/bg rgb("{7};{8};{9}"):fg rgb("{10};{11};{12}"); "{0:^9}"!
-			' '
-			/bg rgb("{1};{2};{3}"):fg rgb("{13};{14};{15}"); "{0:^9}"!
-			/bg rgb("{7};{8};{9}"):fg rgb("{16};{17};{18}"); "{0:^9}"!
-			' '
-			/bg rgb("{1};{2};{3}"):fg rgb("{19};{20};{21}"); " ─── ━━━ ═══ "!
-			/bg rgb("{7};{8};{9}"):fg rgb("{22};{23};{24}"); " ─── ━━━ ═══ "!
-			
 		}, set.to_str(), bg.red, bg.green, bg.blue,
-			
 			like.red, like.green, like.blue,
 			area.red, area.green, area.blue,
-			text.red, text.green, text.blue,
-			
-			dim_like.red, dim_like.green, dim_like.blue,
-			dim_area.red, dim_area.green, dim_area.blue,
-			
-			border_like.red, border_like.green, border_like.blue,
-			border_area.red, border_area.green, border_area.blue,
+			text.red, text.green, text.blue, i * 19 + 1
 		)?
 	}
 	

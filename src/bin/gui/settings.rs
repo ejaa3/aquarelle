@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -22,7 +22,7 @@ use crate::{icons, log, utils, i18n, send};
 		width_chars: 4
 	}
 	add_prefix: &_ @ gtk::CheckButton {
-		~valign: gtk::Align::Center
+		valign: gtk::Align::Center ~
 		bind_property: "active", &spin, "sensitive" 'back { sync_create; }
 	}
 } ]]
@@ -32,7 +32,7 @@ fn rhai_max_value(row: &adw::ActionRow, value: f64, upper: f64) {
 }
 
 #[view[ gtk::ScrolledWindow root {
-	~child: &_ @ adw::Clamp {
+	child: &_ @ adw::Clamp {
 		margin_bottom: 12
 		margin_end: 12
 		margin_start: 12
@@ -42,18 +42,18 @@ fn rhai_max_value(row: &adw::ActionRow, value: f64, upper: f64) {
 		
 		child: &_ @ gtk::Box {
 			orientation: gtk::Orientation::Vertical
-			~spacing: 12
-			
+			spacing: 12
+			~
 			append: &_ @ adw::PreferencesGroup {
 				title: i18n("Maximum values for Rhai engine")
 				description: i18n("Zero means “no limits”")
 				
-				~header_suffix: &_ @ gtk::LinkButton {
+				header_suffix: &_ @ gtk::LinkButton {
 					icon_name: icons::OPEN_BOOK
 					tooltip_text: i18n("About this in the Rhai book")
 					uri: "https://rhai.rs/book/safety/index.html"
 					valign: gtk::Align::Center
-				}
+				} ~
 				add: &_ @ adw::ActionRow {
 					title: i18n("Length of strings")
 					rhai_max_value: &_, 0.0, usize::MAX as f64
@@ -90,13 +90,13 @@ fn rhai_max_value(row: &adw::ActionRow, value: f64, upper: f64) {
 				}
 			}
 			append: &_ @ adw::PreferencesGroup {
-				~title: i18n("Miscellaneous")
-				
+				title: i18n("Miscellaneous")
+				~
 				add: &_ @ adw::ActionRow {
 					title: i18n("Print errors in the log panel")
 					subtitle: i18n("Use this function to test a translation")
-					~activatable_widget: &button
-					
+					activatable_widget: &button
+					~
 					add_suffix: &_ @ gtk::MenuButton button {
 						icon_name: icons::OPEN_MENU
 						valign: gtk::Align::Center
@@ -117,7 +117,7 @@ fn rhai_max_value(row: &adw::ActionRow, value: f64, upper: f64) {
 				}
 			}
 		}
-	}
+	} ~
 	insert_action_group: "show-errors", Some(&_) @ gio::SimpleActionGroup {
 		add_action: &_ @ gio::SimpleAction::new("scan", None) {
 			connect_activate: clone![tx; move |_, _| send!(ShowErrors::Scan => tx)]
@@ -145,13 +145,13 @@ fn rhai_max_value(row: &adw::ActionRow, value: f64, upper: f64) {
 
 pub fn start(tags: utils::Tags) -> gtk::ScrolledWindow {
 	enum ShowErrors { Scan, Cache, Namespace, Rhai, Scheme, Theme, Listing }
-	let (tx, rx) = glib::MainContext::channel(glib::Priority::DEFAULT);
+	let (tx, rx) = async_channel::bounded(1);
 	
 	expand_view_here! { }
 	
 	let show_errors = move |show| match show {
 		ShowErrors::Scan => for error in scan_errors(&path()) {
-			(if let cache::ScanError::Path { local: true, .. } = error
+			(if let cache::ScanError::Path { user: true, .. } = error
 				{ log::warning } else { log::error }) (&tags, true);
 			
 			log::scan_error(&tags, error, ())
@@ -183,6 +183,9 @@ pub fn start(tags: utils::Tags) -> gtk::ScrolledWindow {
 		}
 	};
 	
-	rx.attach(None, move |show| { show_errors(show); glib::ControlFlow::Continue });
+	glib::spawn_future_local(async move {
+		while let Ok(show) = rx.recv().await { show_errors(show) }
+	});
+	
 	root
 }

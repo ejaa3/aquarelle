@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name = 'Chromium'
+type = 'directory' # md
+about = '''
+Directory with a Chromium extension manifest.
+Just enable developer [mode] and load the unpacked extension.
+
+[mode]: https://developer.chrome.com/docs/extensions/mv3/linux_hosting/#create
+''' # rhai
+
+nomenclature = 'arrangement + " – " + scheme("main")'
+
+[schemes]
+main = { name = 'Main' }
+
+[suggested-paths]
+default = { default = 'chromium' }
+
+[files]
+manifest.name = 'manifest.json'

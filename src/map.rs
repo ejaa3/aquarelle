@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -10,7 +10,7 @@ use serde::{Serialize, Deserialize};
 use crate::{arrangement, cache, mapping, namespace, path, pathing, scheme, script, Value};
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub struct Request {
 	#[serde(rename = "request")]
 	params: Params,
@@ -19,10 +19,10 @@ pub struct Request {
 	pub(crate) disabled: bool,
 	
 	#[serde(default, skip_serializing_if = "str::is_empty")]
-	displaying: CompactString,
+	display: CompactString,
 	
 	#[serde(default, skip_serializing_if = "str::is_empty")]
-	naming: CompactString,
+	nomenclature: CompactString,
 	
 	#[serde(default, skip_serializing_if = "is_arrangement")]
 	replica: Replica,
@@ -33,17 +33,18 @@ pub struct Request {
 	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
 	schemes: BTreeMap<CompactString, CompactString>,
 	
-	#[serde(default, skip_serializing_if = "pathing::no_suggestions")]
+	#[serde(default, skip_serializing_if = "pathing::includes_nothing")]
 	pub(crate) paths: pathing::Paths,
 	
 	#[serde(default, skip_serializing_if = "<[_]>::is_empty")]
-	pub(crate) custom_paths: Box<[path::Located]>,
+	pub(crate) custom_paths: Box<[path::Location]>,
 	
 	#[serde(default, skip_serializing_if = "arrangement::EngineSafety::is_default")]
 	pub(crate) engine: arrangement::EngineSafety,
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct Params {
 	#[serde(default, rename = "from")]
 	namespace_id: CompactString,
@@ -64,7 +65,7 @@ pub fn lazy_mapping<'a>(
 	    (id, request): (&'a str, &'a Request),
 	main_namespace_id: &'a str,
 	            cache: &'a cache::Cache,
-	          schemes: & BTreeMap<&str, Rc<scheme::Static>>,
+	          schemes: & BTreeMap<&str, Rc<scheme::Data>>,
 	       schemes_id: &'a str,
 	   arrangement_id: rhai::ImmutableString,
 	 arrangement_name: rhai::ImmutableString,
@@ -72,7 +73,6 @@ pub fn lazy_mapping<'a>(
 	     default_path: &std::path::PathBuf,
 	          replica: arrangement::Replica,
 	   previous_paths: &mut Vec<path::ParsedFrom<'a>>,
-	   global_options: Option<&'a BTreeMap<CompactString, Value>>,
 ) -> Result<impl FnOnce() -> mapping::Result<'a>, Error<'a>> {
 	let Params { namespace_id, map_id } = &request.params;
 	
@@ -121,16 +121,9 @@ pub fn lazy_mapping<'a>(
 	
 	for (option_id, option) in &map.options {
 		request.options.get(option_id)
-			.and_then(|value| {
-				let current = match value {
-					Value::Binding((bind,)) => global_options?.get(bind)?,
-					Value::Bind(..) => global_options?.get(option_id)?,
-					_ => value
-				};
-				Some(current.has_same_type(&option.default)
-					.then(|| options.insert(option_id.clone(), current.clone()))
-					.ok_or(Error::OptionType { id, option_id, current, required: &option.default }))
-			})
+			.and_then(|value| Some(value.has_same_type(&option.default)
+				.then(|| options.insert(option_id.clone(), value.clone()))
+				.ok_or(Error::OptionType { id, option_id, value, required: &option.default })))
 			.or_else(|| Some(Ok(options.insert(option_id.clone(), option.default.clone()))))
 			.transpose()?;
 	}
@@ -138,25 +131,23 @@ pub fn lazy_mapping<'a>(
 	let mut engine = script::naming_engine(arrangement_id, arrangement_name, Rc::clone(&schemes));
 	safety.set(&mut engine);
 	
-	let display = if !request.displaying.is_empty() {
-		engine.eval(&request.displaying).map_err(|error|
-			Error::BadDisplaying { id, script: &map.displaying, error })?
-	} else if !map.displaying.is_empty() {
-		engine.eval(&map.displaying).map_err(|error|
-			Error::BadMapDisplaying { id, map_id, script: &map.displaying, error })?
+	let display = if !request.display.is_empty() {
+		engine.eval(&request.display).map_err(|error|
+			Error::BadDisplaying { id, script: &map.display, error })?
+	} else if !map.display.is_empty() {
+		engine.eval(&map.display).map_err(|error|
+			Error::BadMapDisplaying { id, map_id, script: &map.display, error })?
 	} else {
 		rhai::ImmutableString::new()
 	};
 	
-	let name = if !request.naming.is_empty() {
-		engine.eval(&request.naming).map_err(|error|
-			Error::BadNaming { id, script: &map.naming, error })?
-	} else if !map.naming.is_empty() {
-		engine.eval(&map.naming).map_err(|error|
-			Error::BadMapNaming { id, map_id, script: &map.naming, error })?
-	} else {
-		rhai::ImmutableString::new()
-	};
+	let name = if !request.nomenclature.is_empty() {
+		engine.eval(&request.nomenclature).map_err(|error|
+			Error::BadNaming { id, script: &map.nomenclature, error })?
+	} else if !map.nomenclature.is_empty() {
+		engine.eval(&map.nomenclature).map_err(|error|
+			Error::BadMapNaming { id, map_id, script: &map.nomenclature, error })?
+	} else { rhai::ImmutableString::new() };
 	
 	let paths = Some(pathing::resolve(
 		(id, request), map, map_id, cache, default_path, &name, previous_paths
@@ -175,7 +166,7 @@ pub enum Error<'a> {
 FallbackNotFound { id: &'a str, map_id: &'a str, binding_id: &'a str, fallback_id: &'a str },
    FallbackCycle { id: &'a str, map_id: &'a str },
   SchemeNotFound { id: &'a str, schemes_id: &'a str, binding_id: &'a str, response: &'a str },
-      OptionType { id: &'a str, option_id: &'a str, current: &'a Value, required: &'a Value },
+      OptionType { id: &'a str, option_id: &'a str, value: &'a Value, required: &'a Value },
 BadMapDisplaying { id: &'a str, map_id: &'a str, script: &'a str, error: Box<rhai::EvalAltResult> },
    BadDisplaying { id: &'a str, script: &'a str, error: Box<rhai::EvalAltResult> },
     BadMapNaming { id: &'a str, map_id: &'a str, script: &'a str, error: Box<rhai::EvalAltResult> },
@@ -238,11 +229,11 @@ pub fn show_error(mut out: impl std::io::Write, error: Error) -> std::io::Result
 			
 			Ok(exitcode::CONFIG)
 		}
-		Error::OptionType { id, option_id, current, required } => {
+		Error::OptionType { id, option_id, value, required } => {
 			writeln!(out, crate::csi! {
 				"Datatype of " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ".options." /fg red; "{:?}" /fg blue; ']'!
 				" is " /fg magenta; "{}"! " instead of " /fg magenta; "{}"!
-			}, id, option_id, current.type_str(), required.type_str())?;
+			}, id, option_id, value.type_str(), required.type_str())?;
 			
 			Ok(exitcode::DATAERR)
 		}

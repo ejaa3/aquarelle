@@ -1,19 +1,18 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const   main = cfg::scheme("main");
+const main   = cfg::scheme("main");
 const accent = cfg::option("accent");
 
-fn out() { '#' + this.to_hex_rgba(true) }
+fn out() { '#' + this.to_hex_rgba(true) } // css
 
-`
-@-moz-document url("about:newtab"), url("about:home") {
+`@-moz-document url("about:newtab"), url("about:home") {
 	body {
 		--newtab-background-color: ${main.lower.like.out()} !important;
-		--newtab-background-color-secondary: ${main.upper.like.out()} !important;
+		--newtab-background-color-secondary: ${main.upper.area.out()} !important;
 		--newtab-text-primary-color: ${main.lower.text.out()} !important;
 		--newtab-primary-action-background: ${main[accent].area.out()} !important;
 		--newtab-primary-element-text-color: ${main[accent].text.out()} !important;
@@ -24,5 +23,4 @@ fn out() { '#' + this.to_hex_rgba(true) }
 		--newtab-text-emphasis-text-color: ${main.yellow.text.out()} !important;
 		--newtab-wordmark-color: ${main.lower.text.out()} !important;
 	}
-}
-`
+}`

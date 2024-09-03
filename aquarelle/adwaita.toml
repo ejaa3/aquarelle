@@ -1,133 +1,185 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Adwaita'
- type = 'text-file'
-about = """
-A basic style sheet that works for many applications using \
-<a href='https://gitlab.gnome.org/GNOME/libadwaita'>libadwaita</a> \
-or the <a href='https://github.com/lassekongo83/adw-gtk3'>adw-gtk3</a> style.
-"""
+name = 'Adwaita'
+type = 'text-file' # md
+about = '''
+A basic style sheet that works for many applications using
+[libadwaita](https://gitlab.gnome.org/GNOME/libadwaita) or the
+[adw-gtk3](https://github.com/lassekongo83/adw-gtk3) style.
+'''
 
-[schemes]
-main = { name = 'Main Color Scheme' }
+schemes.main.name = 'Main'
 
 [options]
-accent = { default.set = 'any', name = 'Accent Color Set' }
-custom-css = { default = '', name = 'Custom CSS' }
+accent = { name = 'Accent', default.set = 'any' }
+custom-css = { name = 'Custom CSS', default = '' }
 
 [options.dim-header]
-   name = 'Inactive header bar color'
-  about = 'Use another color for the header bar when the window is out of focus'
+name = 'Inactive header bar color'
+about = 'Use another color for the header bar when the window is out of focus'
 default = true
 
 [suggested-paths]
 default = { default = 'adwaita.css' }
+firefox = { home = '.var/app/org.mozilla.firefox/config/gtk-3.0/gtk.css' }
 
-# General
 gtk4-1 = { config = 'gtk-4.0/gtk.css' }
 gtk3-1 = { config = 'gtk-3.0/gtk.css' }
 gtk4-2 = { home = '.config/gtk-4.0/gtk.css' }
 gtk3-2 = { home = '.config/gtk-3.0/gtk.css' }
 
-# Flatpak Firefox (if using adw-gtk3 theme)
-firefox = { home = '.var/app/org.mozilla.firefox/config/gtk-3.0/gtk.css' }
+# GNOME Core Apps
+baobab      = { home = '.var/app/org.gnome.baobab/config/gtk-4.0/gtk.css' }
+calculator  = { home = '.var/app/org.gnome.Calculator/config/gtk-4.0/gtk.css' }
+calendar    = { home = '.var/app/org.gnome.Calendar/config/gtk-4.0/gtk.css' }
+snapshot    = { home = '.var/app/org.gnome.Snapshot/config/gtk-4.0/gtk.css' }
+connections = { home = '.var/app/org.gnome.Connections/config/gtk-4.0/gtk.css' }
+contacts    = { home = '.var/app/org.gnome.Contacts/config/gtk-4.0/gtk.css' }
+# text-edit = { home = '.var/app/org.gnome.TextEditor/config/gtk-4.0/gtk.css' }
+simple-scan = { home = '.var/app/org.gnome.SimpleScan/config/gtk-4.0/gtk.css' }
+extensions  = { home = '.var/app/org.gnome.Extensions/config/gtk-4.0/gtk.css' }
+maps        = { home = '.var/app/org.gnome.Maps/config/gtk-4.0/gtk.css' }
+weather     = { home = '.var/app/org.gnome.Weather/config/gtk-4.0/gtk.css' }
+logs        = { home = '.var/app/org.gnome.Logs/config/gtk-4.0/gtk.css' }
+clocks      = { home = '.var/app/org.gnome.clocks/config/gtk-4.0/gtk.css' }
+font-viewer = { home = '.var/app/org.gnome.font-viewer/config/gtk-4.0/gtk.css' }
+totem       = { home = '.var/app/org.gnome.Totem/config/gtk-3.0/gtk.css' }
+evince      = { home = '.var/app/org.gnome.Evince/config/gtk-3.0/gtk.css' }
+loupe       = { home = '.var/app/org.gnome.Loupe/config/gtk-4.0/gtk.css' }
+epiphany    = { home = '.var/app/org.gnome.Epiphany/config/gtk-4.0/gtk.css' }
 
-# GTK 4 Flatpak apps using libadwaita
-amberol          = { home = '.var/app/io.bassi.Amberol/config/gtk-4.0/gtk.css' }
+# GNOME Circle
+amberol       = { home = '.var/app/io.bassi.Amberol/config/gtk-4.0/gtk.css' }
+apostrophe    = { home = '.var/app/org.gnome.gitlab.somas.Apostrophe/config/gtk-4.0/gtk.css' }
+audio-sharing = { home = '.var/app/de.haeckerfelix.AudioSharing/config/gtk-4.0/gtk.css' }
+authenticator = { home = '.var/app/com.belmoussaoui.Authenticator/config/gtk-4.0/gtk.css' }
+# biblioteca  = { home = '.var/app/app.drey.Biblioteca/config/gtk-4.0/gtk.css' }
+blanket       = { home = '.var/app/com.rafaelmardojai.Blanket/config/gtk-4.0/gtk.css' }
+boatswain     = { home = '.var/app/com.feaneron.Boatswain/config/gtk-4.0/gtk.css' }
+cartridges    = { home = '.var/app/page.kramo.Cartridges/config/gtk-4.0/gtk.css' }
+citations     = { home = '.var/app/org.gnome.World.Citations/config/gtk-4.0/gtk.css' }
+# clairvoyant = { home = '.var/app/com.github.cassidyjames.clairvoyant/config/gtk-4.0/gtk.css' }
+collision     = { home = '.var/app/dev.geopjr.Collision/config/gtk-4.0/gtk.css' }
+commit        = { home = '.var/app/re.sonny.Commit/config/gtk-4.0/gtk.css' }
+pika-backup   = { home = '.var/app/org.gnome.World.PikaBackup/config/gtk-4.0/gtk.css' }
+deja-dup      = { home = '.var/app/org.gnome.DejaDup/config/gtk-4.0/gtk.css' }
+curtail       = { home = '.var/app/com.github.huluti.Curtail/config/gtk-4.0/gtk.css' }
+decibels      = { home = '.var/app/org.gnome.Decibels/config/gtk-4.0/gtk.css' }
+decoder       = { home = '.var/app/com.belmoussaoui.Decoder/config/gtk-4.0/gtk.css' }
+dialect       = { home = '.var/app/app.drey.Dialect/config/gtk-4.0/gtk.css' }
+ear-tag       = { home = '.var/app/app.drey.EarTag/config/gtk-4.0/gtk.css' }
+elastic       = { home = '.var/app/app.drey.Elastic/config/gtk-4.0/gtk.css' }
+emblem        = { home = '.var/app/org.gnome.design.Emblem/config/gtk-4.0/gtk.css' }
+eyedropper    = { home = '.var/app/com.github.finefindus.eyedropper/config/gtk-4.0/gtk.css' }
+die-bahn      = { home = '.var/app/de.schmidhuberj.DieBahn/config/gtk-4.0/gtk.css' }
+forge-sparks  = { home = '.var/app/com.mardojai.ForgeSparks/config/gtk-4.0/gtk.css' }
+fragments     = { home = '.var/app/de.haeckerfelix.Fragments/config/gtk-4.0/gtk.css' }
+fretboard     = { home = '.var/app/dev.bragefuglseth.Fretboard/config/gtk-4.0/gtk.css' }
+gaphor        = { home = '.var/app/org.gaphor.Gaphor/config/gtk-4.0/gtk.css' }
+graphs        = { home = '.var/app/se.sjoerd.Graphs/config/gtk-4.0/gtk.css' }
+hieroglyphic  = { home = '.var/app/io.github.finefindus.Hieroglyphic/config/gtk-4.0/gtk.css' }
+identity      = { home = '.var/app/org.gnome.gitlab.YaLTeR.Identity/config/gtk-4.0/gtk.css' }
+impression    = { home = '.var/app/io.gitlab.adhami3310.Impression/config/gtk-4.0/gtk.css' }
+junction      = { home = '.var/app/re.sonny.Junction/config/gtk-4.0/gtk.css' }
+khronos       = { home = '.var/app/io.github.lainsce.Khronos/config/gtk-4.0/gtk.css' }
+komikku       = { home = '.var/app/info.febvre.Komikku/config/gtk-4.0/gtk.css' }
+letterpress   = { home = '.var/app/io.gitlab.gregorni.Letterpress/config/gtk-4.0/gtk.css' }
+meta-cleaner  = { home = '.var/app/fr.romainvigier.MetadataCleaner/config/gtk-4.0/gtk.css' }
+lorem         = { home = '.var/app/org.gnome.design.Lorem/config/gtk-4.0/gtk.css' }
+mousai        = { home = '.var/app/io.github.seadve.Mousai/config/gtk-4.0/gtk.css' }
+news-flash    = { home = '.var/app/io.gitlab.news_flash.NewsFlash/config/gtk-4.0/gtk.css' }
+obfuscate     = { home = '.var/app/com.belmoussaoui.Obfuscate/config/gtk-4.0/gtk.css' }
+paper-clip    = { home = '.var/app/io.github.diegoivan.pdf_metadata_editor/config/gtk-4.0/gtk.css' }
+podcasts      = { home = '.var/app/org.gnome.Podcasts/config/gtk-4.0/gtk.css' }
+polari        = { home = '.var/app/org.gnome.Polari/config/gtk-4.0/gtk.css' }
+list          = { home = '.var/app/io.github.mrvladus.List/config/gtk-4.0/gtk.css' }
+video-trimmer = { home = '.var/app/org.gnome.gitlab.YaLTeR.VideoTrimmer/config/gtk-4.0/gtk.css' }
+chess-clock   = { home = '.var/app/com.clarahobbs.chessclock/config/gtk-4.0/gtk.css' }
+resources     = { home = '.var/app/net.nokyan.Resources/config/gtk-4.0/gtk.css' }
+health        = { home = '.var/app/dev.Cogitri.Health/config/gtk-4.0/gtk.css' }
+secrets       = { home = '.var/app/org.gnome.World.Secrets/config/gtk-4.0/gtk.css' }
+share-preview = { home = '.var/app/com.rafaelmardojai.SharePreview/config/gtk-4.0/gtk.css' }
+shortwave     = { home = '.var/app/de.haeckerfelix.Shortwave/config/gtk-4.0/gtk.css' }
+solanum       = { home = '.var/app/org.gnome.Solanum/config/gtk-4.0/gtk.css' }
+switcheroo    = { home = '.var/app/io.gitlab.adhami3310.Converter/config/gtk-4.0/gtk.css' }
+tangram       = { home = '.var/app/re.sonny.Tangram/config/gtk-4.0/gtk.css' }
+text-pieces   = { home = '.var/app/io.gitlab.liferooter.TextPieces/config/gtk-4.0/gtk.css' }
+raider        = { home = '.var/app/com.github.ADBeveridge.Raider/config/gtk-4.0/gtk.css' }
+tuba          = { home = '.var/app/dev.geopjr.Tuba/config/gtk-4.0/gtk.css' }
+valuta        = { home = '.var/app/io.github.idevecore.Valuta/config/gtk-4.0/gtk.css' }
+warp          = { home = '.var/app/app.drey.Warp/config/gtk-4.0/gtk.css' }
+wf-kit-gen    = { home = '.var/app/com.rafaelmardojai.WebfontKitGenerator/config/gtk-4.0/gtk.css' }
+wike          = { home = '.var/app/com.github.hugolabe.Wike/config/gtk-4.0/gtk.css' }
+workbench     = { home = '.var/app/re.sonny.Workbench/config/gtk-4.0/gtk.css' }
+
+# GNOME Developer Tools
+builder      = { home = '.var/app/org.gnome.Builder/config/gtk-4.0/gtk.css' }
+boxes        = { home = '.var/app/org.gnome.Boxes/config/gtk-4.0/gtk.css' }
+dspy         = { home = '.var/app/org.gnome.dspy/config/gtk-4.0/gtk.css' }
+devhelp      = { home = '.var/app/org.gnome.Devhelp/config/gtk-3.0/gtk.css' }
+dconf-editor = { home = '.var/app/ca.desrt.dconf-editor/config/gtk-3.0/gtk.css' }
+
+# GNOME Design Tools
+icon-library     = { home = '.var/app/org.gnome.design.IconLibrary/config/gtk-4.0/gtk.css' }
 app-icon-preview = { home = '.var/app/org.gnome.design.AppIconPreview/config/gtk-4.0/gtk.css' }
-atoms            = { home = '.var/app/pm.mirko.Atoms/config/gtk-4.0/gtk.css' }
-audio-sharing    = { home = '.var/app/de.haeckerfelix.AudioSharing/config/gtk-4.0/gtk.css' }
-authenticator    = { home = '.var/app/com.belmoussaoui.Authenticator/config/gtk-4.0/gtk.css' }
-bible_gui        = { home = '.var/app/net.lugsole.bible_gui/config/gtk-4.0/gtk.css' }
-# black-box      = { home = '.var/app/com.raggesilver.BlackBox/config/gtk-4.0/gtk.css' }
-blanket          = { home = '.var/app/com.rafaelmardojai.Blanket/config/gtk-4.0/gtk.css' }
-boatswain        = { home = '.var/app/com.feaneron.Boatswain/config/gtk-4.0/gtk.css' }
-bottles          = { home = '.var/app/com.usebottles.bottles/config/gtk-4.0/gtk.css' }
-builder          = { home = '.var/app/org.gnome.Builder/config/gtk-4.0/gtk.css' }
-calculator       = { home = '.var/app/org.gnome.Calculator/config/gtk-4.0/gtk.css' }
-celluloid        = { home = '.var/app/io.github.celluloid_player.Celluloid/config/gtk-4.0/gtk.css' }
-chess-clock      = { home = '.var/app/com.clarahobbs.chessclock/config/gtk-4.0/gtk.css' }
-citations        = { home = '.var/app/org.gnome.World.Citations/config/gtk-4.0/gtk.css' }
-clapper          = { home = '.var/app/com.github.rafostar.Clapper/config/gtk-4.0/gtk.css' }
-clocks           = { home = '.var/app/org.gnome.clocks/config/gtk-4.0/gtk.css' }
-collision        = { home = '.var/app/dev.geopjr.Collision/config/gtk-4.0/gtk.css' }
-colorway         = { home = '.var/app/io.github.lainsce.Colorway/config/gtk-4.0/gtk.css' }
-commit           = { home = '.var/app/re.sonny.Commit/config/gtk-4.0/gtk.css' }
+palette          = { home = '.var/app/org.gnome.design.Palette/config/gtk-4.0/gtk.css' }
+symbolic-preview = { home = '.var/app/org.gnome.design.SymbolicPreview/config/gtk-4.0/gtk.css' }
 contrast         = { home = '.var/app/org.gnome.design.Contrast/config/gtk-4.0/gtk.css' }
+
+# more GTK 4 apps
+atoms            = { home = '.var/app/pm.mirko.Atoms/config/gtk-4.0/gtk.css' }
+bible_gui        = { home = '.var/app/net.lugsole.bible_gui/config/gtk-4.0/gtk.css' }
+black-box        = { home = '.var/app/com.raggesilver.BlackBox/config/gtk-4.0/gtk.css' }
+bottles          = { home = '.var/app/com.usebottles.bottles/config/gtk-4.0/gtk.css' }
+bustle           = { home = '.var/app/org.freedesktop.Bustle/config/gtk-4.0/gtk.css' }
+celluloid        = { home = '.var/app/io.github.celluloid_player.Celluloid/config/gtk-4.0/gtk.css' }
+clapper          = { home = '.var/app/com.github.rafostar.Clapper/config/gtk-4.0/gtk.css' }
+colorway         = { home = '.var/app/io.github.lainsce.Colorway/config/gtk-4.0/gtk.css' }
 countdown        = { home = '.var/app/io.github.lainsce.Countdown/config/gtk-4.0/gtk.css' }
-decoder          = { home = '.var/app/com.belmoussaoui.Decoder/config/gtk-4.0/gtk.css' }
-deja-dup         = { home = '.var/app/org.gnome.DejaDup/config/gtk-4.0/gtk.css' }
-# dev-toolbox    = { home = '.var/app/me.iepure.devtoolbox/config/gtk-4.0/gtk.css' } # Wrong in light schemes.
-dialect          = { home = '.var/app/app.drey.Dialect/config/gtk-4.0/gtk.css' }
-done             = { home = '.var/app/dev.edfloreshz.Done/config/gtk-4.0/gtk.css' }
+cozy            = { home = '.var/app/com.github.geigi.cozy/config/gtk-4.0/gtk.css' }
+# dev-toolbox    = { home = '.var/app/me.iepure.devtoolbox/config/gtk-4.0/gtk.css' } # Wrong in light scheme
 dot-matrix       = { home = '.var/app/io.github.lainsce.DotMatrix/config/gtk-4.0/gtk.css' }
 easy-effects     = { home = '.var/app/com.github.wwmm.easyeffects/config/gtk-4.0/gtk.css' }
 emulsion         = { home = '.var/app/io.github.lainsce.Emulsion/config/gtk-4.0/gtk.css' }
 flatseal         = { home = '.var/app/com.github.tchx84.Flatseal/config/gtk-4.0/gtk.css' }
-font-viewer      = { home = '.var/app/org.gnome.font-viewer/config/gtk-4.0/gtk.css' }
-fractal-next     = { home = '.var/app/org.gnome.Fractal.Devel/config/gtk-4.0/gtk.css' }
-fragments        = { home = '.var/app/de.haeckerfelix.Fragments/config/gtk-4.0/gtk.css' }
+fotema           = { home = '.var/app/app.fotema.Fotema/config/gtk-4.0/gtk.css' }
+fractal          = { home = '.var/app/org.gnome.Fractal/config/gtk-4.0/gtk.css' }
 frog             = { home = '.var/app/com.github.tenderowl.frog/config/gtk-4.0/gtk.css' }
 furtherance      = { home = '.var/app/com.lakoliu.Furtherance/config/gtk-4.0/gtk.css' }
 g4music          = { home = '.var/app/com.github.neithern.g4music/config/gtk-4.0/gtk.css' }
-gaphor           = { home = '.var/app/org.gaphor.Gaphor/config/gtk-4.0/gtk.css' }
-gradience        = { home = '.var/app/com.github.GradienceTeam.Gradience/config/gtk-4.0/gtk.css' } # Makes sense?
-health           = { home = '.var/app/dev.Cogitri.Health/config/gtk-4.0/gtk.css' }
-icon-library     = { home = '.var/app/org.gnome.design.IconLibrary/config/gtk-4.0/gtk.css' }
-identity         = { home = '.var/app/org.gnome.gitlab.YaLTeR.Identity/config/gtk-4.0/gtk.css' }
-# junction       = { home = '.var/app/re.sonny.Junction/config/gtk-4.0/gtk.css' } # Wrong in light schemes.
-khronos          = { home = '.var/app/io.github.lainsce.Khronos/config/gtk-4.0/gtk.css' }
-komikku          = { home = '.var/app/info.febvre.Komikku/config/gtk-4.0/gtk.css' }
-music            = { home = '.var/app/org.gnome.Music/config/gtk-4.0/gtk.css' }
+gtranslator      = { home = '.var/app/org.gnome.Gtranslator/config/gtk-4.0/gtk.css' }
+hand-brake       = { home = '.var/app/fr.handbrake.ghb/config/gtk-4.0/gtk.css' }
 notejot          = { home = '.var/app/io.github.lainsce.Notejot/config/gtk-4.0/gtk.css' }
-obfuscate        = { home = '.var/app/com.belmoussaoui.Obfuscate/config/gtk-4.0/gtk.css' }
-palette          = { home = '.var/app/org.gnome.design.Palette/config/gtk-4.0/gtk.css' }
-# paper          = { home = '.var/app/io.posidon.Paper/config/gtk-4.0/gtk.css' }
-raider           = { home = '.var/app/com.github.ADBeveridge.Raider/config/gtk-4.0/gtk.css' }
+pipeline         = { home = '.var/app/de.schmidhuberj.tubefeeder/config/gtk-4.0/gtk.css' }
 rnote            = { home = '.var/app/com.github.flxzt.rnote/config/gtk-4.0/gtk.css' }
-secrets          = { home = '.var/app/org.gnome.World.Secrets/config/gtk-4.0/gtk.css' }
-shortwave        = { home = '.var/app/de.haeckerfelix.Shortwave/config/gtk-4.0/gtk.css' }
 swatch           = { home = '.var/app/org.gabmus.swatch/config/gtk-4.0/gtk.css' }
-symbolic-preview = { home = '.var/app/org.gnome.design.SymbolicPreview/config/gtk-4.0/gtk.css' }
-# text-editor    = { home = '.var/app/org.gnome.TextEditor/config/gtk-4.0/gtk.css' }
 typography       = { home = '.var/app/org.gnome.design.Typography/config/gtk-4.0/gtk.css' }
-tubefeeder       = { home = '.var/app/de.schmidhuberj.tubefeeder/config/gtk-4.0/gtk.css' }
 video-downloader = { home = '.var/app/com.github.unrud.VideoDownloader/config/gtk-4.0/gtk.css' }
-video-trimmer    = { home = '.var/app/org.gnome.gitlab.YaLTeR.VideoTrimmer/config/gtk-4.0/gtk.css' }
-workbench        = { home = '.var/app/re.sonny.Workbench/config/gtk-4.0/gtk.css' }
 
-# GTK 3 Flatpak apps if using adw-gtk3 style
-bustle          = { home = '.var/app/org.freedesktop.Bustle/config/gtk-3.0/gtk.css' }
+# more GTK 3 apps
 cambalache      = { home = '.var/app/ar.xjuan.Cambalache/config/gtk-3.0/gtk.css' }
-cozy            = { home = '.var/app/com.github.geigi.cozy/config/gtk-3.0/gtk.css' }
-curtail         = { home = '.var/app/com.github.huluti.Curtail/config/gtk-3.0/gtk.css' }
-dconf-editor    = { home = '.var/app/ca.desrt.dconf-editor/config/gtk-3.0/gtk.css' }
 drawing         = { home = '.var/app/com.github.maoschanz.drawing/config/gtk-3.0/gtk.css' }
-evince          = { home = '.var/app/org.gnome.Evince/config/gtk-3.0/gtk.css' }
+evolution       = { home = '.var/app/org.gnome.Evolution/config/gtk-3.0/gtk.css' }
 eye-of-gnome    = { home = '.var/app/org.gnome.eog/config/gtk-3.0/gtk.css' }
 font-downloader = { home = '.var/app/org.gustavoperedo.FontDownloader/config/gtk-3.0/gtk.css' }
-fractal         = { home = '.var/app/org.gnome.Fractal/config/gtk-3.0/gtk.css' }
 gcolor3         = { home = '.var/app/nl.hjdskes.gcolor3/config/gtk-3.0/gtk.css' }
 gedit           = { home = '.var/app/org.gnome.gedit/config/gtk-3.0/gtk.css' }
 glade           = { home = '.var/app/org.gnome.Glade/config/gtk-3.0/gtk.css' }
-gtranslator     = { home = '.var/app/org.gnome.Gtranslator/config/gtk-3.0/gtk.css' }
-hand-brake      = { home = '.var/app/fr.handbrake.ghb/config/gtk-3.0/gtk.css' } # (*)
-inkscape        = { home = '.var/app/org.inkscape.Inkscape/config/gtk-3.0/gtk.css' } # (*)
+inkscape        = { home = '.var/app/org.inkscape.Inkscape/config/gtk-3.0/gtk.css' }
 lollypop        = { home = '.var/app/org.gnome.Lollypop/config/gtk-3.0/gtk.css' }
 media-info      = { home = '.var/app/net.mediaarea.MediaInfo/config/gtk-3.0/gtk.css' }
 menu-libre      = { home = '.var/app/org.bluesabre.MenuLibre/config/gtk-3.0/gtk.css' }
 qalculate       = { home = '.var/app/io.github.Qalculate/config/gtk-3.0/gtk.css' }
-quod-libet      = { home = '.var/app/io.github.quodlibet.QuodLibet/config/gtk-3.0/gtk.css' } # (*)
-wike            = { home = '.var/app/com.github.hugolabe.Wike/config/gtk-3.0/gtk.css' }
+quod-libet      = { home = '.var/app/io.github.quodlibet.QuodLibet/config/gtk-3.0/gtk.css' }
+synfig          = { home = '.var/app/org.synfig.SynfigStudio/config/gtk-3.0/gtk.css' }
 
 # Chromium-like and Electron Flatpak apps
 chromium = { home = '.var/app/org.chromium.Chromium/config/gtk-3.0/gtk.css' }
 code     = { home = '.var/app/com.visualstudio.code/config/gtk-3.0/gtk.css' }
 code-oss = { home = '.var/app/com.visualstudio.code-oss/config/gtk-3.0/gtk.css' }
-codium   = { home = '.var/app/com.vscodium.codium/config/gtk-3.0/gtk.css' } # (*)
+codium   = { home = '.var/app/com.vscodium.codium/config/gtk-3.0/gtk.css' }
 element  = { home = '.var/app/im.riot.Riot/config/gtk-3.0/gtk.css' }
 skype    = { home = '.var/app/com.skype.Client/config/gtk-3.0/gtk.css' }
-
-# (*) means that the app has default access to xdg-config/gtk-3.0 or xdg-config/gtk-4.0
+zotero   = { home = '.var/app/org.zotero.Zotero/config/gtk-3.0/gtk.css' }

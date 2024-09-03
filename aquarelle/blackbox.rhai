@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -10,7 +10,7 @@ const accent = cfg::option("accent");
 const  normal = if cfg::option("bold") { "like" } else { "area" };
 const intense = if cfg::option("bold") { "area" } else { "like" };
 
-fn out() { '#' + this.to_hex_rgb(true) }
+fn out() { '#' + this.to_hex_rgb(true) } // json
 
 `{
 	"name": "${cfg::display}",
@@ -37,7 +37,7 @@ fn out() { '#' + this.to_hex_rgb(true) }
 	"palette": [
 		"${ // HACK better solarized
 			if main.lower.like.luma() != main.lower.area.luma()
-				{ main.lower.like.out() } else { main.upper.area.out() }
+				{ main.lower.like.out() } else { main.upper.like.out() }
 		}",
 		"${main.red[normal].out()}",
 		"${main.green[normal].out()}",
@@ -46,7 +46,7 @@ fn out() { '#' + this.to_hex_rgb(true) }
 		"${main.magenta[normal].out()}",
 		"${main.cyan[normal].out()}",
 		"${main.any[normal].out()}",
-		"${lab::mix(main.lower.text, main.lower.area, main.dim).out()}",
+		"${lab::mix(main.lower.text, main.lower.area, 0.625).out()}",
 		"${main.red[intense].out()}",
 		"${main.green[intense].out()}",
 		"${main.yellow[intense].out()}",

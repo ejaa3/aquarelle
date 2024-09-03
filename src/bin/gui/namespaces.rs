@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -26,8 +26,6 @@ pub struct Selection {
 	pub struct Pane { }
 	
 	gtk::ScrolledWindow pub root {
-		'bind set_width_request: utils::resize(window.allocated_width(), 324.0, 0.2)
-		
 		child: &_ @ adw::Clamp {
 			margin_bottom: 12
 			margin_end: 12
@@ -41,12 +39,9 @@ pub struct Selection {
 			}
 		}
 	}
-	ref window {
-		connect_default_width_notify: { clone![root]; move |window| bindings!() }
-	}
 }]
 
-pub fn pane(window: &adw::ApplicationWindow) -> Pane {
+pub fn pane() -> Pane {
 	expand_view_here! { }
 	Pane { root, vbox }
 }
@@ -55,12 +50,12 @@ pub fn pane(window: &adw::ApplicationWindow) -> Pane {
 	title: format!("{name}<span face='monospace' size='90%' alpha='55%'>: {id}</span>")
 	title_lines: 1
 	subtitle: about
-	~subtitle_lines: 1
-	
+	subtitle_lines: 1
+	~
 	add_prefix: &_ @ gtk::CheckButton {
 		group: radio
-		~valign: gtk::Align::Center
-		
+		valign: gtk::Align::Center
+		~
 		connect_toggled: clone![tx; move |this|
 			if this.is_active() { send!(true => tx) }]
 	}
@@ -72,23 +67,24 @@ fn namespace(
 	       id:   CompactString,
 	    local:   bool,
 	     name: & str,
-	   parent:   glib::Sender<Msg>,
+	   parent:   async_channel::Sender<Msg>,
 	    radio: & gtk::CheckButton,
 	selection:   SharedSelection,
-) -> (adw::ExpanderRow, glib::Sender<bool>) {
-	let (tx, rx) = glib::MainContext::channel(glib::Priority::DEFAULT);
+) -> (adw::ExpanderRow, async_channel::Sender<bool>) {
+	let (tx, rx) = async_channel::bounded(1);
 	expand_view_here! { }
 	container.add(&root);
 	
-	rx.attach(None, move |no_group| {
-		let mut selected = selection.borrow_mut();
-		selected.namespace.clone_from(&id);
-		selected.local = local;
-		
-		if no_group { selected.group.clear(); }
-		
-		send!(Msg::Select => parent);
-		glib::ControlFlow::Continue
+	glib::spawn_future_local(async move {
+		while let Ok(no_group) = rx.recv().await {
+			let mut selected = selection.borrow_mut();
+			selected.namespace.clone_from(&id);
+			selected.local = local;
+			
+			if no_group { selected.group.clear(); }
+			
+			send!(Msg::Select => parent);
+		}
 	});
 	
 	(root, tx)
@@ -99,12 +95,12 @@ fn namespace(
 	title_lines: 1
 	subtitle: about
 	subtitle_lines: 1
-	~activatable_widget: &prefix
-	
+	activatable_widget: &prefix
+	~
 	add_prefix: &_ @ gtk::CheckButton prefix {
 		group: radio
-		~valign: gtk::Align::Center
-		
+		valign: gtk::Align::Center
+		~
 		connect_toggled: move |this| if this.is_active() {
 			let mut selected = selection.borrow_mut();
 			selected.group.clone_from(&id);
@@ -119,7 +115,7 @@ fn group(about: & str,
           name: & str,
          radio: & gtk::CheckButton,
      selection:   SharedSelection,
-            tx:   glib::Sender<bool>,
+            tx:   async_channel::Sender<bool>,
 ) {
 	expand_view_here! { }
 	expander.add_row(&root)
@@ -131,7 +127,7 @@ pub fn populate(
 	    cache: & cache::Cache,
 	container: & adw::PreferencesGroup,
 	selection: & SharedSelection,
-	       tx: & glib::Sender<Msg>,
+	       tx: & async_channel::Sender<Msg>,
 ) {
 	for (id, bin) in &cache.namespaces {
 		let Some(namespace) = bin.get(id).log(|error| match **error {
@@ -139,7 +135,7 @@ pub fn populate(
 		}, log::cache_error, (), tags, true) else { continue };
 		
 		let (expander, tx) = self::namespace(
-			&namespace.about, container, id.clone(), bin.local,
+			&namespace.about, container, id.clone(), bin.user,
 			&namespace.name, tx.clone(), &radio, selection.clone()
 		);
 		

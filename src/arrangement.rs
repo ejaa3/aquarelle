@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 use crate::{cache, mapping, map, namespace, path, theme, Value};
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub struct Arrangement {
 	pub name: rhai::ImmutableString,
 	
@@ -32,18 +32,18 @@ pub struct Arrangement {
 	maps: BTreeMap<CompactString, map::Request>,
 }
 
-struct DefaultPath(path::Located);
+struct DefaultPath(path::Location);
 
 impl std::ops::Deref for DefaultPath {
-	type Target = path::Located;
-	fn deref(&self) -> &path::Located { &self.0 }
+	type Target = path::Location;
+	fn deref(&self) -> &path::Location { &self.0 }
 }
 
 impl Serialize for DefaultPath {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where S: serde::Serializer {
-		if let path::Location::Default = self.0.location {
-			Err(ser::Error::custom("cannot be `Location::Default`"))
+		if let path::Prefix::Default = self.0.prefix {
+			Err(ser::Error::custom("cannot be `Prefix::Default`"))
 		} else { self.0.serialize(serializer) }
 	}
 }
@@ -51,15 +51,16 @@ impl Serialize for DefaultPath {
 impl<'de> Deserialize<'de> for DefaultPath {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
 	where D: serde::Deserializer<'de> {
-		let path = path::Located::deserialize(deserializer)?;
+		let location = path::Location::deserialize(deserializer)?;
 		
-		if let path::Location::Default = path.location {
+		if let path::Prefix::Default = location.prefix {
 			Err(de::Error::custom("cannot be `default`"))
-		} else { Ok(Self(path)) }
+		} else { Ok(Self(location)) }
 	}
 }
 
 #[derive(Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub struct EngineSafety {
 	max_array_size : Option<usize>,
 	max_call_levels: Option<usize>,
@@ -71,6 +72,7 @@ pub struct EngineSafety {
 }
 
 #[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct MaxExprDepths { global: usize, function: usize }
 
 impl EngineSafety {
@@ -108,7 +110,6 @@ pub fn arrange<'a>(
 	  namespace_id: &'a str,
 	arrangement_id: &'a rhai::ImmutableString,
 	    schemes_id: &'a str,
-	    options_id: Option<&'a str>,
 	        map_id: Option<&'a str>,
 ) -> Result<Vec<impl FnOnce() -> mapping::Result<'a>>, Error<'a>> {
 	let (namespace, bin) = cache.namespace(namespace_id).map_err(Error::Cache)?;
@@ -123,17 +124,13 @@ pub fn arrange<'a>(
 		arrangement, schemes_id, namespace_id, cache, &arrangement.engine
 	).map_err(Error::SchemeListing)?;
 	
-	let options = if let Some(id) = options_id {
-		Some(arrangement.options.get(id).ok_or(Error::OptionsNotFound { id })?)
-	} else { None };
-	
 	if let Some(id) = map_id {
 		let request = arrangement.maps.get(id).ok_or(Error::MapNotFound { id })?;
 		
 		return Ok(vec![map::lazy_mapping(
 			(id, request), namespace_id, cache, &schemes, schemes_id,
-			arrangement_id.clone(), arrangement.name.clone(), request.engine.or(&arrangement.engine),
-			&default_path, arrangement.replica, &mut vec![], options
+			arrangement_id.clone(), arrangement.name.clone(),
+			request.engine.or(&arrangement.engine), &default_path, arrangement.replica, &mut vec![]
 		).map_err(Error::Map)?])
 	}
 	
@@ -146,7 +143,7 @@ pub fn arrange<'a>(
 		mappings.push(map::lazy_mapping(
 			(id, request), namespace_id, cache, &schemes, schemes_id,
 			arrangement_id.clone(), arrangement.name.clone(), request.engine.or(&arrangement.engine),
-			&default_path, arrangement.replica, &mut previous_paths, options
+			&default_path, arrangement.replica, &mut previous_paths
 		).map_err(Error::Map)?)
 	}
 	
@@ -156,10 +153,9 @@ pub fn arrange<'a>(
 pub enum Error<'a> {
              Cache (Box<cache::Error<'a>>),
          Namespace { namespace_id: &'a str, error: Box<namespace::Error<'a>> },
-MissingDefaultPath { default_path: &'a path::Located },
+MissingDefaultPath { default_path: &'a path::Location },
      SchemeListing (Box<theme::ListingError<'a>>),
        MapNotFound { id: &'a str },
-   OptionsNotFound { id: &'a str },
                Map (map::Error<'a>),
 }
 
@@ -178,17 +174,13 @@ pub fn show_error(mut out: impl std::io::Write, error: Error, aid: &str) -> std:
 				"Unable to parse " /fg blue; "default-path"! " as "
 			})?;
 			
-			path::show_located(&mut out, default_path)?; writeln!(out)?;
+			path::show_location(&mut out, default_path)?; writeln!(out)?;
 			Ok(exitcode::SOFTWARE)
 		}
 		Error::SchemeListing(error) => error.show(&mut out),
 		
 		Error::MapNotFound { id } => {
 			writeln!(out, crate::csi!(/fg blue; "[maps." /fg red; "{:?}" /fg blue; ']'! " not found "), id)?;
-			Ok(exitcode::TEMPFAIL)
-		}
-		Error::OptionsNotFound { id } => { // TODO test
-			writeln!(out, crate::csi!(/fg blue; "[options." /fg red; "{:?}" /fg blue; ']'! " not found"), id)?;
 			Ok(exitcode::TEMPFAIL)
 		}
 		Error::Map(error) => map::show_error(out, error),

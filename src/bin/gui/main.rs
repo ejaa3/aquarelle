@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -38,9 +38,8 @@ fn main() -> gtk::glib::ExitCode {
 }
 
 mod utils {
-	use aquarelle::scheme::Sets;
 	use declarative::{construct, view};
-	use gtk::{gdk, traits::TextTagExt};
+	use gtk::{gdk, prelude::TextTagExt};
 	
 	#[view[ gtk::ShortcutController controller {
 		set_scope: gtk::ShortcutScope::Managed
@@ -53,10 +52,6 @@ mod utils {
 	pub fn shortcut(trigger: &str, action: &str) -> gtk::ShortcutController {
 		expand_view_here! { }
 		controller
-	}
-	
-	pub fn resize(size: i32, minimun: f32, factor: f32) -> i32 {
-		(factor * (size as f32 - 2.0 * minimun) + minimun).max(minimun) as i32
 	}
 	
 	pub fn rgba(color: u32) -> gdk::RGBA {
@@ -74,31 +69,31 @@ mod utils {
 		gtk::TextTagTable table {
 			add: &_ @ gtk::TextTag pub red {
 				foreground: "red"
-				'bind set_foreground_rgba: Some(&rgba(sets.red.like))
+				'bind set_foreground_rgba: Some(&rgba(scheme.red.like))
 			}
 			add: &_ @ gtk::TextTag pub yellow {
 				foreground: "yellow"
-				'bind set_foreground_rgba: Some(&rgba(sets.yellow.like))
+				'bind set_foreground_rgba: Some(&rgba(scheme.yellow.like))
 			}
 			add: &_ @ gtk::TextTag pub green {
 				foreground: "green"
-				'bind set_foreground_rgba: Some(&rgba(sets.green.like))
+				'bind set_foreground_rgba: Some(&rgba(scheme.green.like))
 			}
 			add: &_ @ gtk::TextTag pub cyan {
 				foreground: "cyan"
-				'bind set_foreground_rgba: Some(&rgba(sets.cyan.like))
+				'bind set_foreground_rgba: Some(&rgba(scheme.cyan.like))
 			}
 			add: &_ @ gtk::TextTag pub blue {
 				foreground: "blue"
-				'bind set_foreground_rgba: Some(&rgba(sets.blue.like))
+				'bind set_foreground_rgba: Some(&rgba(scheme.blue.like))
 			}
 			add: &_ @ gtk::TextTag pub magenta {
 				foreground: "magenta"
-				'bind set_foreground_rgba: Some(&rgba(sets.magenta.like))
+				'bind set_foreground_rgba: Some(&rgba(scheme.magenta.like))
 			}
 			add: &_ @ gtk::TextTag pub any {
 				foreground: "purple"
-				'bind set_foreground_rgba: Some(&rgba(sets.any.like))
+				'bind set_foreground_rgba: Some(&rgba(scheme.any.like))
 			}
 		}!
 	}]
@@ -108,14 +103,14 @@ mod utils {
 			expand_view_here! { }
 			Self { red, yellow, green, cyan, blue, magenta, any, buffer }
 		}
-		pub fn refresh(&self, sets: &Sets) {
+		pub fn refresh(&self, scheme: &aquarelle::scheme::Data) {
 			let Self { red, yellow, green, cyan, blue, magenta, any, .. } = self;
 			bindings! { }
 		}
 	}
 }
 
-macro_rules! send { [$msg:expr => $tx:expr] => [$tx.send($msg).unwrap()] }
+macro_rules! send { [$msg:expr => $tx:expr] => [$tx.send_blocking($msg).unwrap()] }
 
 macro_rules! critical {
 	($($arg:expr),*) => {

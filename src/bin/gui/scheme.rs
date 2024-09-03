@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -7,7 +7,7 @@
 use std::rc::Rc;
 use declarative::{construct, view};
 use glib::subclass::types::ObjectSubclassIsExt;
-use gtk::{glib, traits::{BoxExt, ListItemExt}, prelude::GObjectPropertyExpressionExt};
+use gtk::{glib, prelude::{BoxExt, GObjectPropertyExpressionExt, ListItemExt}};
 use palette::{FromColor, Srgba, rgb::channels::Rgba};
 use crate::icons;
 
@@ -20,7 +20,7 @@ pub struct Scheme {
 	pub namespace_id: compact_str::CompactString,
 	pub     theme_id: compact_str::CompactString,
 	pub    scheme_id: compact_str::CompactString,
-	pub         data: Rc<aquarelle::scheme::Static>,
+	pub         data: Rc<aquarelle::scheme::Data>,
 	pub         dark: bool,
 }
 
@@ -35,18 +35,18 @@ glib::wrapper! {
 }
 
 impl Object {
-	pub fn new(data: Rc<aquarelle::scheme::Static>,
+	pub fn new(data: Rc<aquarelle::scheme::Data>,
 	   namespace_id: compact_str::CompactString,
 	       theme_id: compact_str::CompactString,
 	      scheme_id: compact_str::CompactString,
 	        display: &gtk::gdk::Display,
 	) -> Self {
 		let foreground = palette::luma::SrgbLuma::from_color(
-			Srgba::from_u32::<Rgba>(data.sets.lower.text).into_format() as Srgba
+			Srgba::from_u32::<Rgba>(data.lower.text).into_format() as Srgba
 		).luma;
 		
 		let background = palette::luma::SrgbLuma::from_color(
-			Srgba::from_u32::<Rgba>(data.sets.lower.like).into_format() as Srgba
+			Srgba::from_u32::<Rgba>(data.lower.like).into_format() as Srgba
 		).luma;
 		
 		let css_id = format!("{namespace_id}-{theme_id}-{scheme_id}");
@@ -89,8 +89,8 @@ mod imp {
 #[view[ ref item {
 	set_child: Some(&_) @ gtk::Box {
 		orientation: gtk::Orientation::Vertical
-		~spacing: 12
-		
+		spacing: 12
+		~
 		append: &_ @ adw::Bin {
 			css_classes: ["card"]
 			halign: gtk::Align::Center
@@ -121,7 +121,7 @@ mod imp {
 				.map(|scheme| scheme.borrow().data.name.to_string())
 				.unwrap_or_default()
 		}
-		~~bind: &name, "label", gtk::Widget::NONE
+		bind: &name, "label", gtk::Widget::NONE ~~
 	}
 	property_expression: "item" 'back {
 		chain_closure::<String>: glib::closure! {
@@ -129,20 +129,20 @@ mod imp {
 				.map(|scheme| scheme.borrow().css_id.clone())
 				.unwrap_or_default()
 		}
-		~~bind: &thumbnail, "name", gtk::Widget::NONE
+		bind: &thumbnail, "name", gtk::Widget::NONE ~~
 	}
 } ]]
 
 pub fn factory_setup(_: &gtk::SignalListItemFactory, list_item: &glib::Object) {
-	let item = glib::Cast::downcast_ref::<gtk::ListItem>(list_item).unwrap();
+	let item = glib::object::Cast::downcast_ref::<gtk::ListItem>(list_item).unwrap();
 	expand_view_here! { }
 }
 
-fn css_thumbnail(id: &str, scheme: &aquarelle::scheme::Static) -> String {
-	let aquarelle::scheme::Sets {
-		lower, upper, red, yellow,
-		green, cyan, blue, magenta, any
-	} = &scheme.sets;
+fn css_thumbnail(id: &str, scheme: &aquarelle::scheme::Data) -> String {
+	let aquarelle::scheme::Data {
+		lower, upper, red, yellow, green,
+		cyan, blue, magenta, any, name: _
+	} = &scheme;
 	
 	format!(
 		"widget#{id} {{\
@@ -193,8 +193,8 @@ mod tests {
 	#[test]
 	fn thumbnail() {
 		let toml = include_str!("../../../aquarelle/themes/neon_cake.toml");
-		let theme: Theme = toml_edit::de::from_str(toml).unwrap();
-		let namespace_id = compact_str::CompactString::new_inline("aquarelle");
+		let theme: Theme = toml::de::from_str(toml).unwrap();
+		let namespace_id = compact_str::CompactString::const_new("aquarelle");
 		
 		let css = super::css_thumbnail("test", &theme.scheme(
 			"light", &namespace_id, &Cache::new(|_| ()), Default::default(),

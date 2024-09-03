@@ -1,22 +1,21 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const   main = cfg::scheme("main");
+const main   = cfg::scheme("main");
 const accent = cfg::option("accent");
-const   priv = cfg::option("private");
-const    dim = cfg::option("dim-header");
+const priv   = cfg::option("private");
+const dim    = cfg::option("dim-header");
 
 const dark = main.lower.text.luma() > main.lower.like.luma();
 
-const dim_header = if dim { main.lower.like } else { main.upper.area };
-const priv_header = lab::mix(main.upper.like, main[priv].area, 0.2);
+const dim_header  = if dim { main.lower.like } else { main.upper.like };
+const priv_header = lab::mix(main.upper.area, main[priv].area, 0.2);
 const priv_dim_header = lab::mix(dim_header, main[priv].area, 0.2);
 
-fn out() { '#' + this.to_hex_rgba(true) }
-
+fn out() { '#' + this.to_hex_rgba(true) } // css
 fn shadow() { const L = this.luma(); 0xFF.fade(2 ** -L + 0.2 * L - 0.6).out() }
 
 `:root {
@@ -34,25 +33,25 @@ fn shadow() { const L = this.luma(); 0xFF.fade(2 ** -L + 0.2 * L - 0.6).out() }
 	--gnome-view-color: ${main.lower.text.out()};
 	
 	/* Card */
-	--gnome-card-background: ${main.upper.like.out()};
-	--gnome-card-shade-color: ${main.upper.like.shadow()};
+	--gnome-card-background: ${main.upper.area.out()};
+	--gnome-card-shade-color: ${main.upper.area.shadow()};
 	
 	/* Menu */
-	--gnome-menu-background: ${main.upper.like.out()};
+	--gnome-menu-background: ${main.upper.area.out()};
 	--gnome-menu-color: ${main.upper.text.out()};
-	--gnome-menu-border-color: ${main.upper.like.shadow()};
+	--gnome-menu-border-color: ${main.upper.area.shadow()};
 	/*** --gnome-menu-shadow ***/
 	--gnome-menu-button-hover-background: var(--gnome-button-background);
-	--gnome-menu-separator-color: ${main.upper.text.fade(main.border).out()};
+	--gnome-menu-separator-color: ${main.upper.text.fade(0.25).out()};
 	
 	/* Header bar */
-	--gnome-headerbar-background: ${main.upper.area.out()};
-	--gnome-headerbar-shade-color: ${main.upper.area.shadow()};
+	--gnome-headerbar-background: ${main.upper.like.out()};
+	--gnome-headerbar-shade-color: ${main.upper.like.shadow()};
 	
 	/* Toolbars */
-	--gnome-toolbar-background: ${main.upper.area.out()};
+	--gnome-toolbar-background: ${main.upper.like.out()};
 	--gnome-toolbar-color: ${main.lower.text.out()};
-	--gnome-toolbar-border-color: ${main.upper.area.shadow()};
+	--gnome-toolbar-border-color: ${main.upper.like.shadow()};
 	--gnome-toolbar-icon-fill: ${main.lower.text.fade(0.9).out()};
 	
 	/* Elements */
@@ -72,11 +71,11 @@ fn shadow() { const L = this.luma(); 0xFF.fade(2 ** -L + 0.2 * L - 0.6).out() }
 	
 	/* Tabs */
 	--gnome-tabbar-background: var(--gnome-headerbar-background);
-	--gnome-tabbar-tab-separator-color: ${main.lower.text.fade(main.border).out()};
-	--gnome-tabbar-tab-hover-background: ${lab::mix(main.upper.area, main.lower.text, 0.1).out()}; /* Hardcoded color */
-	--gnome-tabbar-tab-active-background: ${lab::mix(main.upper.area, main.lower.text, 0.2).out()}; /* Hardcoded color */
-	--gnome-tabbar-tab-active-background-contrast: ${lab::mix(main.upper.area, main.lower.text, 0.4).out()}; /* Hardcoded color */
-	--gnome-tabbar-tab-active-hover-background: ${lab::mix(main.upper.area, main.lower.text, 0.3).out()}; /* Hardcoded color */
+	--gnome-tabbar-tab-separator-color: ${main.lower.text.fade(0.25).out()};
+	--gnome-tabbar-tab-hover-background: ${lab::mix(main.upper.like, main.lower.text, 0.1).out()}; /* Hardcoded color */
+	--gnome-tabbar-tab-active-background: ${lab::mix(main.upper.like, main.lower.text, 0.2).out()}; /* Hardcoded color */
+	--gnome-tabbar-tab-active-background-contrast: ${lab::mix(main.upper.like, main.lower.text, 0.4).out()}; /* Hardcoded color */
+	--gnome-tabbar-tab-active-hover-background: ${lab::mix(main.upper.like, main.lower.text, 0.3).out()}; /* Hardcoded color */
 	--gnome-tabbar-tab-needs-attetion: ${main[accent].like.out()};
 	
 	--gnome-tabbar-identity-color-blue: ${main.blue.like.out()};

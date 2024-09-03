@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -10,6 +10,7 @@ use serde::{Serialize, Deserialize};
 use crate::{arrangement::Arrangement, mapping::Map, cache::Bin, scheme, theme::Theme};
 
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Namespace {
 	pub name: CompactString,
 	
@@ -23,14 +24,15 @@ pub struct Namespace {
 	pub maps: BTreeMap<rhai::ImmutableString, Item<Paths, Map>>,
 	
 	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-	pub schemes: BTreeMap<rhai::ImmutableString, Item<Paths, scheme::Dynamic>>,
+	pub schemes: BTreeMap<rhai::ImmutableString, Item<Paths, scheme::Parametric>>,
 	
 	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
 	pub themes: BTreeMap<CompactString, Item<CompactString, Theme>>,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Paths { rhai: CompactString, toml: CompactString }
+#[serde(deny_unknown_fields)]
+pub struct Paths { manifest: CompactString, script: CompactString }
 
 pub struct Item<P, V> { path: P, value: OnceCell<V>, }
 
@@ -47,22 +49,22 @@ impl<'de, P: Deserialize<'de>, V> Deserialize<'de> for Item<P, V> {
 
 impl Namespace {
 	pub fn arrangement<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&Arrangement, Box<Error>> {
-		self.arrangements.get(id).ok_or(Error(Object::Arrangement, id, bin.local, Of::NotFound))?.get(id, bin)
+		self.arrangements.get(id).ok_or(Error(Object::Arrangement, id, bin.user, Of::NotFound))?.get(id, bin)
 	}
 	
 	pub fn map<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<(&rhai::ImmutableString, &Map), Box<Error>> {
-		let (id, item) = self.maps.get_key_value(id).ok_or(Error(Object::Map, id, bin.local, Of::NotFound))?;
+		let (id, item) = self.maps.get_key_value(id).ok_or(Error(Object::Map, id, bin.user, Of::NotFound))?;
 		
 		item.get(id, bin).map(|map| (id, map))
 	}
 	
-	pub fn scheme<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<(&rhai::ImmutableString, &scheme::Dynamic), Box<Error>> {
-		let (id, item) = self.schemes.get_key_value(id).ok_or(Error(Object::Scheme, id, bin.local, Of::NotFound))?;
+	pub fn scheme<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<(&rhai::ImmutableString, &scheme::Parametric), Box<Error>> {
+		let (id, item) = self.schemes.get_key_value(id).ok_or(Error(Object::Scheme, id, bin.user, Of::NotFound))?;
 		item.get(id, bin).map(|scheme| (id, scheme))
 	}
 	
 	pub fn theme<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&Theme, Box<Error>> {
-		self.themes.get(id).ok_or(Error(Object::Theme, id, bin.local, Of::NotFound))?.get(id, bin)
+		self.themes.get(id).ok_or(Error(Object::Theme, id, bin.user, Of::NotFound))?.get(id, bin)
 	}
 }
 
@@ -74,12 +76,12 @@ impl Item<CompactString, Arrangement> {
 		
 		let toml = match std::fs::read_to_string(&path) {
 			Ok(text) => text, Err(error) => return Err(Box::new(
-				Error(Object::Arrangement, id, bin.local, Of::Io(path, error))
+				Error(Object::Arrangement, id, bin.user, Of::Io(path, error))
 			))
 		};
 		
-		let value = toml_edit::de::from_str(&toml).map_err(|error| Box::new(
-			Error(Object::Arrangement, id, bin.local, Of::De(path, Box::new(error)))
+		let value = toml::de::from_str(&toml).map_err(|error| Box::new(
+			Error(Object::Arrangement, id, bin.user, Of::De(path, Box::from(error)))
 		))?;
 		
 		Ok(self.value.get_or_init(|| value))
@@ -90,50 +92,50 @@ impl Item<Paths, Map> {
 	pub fn get<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&Map, Box<Error>> {
 		if let Some(map) = self.value.get() { return Ok(map) }
 		
-		let mut path = bin.path.parent().unwrap().join(self.path.toml.as_str());
+		let mut path = bin.path.parent().unwrap().join(self.path.manifest.as_str());
 		
 		let toml = match std::fs::read_to_string(&path) {
 			Ok(text) => text, Err(error) => return Err(Box::new(
-				Error(Object::Map, id, bin.local, Of::Io(path, error))
+				Error(Object::Map, id, bin.user, Of::Io(path, error))
 			))
 		};
 		
-		let mut map: Map = match toml_edit::de::from_str(&toml) {
+		let mut map: Map = match toml::de::from_str(&toml) {
 			Ok(map) => map, Err(error) => return Err(Box::new(
-				Error(Object::Map, id, bin.local, Of::De(path, Box::new(error)))
+				Error(Object::Map, id, bin.user, Of::De(path, Box::from(error)))
 			))
 		};
 		
 		path.clear();
 		path.push(bin.path.parent().unwrap());
-		path.push(self.path.rhai.as_str());
+		path.push(self.path.script.as_str());
 		
 		map.script_path = Some(path.into());
 		Ok(self.value.get_or_init(|| map))
 	}
 }
 
-impl Item<Paths, scheme::Dynamic> {
-	pub fn get<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&scheme::Dynamic, Box<Error>> {
+impl Item<Paths, scheme::Parametric> {
+	pub fn get<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&scheme::Parametric, Box<Error>> {
 		if let Some(scheme) = self.value.get() { return Ok(scheme) }
 		
-		let mut path = bin.path.parent().unwrap().join(self.path.toml.as_str());
+		let mut path = bin.path.parent().unwrap().join(self.path.manifest.as_str());
 		
 		let toml = match std::fs::read_to_string(&path) {
 			Ok(text) => text, Err(error) => return Err(Box::new(
-				Error(Object::Scheme, id, bin.local, Of::Io(path, error))
+				Error(Object::Scheme, id, bin.user, Of::Io(path, error))
 			))
 		};
 		
-		let mut scheme: scheme::Dynamic = match toml_edit::de::from_str(&toml) {
+		let mut scheme: scheme::Parametric = match toml::de::from_str(&toml) {
 			Ok(scheme) => scheme, Err(error) => return Err(Box::new(
-				Error(Object::Scheme, id, bin.local, Of::De(path, Box::new(error)))
+				Error(Object::Scheme, id, bin.user, Of::De(path, Box::from(error)))
 			))
 		};
 		
 		path.clear();
 		path.push(bin.path.parent().unwrap());
-		path.push(self.path.rhai.as_str());
+		path.push(self.path.script.as_str());
 		
 		scheme.script_path = Some(path.into());
 		Ok(self.value.get_or_init(|| scheme))
@@ -148,12 +150,12 @@ impl Item<CompactString, Theme> {
 		
 		let toml = match std::fs::read_to_string(&path) {
 			Ok(text) => text, Err(error) => return Err(Box::new(
-				Error(Object::Theme, id, bin.local, Of::Io(path, error))
+				Error(Object::Theme, id, bin.user, Of::Io(path, error))
 			))
 		};
 		
-		let theme = toml_edit::de::from_str(&toml).map_err(|error| Box::new(
-			Error(Object::Theme, id, bin.local, Of::De(path, Box::new(error)), )
+		let theme = toml::de::from_str(&toml).map_err(|error| Box::new(
+			Error(Object::Theme, id, bin.user, Of::De(path, Box::from(error)), )
 		))?;
 		
 		Ok(self.value.get_or_init(|| theme))
@@ -162,7 +164,7 @@ impl Item<CompactString, Theme> {
 
 pub struct Error<'a>(pub Object, pub &'a str, pub bool, pub Of);
 
-pub enum Of { Io(PathBuf, std::io::Error), De(PathBuf, Box<toml_edit::de::Error>), NotFound }
+pub enum Of { Io(PathBuf, std::io::Error), De(PathBuf, Box<toml::de::Error>), NotFound }
 
 #[derive(Clone, Copy)]
 pub enum Object { Arrangement, Map, Scheme, Theme }
@@ -170,7 +172,7 @@ pub enum Object { Arrangement, Map, Scheme, Theme }
 impl Error<'_> {
 	#[cfg(feature = "cli")]
 	pub fn show(self, out: &mut impl std::io::Write, at: &str) -> std::io::Result<i32> {
-		let Self(object, id, local, of) = self;
+		let Self(object, id, user, of) = self;
 		
 		let object = match object {
 			Object::Arrangement => ("arrangement", "Arrangement"),
@@ -184,7 +186,7 @@ impl Error<'_> {
 				write!(out, crate::csi! {
 					"In the {} namespace " /fg yellow; "{:?}"! "\n"
 					"Unable to read {} " /fg red; "{:?}"! " from\n" /fg cyan; "{}"! "\n{}\n"
-				}, crate::location(local), at, object.0, id, path.to_string_lossy(), error)?;
+				}, crate::location(user), at, object.0, id, path.to_string_lossy(), error)?;
 				
 				Ok(exitcode::NOINPUT)
 			}
@@ -192,14 +194,14 @@ impl Error<'_> {
 				write!(out, crate::csi! {
 					"In the {} namespace " /fg yellow; "{:?}"! "\n"
 					"Failed to deserialize {} " /fg red; "{:?}"! " from\n" /fg cyan; "{}"! "\n\n{}"
-				}, crate::location(local), at, object.0, id, path.to_string_lossy(), error)?;
+				}, crate::location(user), at, object.0, id, path.to_string_lossy(), error)?;
 				
 				Ok(exitcode::DATAERR)
 			}
 			Of::NotFound => {
 				writeln!(out, crate::csi! {
 					"In the {} namespace " /fg green; "{:?}"! "\n{} " /fg red; "{:?}"! " not found"
-				}, crate::location(local), at, object.1, id)?;
+				}, crate::location(user), at, object.1, id)?;
 				
 				Ok(exitcode::UNAVAILABLE)
 			}

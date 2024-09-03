@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,7 +7,7 @@
 import "token" as token;
 import "workbench" as workbench;
 
-const main = cfg::scheme("main");
+const main = cfg::scheme("main"); // json
 const dark = main.lower.text.luma() > main.lower.like.luma();
 
 const MANIFEST = `{
@@ -33,7 +33,7 @@ const MANIFEST = `{
 			"path": "./color-theme.json"
 		}]
 	}
-}`;
+}`; // json
 
 const THEME = `{
 
@@ -47,7 +47,7 @@ const THEME = `{
 
 "semanticTokenColors": ${token::semantic_colors}
 
-}`;
+}`; // json
 
 const LAUNCH = `{
 	"version": "0.2.0",
@@ -55,9 +55,7 @@ const LAUNCH = `{
 		"name": "Launch",
 		"type": "extensionHost",
 		"request": "launch",
-		"args": [
-			"--extensionDevelopmentPath=${"${workspaceFolder}"}"
-		]
+		"args": ["--extensionDevelopmentPath=${"${workspaceFolder}"}"]
 	}]
 }`;
 

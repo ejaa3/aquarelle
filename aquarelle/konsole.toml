@@ -1,36 +1,34 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Konsole'
- type = 'text-files'
-about = """
-An INI file that provides a color scheme for \
-<a href='https://konsole.kde.org'>Konsole</a>, a KDE terminal emulator.
-"""
+name = 'Konsole'
+type = 'text-file' # md
+about = '''
+An INI file that provides a color scheme for
+[Konsole](https://konsole.kde.org), a KDE terminal emulator.
+''' # rhai
 
-displaying = '`${arrangement} – ${scheme("main")}`'
-    naming = '`${arrangement} – ${scheme("main")}`'
- extension = '.colorscheme'
+display      = 'arrangement + " – " + scheme("main")' # rhai
+nomenclature = 'arrangement + " – " + scheme("main") + ".colorscheme"'
 
-[schemes]
-main = { name = 'Main Color Scheme' }
+schemes.main.name = 'Main'
 
 [options]
-   blur = { default = false, name = 'Background Blur' }
-opacity = { default = 1.0  , name = 'Background Opacity' }
+blur    = { name = 'Background Blur', default = false }
+opacity = { name = 'Background Opacity', default = 1.0 }
 
 [options.bold]
-   name = 'Swaps the roles “like” and “area” for emphasis colors'
-  about = 'It is better if the bold text uses intense colors'
+name = 'Swaps the roles “like” and “area” for emphasis colors'
+about = 'It is better if the bold text uses intense colors'
 default = false
 
 [options.embedded]
-   name = 'Use the “mid” color set instead of “low” for backgrounds'
-  about = 'Useful for matching background colors when Konsole is “embedded”'
+name = 'Use the “mid” color set instead of “low” for backgrounds' # FIXME
+about = 'Useful for matching background colors when Konsole is “embedded”'
 default = false
 
 [suggested-paths]
 default = { default = 'konsole' }
- user-1 = { data = 'konsole' }
- user-2 = { home = '.local/share/konsole' }
+user-1  = { data = 'konsole' }
+user-2  = { home = '.local/share/konsole' }

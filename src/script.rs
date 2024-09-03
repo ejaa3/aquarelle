@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -55,7 +55,7 @@ thread_local! {
 pub fn naming_engine(
 	arrangement_id: ImmutableString,
 	   arrangement: ImmutableString,
-	       schemes: Rc<BTreeMap<CompactString, Rc<scheme::Static>>>,
+	       schemes: Rc<BTreeMap<CompactString, Rc<scheme::Data>>>,
 ) -> Engine {
 	let mut module = Module::new();
 	module
@@ -124,14 +124,12 @@ pub fn cfg_module(id: ImmutableString, options: BTreeMap<CompactString, Value>) 
 		))?;
 		
 		match value {
-			Value::Bool (value) => Ok((*value).into()),
-			Value::Int (value) => Ok((*value).into()),
-			Value::Float   (value) => Ok((*value).into()),
-			Value::String  (value) => Ok(value.clone().into()),
-			Value::Set     { set } => Ok((set.to_str()).into()),
-			Value::Role   { role } => Ok((role.to_str()).into()),
-			Value::Binding    (..)  |
-			Value::Bind       (..) => unreachable!(),
+			Value::Bool   (value) => Ok((*value).into()),
+			Value::Int    (value) => Ok((*value).into()),
+			Value::Float  (value) => Ok((*value).into()),
+			Value::String (value) => Ok(value.clone().into()),
+			Value::Set    { set } => Ok((set.to_str()).into()),
+			Value::Role  { role } => Ok((role.to_str()).into()),
 		}
 	});
 	
@@ -174,27 +172,21 @@ mod base {
 
 #[export_module]
 mod map {
-	pub type Scheme = Rc<scheme::Static>;
+	pub type Scheme = Rc<scheme::Data>;
 	pub type Set = scheme::Roles;
-	
-	#[rhai_fn(get = "border", pure)]
-	pub fn border(scheme: &mut Scheme) -> float { scheme.border }
-	
-	#[rhai_fn(get = "dim", pure)]
-	pub fn dim(scheme: &mut Scheme) -> float { scheme.dim }
 	
 	#[rhai_fn(index_get, pure, return_raw)]
 	pub fn set(scheme: &mut Scheme, index: &str) -> Result<Set, Box<EvalAltResult>> {
 		match index {
-			set::LOWER   => Ok(scheme.sets.lower),
-			set::UPPER   => Ok(scheme.sets.upper),
-			set::RED     => Ok(scheme.sets.red),
-			set::YELLOW  => Ok(scheme.sets.yellow),
-			set::GREEN   => Ok(scheme.sets.green),
-			set::CYAN    => Ok(scheme.sets.cyan),
-			set::BLUE    => Ok(scheme.sets.blue),
-			set::MAGENTA => Ok(scheme.sets.magenta),
-			set::ANY     => Ok(scheme.sets.any),
+			set::LOWER   => Ok(scheme.lower),
+			set::UPPER   => Ok(scheme.upper),
+			set::RED     => Ok(scheme.red),
+			set::YELLOW  => Ok(scheme.yellow),
+			set::GREEN   => Ok(scheme.green),
+			set::CYAN    => Ok(scheme.cyan),
+			set::BLUE    => Ok(scheme.blue),
+			set::MAGENTA => Ok(scheme.magenta),
+			set::ANY     => Ok(scheme.any),
 			_ => Err(EvalAltResult::ErrorIndexNotFound(index.into(), Position::NONE).into())
 		}
 	}

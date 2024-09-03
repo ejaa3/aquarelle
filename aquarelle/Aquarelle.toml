@@ -1,96 +1,39 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Aquarelle'
+name = 'Aquarelle'
 about = 'The original namespace of the application'
 
-[maps.ableton-live]
-rhai = 'ableton_live.rhai'
-toml = 'ableton_live.toml'
+[maps]
+adwaita = { manifest = 'adwaita.toml', script = 'adwaita.rhai' }
+blackbox = { manifest = 'blackbox.toml', script = 'blackbox.rhai' }
+chromium = { manifest = 'chromium.toml', script = 'chromium.rhai' }
+code-settings = { manifest = 'code/settings.toml', script = 'code/settings.rhai' }
+code = { manifest = 'code/map.toml', script = 'code/map.rhai' }
+css-colors = { manifest = 'css_colors.toml', script = 'css_colors.rhai' }
+dark-reader = { manifest = 'dark_reader.toml', script = 'dark_reader.rhai' }
+firefox-gnome-theme = { manifest = 'firefox/gnome_theme.toml', script = 'firefox/gnome_theme.rhai' }
+firefox = { manifest = 'firefox/map.toml', script = 'firefox/map.rhai' }
+ghostwriter = { manifest = 'ghostwriter.toml', script = 'ghostwriter.rhai' }
+gimp-palette = { manifest = 'gimp_palette.toml', script = 'gimp_palette.rhai' }
+jdownloader = { manifest = 'jdownloader.toml', script = 'jdownloader.rhai' }
+konsole = { manifest = 'konsole.toml', script = 'konsole.rhai' }
+obsidian-border = { manifest = 'obsidian-border.toml', script = 'obsidian-border.rhai' }
+plasma-scheme = { manifest = 'plasma_scheme.toml', script = 'plasma_scheme.rhai' }
+qjackctl = { manifest = 'qjackctl.toml', script = 'qjackctl.rhai' }
+reaper = { manifest = 'reaper/map.toml', script = 'reaper/map.rhai' }
+sidebery = { manifest = 'sidebery.toml', script = 'sidebery.rhai' }
+syntax-highlighting = { manifest = 'syntax_highlighting.toml', script = 'syntax_highlighting.rhai' }
+telegram-desktop = { manifest = 'telegram_desktop.toml', script = 'telegram_desktop.rhai' }
+wine = { manifest = 'wine.toml', script = 'wine.rhai' }
+zotero = { manifest = 'zotero.toml', script = 'zotero.rhai' }
 
-[maps.adwaita]
-rhai = 'adwaita.rhai'
-toml = 'adwaita.toml'
-
-[maps.blackbox-and-tilix]
-rhai = 'blackbox_and_tilix.rhai'
-toml = 'blackbox_and_tilix.toml'
-
-[maps.code]
-rhai = 'code/map.rhai'
-toml = 'code/map.toml'
-
-[maps.code-settings]
-rhai = 'code/settings.rhai'
-toml = 'code/settings.toml'
-
-[maps.dark-reader]
-rhai = 'dark_reader.rhai'
-toml = 'dark_reader.toml'
-
-[maps.firefox]
-rhai = 'firefox/map.rhai'
-toml = 'firefox/map.toml'
-
-[maps.firefox-gnome-theme]
-rhai = 'firefox/gnome_theme.rhai'
-toml = 'firefox/gnome_theme.toml'
-
-[maps.ghostwriter]
-rhai = 'ghostwriter.rhai'
-toml = 'ghostwriter.toml'
-
-[maps.gimp-palette]
-rhai = 'gimp_palette.rhai'
-toml = 'gimp_palette.toml'
-
-[maps.konsole]
-rhai = 'konsole.rhai'
-toml = 'konsole.toml'
-
-[maps.kvantum]
-rhai = 'kvantum.rhai'
-toml = 'kvantum.toml'
-
-[maps.plasma-scheme]
-rhai = 'plasma_scheme.rhai'
-toml = 'plasma_scheme.toml'
-
-[maps.qjackctl]
-rhai = 'qjackctl.rhai'
-toml = 'qjackctl.toml'
-
-[maps.sidebery]
-rhai = 'sidebery.rhai'
-toml = 'sidebery.toml'
-
-[maps.reaper]
-rhai = 'reaper/map.rhai'
-toml = 'reaper/map.toml'
-
-[maps.telegram-desktop]
-rhai = 'telegram_desktop.rhai'
-toml = 'telegram_desktop.toml'
-
-[maps.stylus]
-rhai = 'stylus/map.rhai'
-toml = 'stylus/map.toml'
-
-[maps.syntax-highlighting]
-rhai = 'syntax_highlighting.rhai'
-toml = 'syntax_highlighting.toml'
-
-[maps.wine]
-rhai = 'wine.rhai'
-toml = 'wine.toml'
-
-[schemes.neon-cake]
-rhai = 'schemes/neon_cake.rhai'
-toml = 'schemes/neon_cake.toml'
+[schemes]
+neon-cake = { manifest = 'schemes/neon_cake.toml', script = 'schemes/neon_cake.rhai' }
 
 [themes]
 everforest = 'themes/everforest.toml'
-   gruvbox = 'themes/gruvbox.toml'
- neon-cake = 'themes/neon_cake.toml'
- solarized = 'themes/solarized.toml'
+gruvbox    = 'themes/gruvbox.toml'
+neon-cake  = 'themes/neon_cake.toml'
+solarized  = 'themes/solarized.toml'

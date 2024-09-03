@@ -1,428 +1,792 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Telegram Desktop'
- type = 'directory'
-about = """
-An experimental theme for <a href='https://www.reaper.fm'>REAPER</a>, \
-a digital audio workstation, based on the default theme for version 6.
+name = 'REAPER'
+type = 'directory' # md
+about = '''
+An experimental theme for [REAPER](https://www.reaper.fm),
+a digital audio workstation, based on the default theme for version 7.
 
-Currently the version 6 theme must be extracted and overwritten by the files exported by this map.
-"""
+The version 7 theme must be extracted and overwritten by the files exported by this map.
+''' # rhai
 
-displaying = '`${arrangement} – ${scheme("main")}`'
-
-naming = '''
-	let scheme = "";
-	
-	for word in `${scheme("main")}`.split()
-	{ scheme += `${word.to_lower()}-` }
-	
-	if scheme.pop() == () { arrangement_id }
-	else { `${arrangement_id}-${scheme}` }
+display = 'arrangement + " – " + scheme("main")' # rhai
+nomenclature = '''
+let scheme = "";
+for word in `${scheme("main")}`.split() { scheme += word.to_lower() + '-' }
+arrangement_id + if scheme.pop() == () { () } else { '.' + scheme }
 '''
 
-subdirectories = ['Aquarelle_6.0', 'Aquarelle_6.0/150', 'Aquarelle_6.0/200']
-
-[schemes]
-main = { name = 'Main Color Scheme' }
+schemes.main.name = 'Main'
+default-file-type = 'svg-to-png'
+subdirectories = ['Aquarelle_7.0', 'Aquarelle_7.0/150', 'Aquarelle_7.0/200']
 
 [options]
-accent = { name = 'Accent Color Set', default.set = 'any' }
+accent = { name = 'Accent', default.set = 'any' }
 
 [suggested-paths]
 default = { default = 'reaper' }
 
 [files]
-color_theme = { type = 'text', name = 'Aquarelle_6.0.ReaperTheme' }
-envcp_arm_off = { type = 'svg-to-png', at = 1, name = 'envcp_arm_off.png' }
-envcp_arm_off_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_off.png' }
-envcp_arm_off_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_off.png' }
-envcp_arm_off_OL = { type = 'svg-to-png', at = 1, name = 'envcp_arm_off_OL.png' }
-envcp_arm_off_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_off_ol.png' }
-envcp_arm_off_OL_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_off_OL.png' }
-envcp_arm_on = { type = 'svg-to-png', at = 1, name = 'envcp_arm_on.png' }
-envcp_arm_on_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_on.png' }
-envcp_arm_on_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_on.png' }
-envcp_arm_on_OL = { type = 'svg-to-png', at = 1, name = 'envcp_arm_on_OL.png' }
-envcp_arm_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_arm_on_ol.png' }
-envcp_arm_on_OL_200 = { type = 'svg-to-png', at = 3, name = 'envcp_arm_on_OL.png' }
-envcp_bg = { type = 'svg-to-png', at = 1, name = 'envcp_bg.png' }
-envcp_bgsel = { type = 'svg-to-png', at = 1, name = 'envcp_bgsel.png' }
-envcp_bypass_off = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_off.png' }
-envcp_bypass_off_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_off.png' }
-envcp_bypass_off_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_off.png' }
-envcp_bypass_off_ol = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_off_ol.png' }
-envcp_bypass_off_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_off_ol.png' }
-envcp_bypass_off_ol_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_off_ol.png' }
-envcp_bypass_on = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_on.png' }
-envcp_bypass_on_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_on.png' }
-envcp_bypass_on_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_on.png' }
-envcp_bypass_on_ol = { type = 'svg-to-png', at = 1, name = 'envcp_bypass_on_ol.png' }
-envcp_bypass_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'envcp_bypass_on_ol.png' }
-envcp_bypass_on_ol_200 = { type = 'svg-to-png', at = 3, name = 'envcp_bypass_on_ol.png' }
-envcp_hide = { type = 'svg-to-png', at = 1, name = 'envcp_hide.png' }
-envcp_hide_150 = { type = 'svg-to-png', at = 2, name = 'envcp_hide.png' }
-envcp_hide_200 = { type = 'svg-to-png', at = 3, name = 'envcp_hide.png' }
-envcp_knob_small = { type = 'svg-to-png', at = 1, name = 'envcp_knob_small.png' }
-envcp_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'envcp_knob_small.png' }
-envcp_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'envcp_knob_small.png' }
-gen_end = { type = 'svg-to-png', at = 1, name = 'gen_end.png' }
-gen_end_150 = { type = 'svg-to-png', at = 2, name = 'gen_end.png' }
-gen_end_200 = { type = 'svg-to-png', at = 3, name = 'gen_end.png' }
-gen_home = { type = 'svg-to-png', at = 1, name = 'gen_home.png' }
-gen_home_150 = { type = 'svg-to-png', at = 2, name = 'gen_home.png' }
-gen_home_200 = { type = 'svg-to-png', at = 3, name = 'gen_home.png' }
-gen_panbg_horz = { type = 'svg-to-png', at = 1, name = 'gen_panbg_horz.png' }
-gen_panbg_horz_dark = { type = 'svg-to-png', at = 1, name = 'gen_panbg_horz_dark.png' }
-gen_panthumb_horz = { type = 'svg-to-png', at = 1, name = 'gen_panthumb_horz.png' }
-gen_panthumb_horz_150 = { type = 'svg-to-png', at = 2, name = 'gen_panthumb_horz.png' }
-gen_panthumb_horz_200 = { type = 'svg-to-png', at = 3, name = 'gen_panthumb_horz.png' }
-gen_pause = { type = 'svg-to-png', at = 1, name = 'gen_pause.png' }
-gen_pause_150 = { type = 'svg-to-png', at = 2, name = 'gen_pause.png' }
-gen_pause_200 = { type = 'svg-to-png', at = 3, name = 'gen_pause.png' }
-gen_pause_on = { type = 'svg-to-png', at = 1, name = 'gen_pause_on.png' }
-gen_pause_on_150 = { type = 'svg-to-png', at = 2, name = 'gen_pause_on.png' }
-gen_pause_on_200 = { type = 'svg-to-png', at = 3, name = 'gen_pause_on.png' }
-gen_play = { type = 'svg-to-png', at = 1, name = 'gen_play.png' }
-gen_play_150 = { type = 'svg-to-png', at = 2, name = 'gen_play.png' }
-gen_play_200 = { type = 'svg-to-png', at = 3, name = 'gen_play.png' }
-gen_play_on = { type = 'svg-to-png', at = 1, name = 'gen_play_on.png' }
-gen_play_on_150 = { type = 'svg-to-png', at = 2, name = 'gen_play_on.png' }
-gen_play_on_200 = { type = 'svg-to-png', at = 3, name = 'gen_play_on.png' }
-gen_repeat = { type = 'svg-to-png', at = 1, name = 'gen_repeat_off.png' }
-gen_repeat_150 = { type = 'svg-to-png', at = 2, name = 'gen_repeat_off.png' }
-gen_repeat_200 = { type = 'svg-to-png', at = 3, name = 'gen_repeat_off.png' }
-gen_repeat_on = { type = 'svg-to-png', at = 1, name = 'gen_repeat_on.png' }
-gen_repeat_on_150 = { type = 'svg-to-png', at = 2, name = 'gen_repeat_on.png' }
-gen_repeat_on_200 = { type = 'svg-to-png', at = 3, name = 'gen_repeat_on.png' }
-gen_stop = { type = 'svg-to-png', at = 1, name = 'gen_stop.png' }
-gen_stop_150 = { type = 'svg-to-png', at = 2, name = 'gen_stop.png' }
-gen_stop_200 = { type = 'svg-to-png', at = 3, name = 'gen_stop.png' }
-gen_volbg_horz = { type = 'svg-to-png', at = 1, name = 'gen_volbg_horz.png' }
-gen_volbg_horz_dark = { type = 'svg-to-png', at = 1, name = 'gen_volbg_horz_dark.png' }
-gen_volbg_vert = { type = 'svg-to-png', at = 1, name = 'gen_volbg_vert.png' }
-gen_volbg_vert_dark = { type = 'svg-to-png', at = 1, name = 'gen_volbg_vert_dark.png' }
-gen_volthumb_horz = { type = 'svg-to-png', at = 1, name = 'gen_volthumb_horz.png' }
-gen_volthumb_horz_150 = { type = 'svg-to-png', at = 2, name = 'gen_volthumb_horz.png' }
-gen_volthumb_horz_200 = { type = 'svg-to-png', at = 3, name = 'gen_volthumb_horz.png' }
-gen_volthumb_vert = { type = 'svg-to-png', at = 1, name = 'gen_volthumb_vert.png' }
-gen_volthumb_vert_150 = { type = 'svg-to-png', at = 2, name = 'gen_volthumb_vert.png' }
-gen_volthumb_vert_200 = { type = 'svg-to-png', at = 3, name = 'gen_volthumb_vert.png' }
-item_bg = { type = 'svg-to-png', at = 1, name = 'item_bg.png' }
-item_bg_sel = { type = 'svg-to-png', at = 1, name = 'item_bg_sel.png' }
-item_lock_off = { type = 'svg-to-png', at = 1, name = 'item_lock_off.png' }
-item_lock_on = { type = 'svg-to-png', at = 1, name = 'item_lock_on.png' }
-item_pooled = { type = 'svg-to-png', at = 1, name = 'item_pooled.png' }
-item_pooled_on = { type = 'svg-to-png', at = 1, name = 'item_pooled_on.png' }
-mcp_bg = { type = 'svg-to-png', at = 1, name = 'mcp_bg.png' }
-mcp_bg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_bg.png' }
-mcp_bg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_bg.png' }
-mcp_bgsel = { type = 'svg-to-png', at = 1, name = 'mcp_bgsel.png' }
-mcp_bgsel_150 = { type = 'svg-to-png', at = 2, name = 'mcp_bgsel.png' }
-mcp_bgsel_200 = { type = 'svg-to-png', at = 3, name = 'mcp_bgsel.png' }
-mcp_extmixbg = { type = 'svg-to-png', at = 1, name = 'mcp_extmixbg.png' }
-mcp_extmixbgsel = { type = 'svg-to-png', at = 1, name = 'mcp_extmixbgsel.png' }
-mcp_fxlist_bg = { type = 'svg-to-png', at = 1, name = 'mcp_fxlist_bg.png' }
-mcp_fxlist_byp = { type = 'svg-to-png', at = 1, name = 'mcp_fxlist_byp.png' }
-mcp_fxlist_byp_200 = { type = 'svg-to-png', at = 3, name = 'mcp_fxlist_byp.png' }
-mcp_fxlist_empty = { type = 'svg-to-png', at = 1, name = 'mcp_fxlist_empty.png' }
-mcp_fxlist_empty_200 = { type = 'svg-to-png', at = 3, name = 'mcp_fxlist_empty.png' }
-mcp_fxlist_norm = { type = 'svg-to-png', at = 1, name = 'mcp_fxlist_norm.png' }
-mcp_fxlist_norm_200 = { type = 'svg-to-png', at = 3, name = 'mcp_fxlist_norm.png' }
-mcp_idxbg = { type = 'svg-to-png', at = 1, name = 'mcp_idxbg.png' }
-mcp_idxbg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_idxbg.png' }
-mcp_idxbg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_idxbg.png' }
-mcp_idxbg_sel = { type = 'svg-to-png', at = 1, name = 'mcp_idxbg_sel.png' }
-mcp_idxbg_sel_150 = { type = 'svg-to-png', at = 2, name = 'mcp_idxbg_sel.png' }
-mcp_idxbg_sel_200 = { type = 'svg-to-png', at = 3, name = 'mcp_idxbg_sel.png' }
-mcp_mainbg = { type = 'svg-to-png', at = 1, name = 'mcp_mainbg.png' }
-mcp_mainbgsel = { type = 'svg-to-png', at = 1, name = 'mcp_mainbgsel.png' }
-mcp_master_volbg = { type = 'svg-to-png', at = 1, name = 'mcp_master_volbg.png' }
-mcp_master_volbg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_master_volbg.png' }
-mcp_master_volbg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_master_volbg.png' }
-mcp_pan_knob_small = { type = 'svg-to-png', at = 1, name = 'mcp_pan_knob_small.png' }
-mcp_pan_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'mcp_pan_knob_small.png' }
-mcp_pan_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'mcp_pan_knob_small.png' }
-mcp_recarm_auto = { type = 'svg-to-png', at = 1, name = 'mcp_recarm_auto.png' }
-mcp_recarm_auto_150 = { type = 'svg-to-png', at = 2, name = 'mcp_recarm_auto.png' }
-mcp_recarm_auto_200 = { type = 'svg-to-png', at = 3, name = 'mcp_recarm_auto.png' }
-mcp_recarm_auto_norec = { type = 'svg-to-png', at = 1, name = 'mcp_recarm_auto_norec.png' }
-mcp_recarm_auto_norec_150 = { type = 'svg-to-png', at = 2, name = 'mcp_recarm_auto_norec.png' }
-mcp_recarm_auto_norec_200 = { type = 'svg-to-png', at = 3, name = 'mcp_recarm_auto_norec.png' }
-mcp_recarm_auto_on = { type = 'svg-to-png', at = 1, name = 'mcp_recarm_auto_on.png' }
-mcp_recarm_auto_on_150 = { type = 'svg-to-png', at = 2, name = 'mcp_recarm_auto_on.png' }
-mcp_recarm_auto_on_200 = { type = 'svg-to-png', at = 3, name = 'mcp_recarm_auto_on.png' }
-mcp_recarm_norec = { type = 'svg-to-png', at = 1, name = 'mcp_recarm_norec.png' }
-mcp_recarm_norec_150 = { type = 'svg-to-png', at = 2, name = 'mcp_recarm_norec.png' }
-mcp_recarm_norec_200 = { type = 'svg-to-png', at = 3, name = 'mcp_recarm_norec.png' }
-mcp_recarm_off = { type = 'svg-to-png', at = 1, name = 'mcp_recarm_off.png' }
-mcp_recarm_off_150 = { type = 'svg-to-png', at = 2, name = 'mcp_recarm_off.png' }
-mcp_recarm_off_200 = { type = 'svg-to-png', at = 3, name = 'mcp_recarm_off.png' }
-mcp_recarm_on = { type = 'svg-to-png', at = 1, name = 'mcp_recarm_on.png' }
-mcp_recarm_on_150 = { type = 'svg-to-png', at = 2, name = 'mcp_recarm_on.png' }
-mcp_recarm_on_200 = { type = 'svg-to-png', at = 3, name = 'mcp_recarm_on.png' }
-mcp_volbg = { type = 'svg-to-png', at = 1, name = 'mcp_volbg.png' }
-mcp_volbg_150 = { type = 'svg-to-png', at = 2, name = 'mcp_volbg.png' }
-mcp_volbg_200 = { type = 'svg-to-png', at = 3, name = 'mcp_volbg.png' }
-mcp_width_knob_small = { type = 'svg-to-png', at = 1, name = 'mcp_width_knob_small.png' }
-mcp_width_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'mcp_width_knob_small.png' }
-mcp_width_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'mcp_width_knob_small.png' }
-meter_bg_h = { type = 'svg-to-png', at = 1, name = 'meter_bg_h.png' }
-meter_bg_mcp = { type = 'svg-to-png', at = 1, name = 'meter_bg_mcp.png' }
-meter_bg_mcp_150 = { type = 'svg-to-png', at = 2, name = 'meter_bg_mcp.png' }
-meter_bg_mcp_200 = { type = 'svg-to-png', at = 3, name = 'meter_bg_mcp.png' }
-meter_bg_tcp = { type = 'svg-to-png', at = 1, name = 'meter_bg_tcp.png' }
-meter_bg_tcp_150 = { type = 'svg-to-png', at = 2, name = 'meter_bg_tcp.png' }
-meter_bg_tcp_200 = { type = 'svg-to-png', at = 3, name = 'meter_bg_tcp.png' }
-meter_bg_v = { type = 'svg-to-png', at = 1, name = 'meter_bg_v.png' }
-meter_clip_h = { type = 'svg-to-png', at = 1, name = 'meter_clip_h.png' }
-meter_clip_v = { type = 'svg-to-png', at = 1, name = 'meter_clip_v.png' }
-meter_clip_v_rms2 = { type = 'svg-to-png', at = 1, name = 'meter_clip_v_rms2.png' }
-meter_foldermute = { type = 'svg-to-png', at = 1, name = 'meter_foldermute.png' }
-meter_mute = { type = 'svg-to-png', at = 1, name = 'meter_mute.png' }
-meter_solodim = { type = 'svg-to-png', at = 1, name = 'meter_solodim.png' }
-meter_strip_h = { type = 'svg-to-png', at = 1, name = 'meter_strip_h.png' }
-meter_strip_h_rms = { type = 'svg-to-png', at = 1, name = 'meter_strip_h_rms.png' }
-meter_strip_v = { type = 'svg-to-png', at = 1, name = 'meter_strip_v.png' }
-meter_strip_v_rms = { type = 'svg-to-png', at = 1, name = 'meter_strip_v_rms.png' }
-meter_unsolo = { type = 'svg-to-png', at = 1, name = 'meter_unsolo.png' }
-piano_black_key = { type = 'svg-to-png', at = 1, name = 'piano_black_key.png' }
-piano_black_key_sel = { type = 'svg-to-png', at = 1, name = 'piano_black_key_sel.png' }
-piano_white_key = { type = 'svg-to-png', at = 1, name = 'piano_white_key.png' }
-piano_white_key_sel = { type = 'svg-to-png', at = 1, name = 'piano_white_key_sel.png' }
-scrollbar = { type = 'svg-to-png', at = 1, name = 'scrollbar.png' }
-scrollbar_3 = { type = 'svg-to-png', at = 1, name = 'scrollbar_3.png' }
-tcp_bg = { type = 'svg-to-png', at = 1, name = 'tcp_bg.png' }
-tcp_bgsel = { type = 'svg-to-png', at = 1, name = 'tcp_bgsel.png' }
-tcp_idxbg = { type = 'svg-to-png', at = 1, name = 'tcp_idxbg.png' }
-tcp_idxbg_150 = { type = 'svg-to-png', at = 2, name = 'tcp_idxbg.png' }
-tcp_idxbg_200 = { type = 'svg-to-png', at = 3, name = 'tcp_idxbg.png' }
-tcp_idxbg_sel = { type = 'svg-to-png', at = 1, name = 'tcp_idxbg_sel.png' }
-tcp_idxbg_sel_150 = { type = 'svg-to-png', at = 2, name = 'tcp_idxbg_sel.png' }
-tcp_idxbg_sel_200 = { type = 'svg-to-png', at = 3, name = 'tcp_idxbg_sel.png' }
-tcp_main_namebg_sel = { type = 'svg-to-png', at = 1, name = 'tcp_main_namebg_sel.png' }
-tcp_mainbg = { type = 'svg-to-png', at = 1, name = 'tcp_mainbg.png' }
-tcp_mainbgsel = { type = 'svg-to-png', at = 1, name = 'tcp_mainbgsel.png' }
-tcp_namebg = { type = 'svg-to-png', at = 1, name = 'tcp_namebg.png' }
-tcp_namebg_200 = { type = 'svg-to-png', at = 3, name = 'tcp_namebg.png' }
-tcp_pan_knob_small = { type = 'svg-to-png', at = 1, name = 'tcp_pan_knob_small.png' }
-tcp_pan_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'tcp_pan_knob_small.png' }
-tcp_pan_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'tcp_pan_knob_small.png' }
-tcp_vol_knob_small = { type = 'svg-to-png', at = 1, name = 'tcp_vol_knob_small.png' }
-tcp_vol_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'tcp_vol_knob_small.png' }
-tcp_vol_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'tcp_vol_knob_small.png' }
-tcp_volbg = { type = 'svg-to-png', at = 1, name = 'tcp_volbg.png' }
-tcp_volbg_150 = { type = 'svg-to-png', at = 2, name = 'tcp_volbg.png' }
-tcp_volbg_200 = { type = 'svg-to-png', at = 3, name = 'tcp_volbg.png' }
-tcp_volthumb = { type = 'svg-to-png', at = 1, name = 'tcp_volthumb.png' }
-tcp_volthumb_150 = { type = 'svg-to-png', at = 2, name = 'tcp_volthumb.png' }
-tcp_volthumb_200 = { type = 'svg-to-png', at = 3, name = 'tcp_volthumb.png' }
-tcp_width_knob_small = { type = 'svg-to-png', at = 1, name = 'tcp_width_knob_small.png' }
-tcp_width_knob_small_150 = { type = 'svg-to-png', at = 2, name = 'tcp_width_knob_small.png' }
-tcp_width_knob_small_200 = { type = 'svg-to-png', at = 3, name = 'tcp_width_knob_small.png' }
-toolbar_blank = { type = 'svg-to-png', at = 1, name = 'toolbar_blank.png' }
-toolbar_blank_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_blank.png' }
-toolbar_blank_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_blank.png' }
-toolbar_dock_off = { type = 'svg-to-png', at = 1, name = 'toolbar_dock_off.png' }
-toolbar_dock_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_dock_off.png' }
-toolbar_dock_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_dock_off.png' }
-toolbar_dock_on = { type = 'svg-to-png', at = 1, name = 'toolbar_dock_on.png' }
-toolbar_dock_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_dock_on.png' }
-toolbar_dock_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_dock_on.png' }
-toolbar_envitem_off = { type = 'svg-to-png', at = 1, name = 'toolbar_envitem_off.png' }
-toolbar_envitem_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_envitem_off.png' }
-toolbar_envitem_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_envitem_off.png' }
-toolbar_envitem_on = { type = 'svg-to-png', at = 1, name = 'toolbar_envitem_on.png' }
-toolbar_envitem_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_envitem_on.png' }
-toolbar_envitem_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_envitem_on.png' }
-toolbar_filter_off = { type = 'svg-to-png', at = 1, name = 'toolbar_filter_off.png' }
-toolbar_filter_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_filter_off.png' }
-toolbar_filter_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_filter_off.png' }
-toolbar_filter_on = { type = 'svg-to-png', at = 1, name = 'toolbar_filter_on.png' }
-toolbar_filter_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_filter_on.png' }
-toolbar_filter_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_filter_on.png' }
-toolbar_grid_off = { type = 'svg-to-png', at = 1, name = 'toolbar_grid_off.png' }
-toolbar_grid_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_grid_off.png' }
-toolbar_grid_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_grid_off.png' }
-toolbar_grid_on = { type = 'svg-to-png', at = 1, name = 'toolbar_grid_on.png' }
-toolbar_grid_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_grid_on.png' }
-toolbar_grid_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_grid_on.png' }
-toolbar_group_off = { type = 'svg-to-png', at = 1, name = 'toolbar_group_off.png' }
-toolbar_group_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_group_off.png' }
-toolbar_group_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_group_off.png' }
-toolbar_group_on = { type = 'svg-to-png', at = 1, name = 'toolbar_group_on.png' }
-toolbar_group_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_group_on.png' }
-toolbar_group_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_group_on.png' }
-toolbar_load = { type = 'svg-to-png', at = 1, name = 'toolbar_load.png' }
-toolbar_load_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_load.png' }
-toolbar_load_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_load.png' }
-toolbar_lock_off = { type = 'svg-to-png', at = 1, name = 'toolbar_lock_off.png' }
-toolbar_lock_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_lock_off.png' }
-toolbar_lock_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_lock_off.png' }
-toolbar_lock_on = { type = 'svg-to-png', at = 1, name = 'toolbar_lock_on.png' }
-toolbar_lock_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_lock_on.png' }
-toolbar_lock_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_lock_on.png' }
-toolbar_metro_off = { type = 'svg-to-png', at = 1, name = 'toolbar_metro_off.png' }
-toolbar_metro_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_metro_off.png' }
-toolbar_metro_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_metro_off.png' }
-toolbar_metro_on = { type = 'svg-to-png', at = 1, name = 'toolbar_metro_on.png' }
-toolbar_metro_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_metro_on.png' }
-toolbar_metro_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_metro_on.png' }
-toolbar_midi_itemsel_off = { type = 'svg-to-png', at = 1, name = 'toolbar_midi_itemsel_off.png' }
-toolbar_midi_itemsel_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_midi_itemsel_off.png' }
-toolbar_midi_itemsel_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_midi_itemsel_off.png' }
-toolbar_midi_itemsel_on = { type = 'svg-to-png', at = 1, name = 'toolbar_midi_itemsel_on.png' }
-toolbar_midi_itemsel_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_midi_itemsel_on.png' }
-toolbar_midi_itemsel_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_midi_itemsel_on.png' }
-toolbar_midi_tracksel_off = { type = 'svg-to-png', at = 1, name = 'toolbar_midi_tracksel_off.png' }
-toolbar_midi_tracksel_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_midi_tracksel_off.png' }
-toolbar_midi_tracksel_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_midi_tracksel_off.png' }
-toolbar_midi_tracksel_on = { type = 'svg-to-png', at = 1, name = 'toolbar_midi_tracksel_on.png' }
-toolbar_midi_tracksel_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_midi_tracksel_on.png' }
-toolbar_midi_tracksel_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_midi_tracksel_on.png' }
-toolbar_new = { type = 'svg-to-png', at = 1, name = 'toolbar_new.png' }
-toolbar_new_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_new.png' }
-toolbar_new_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_new.png' }
-toolbar_projprop = { type = 'svg-to-png', at = 1, name = 'toolbar_projprop.png' }
-toolbar_projprop_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_projprop.png' }
-toolbar_projprop_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_projprop.png' }
-toolbar_redo = { type = 'svg-to-png', at = 1, name = 'toolbar_redo.png' }
-toolbar_redo_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_redo.png' }
-toolbar_redo_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_redo.png' }
-toolbar_relsnap_off = { type = 'svg-to-png', at = 1, name = 'toolbar_relsnap_off.png' }
-toolbar_relsnap_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_relsnap_off.png' }
-toolbar_relsnap_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_relsnap_off.png' }
-toolbar_relsnap_on = { type = 'svg-to-png', at = 1, name = 'toolbar_relsnap_on.png' }
-toolbar_relsnap_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_relsnap_on.png' }
-toolbar_relsnap_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_relsnap_on.png' }
-toolbar_ripple_all = { type = 'svg-to-png', at = 1, name = 'toolbar_ripple_all.png' }
-toolbar_ripple_all_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_ripple_all.png' }
-toolbar_ripple_all_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_ripple_all.png' }
-toolbar_ripple_off = { type = 'svg-to-png', at = 1, name = 'toolbar_ripple_off.png' }
-toolbar_ripple_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_ripple_off.png' }
-toolbar_ripple_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_ripple_off.png' }
-toolbar_ripple_one = { type = 'svg-to-png', at = 1, name = 'toolbar_ripple_one.png' }
-toolbar_ripple_one_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_ripple_one.png' }
-toolbar_ripple_one_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_ripple_one.png' }
-toolbar_save = { type = 'svg-to-png', at = 1, name = 'toolbar_save.png' }
-toolbar_save_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_save.png' }
-toolbar_save_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_save.png' }
-toolbar_snap_off = { type = 'svg-to-png', at = 1, name = 'toolbar_snap_off.png' }
-toolbar_snap_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_snap_off.png' }
-toolbar_snap_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_snap_off.png' }
-toolbar_snap_on = { type = 'svg-to-png', at = 1, name = 'toolbar_snap_on.png' }
-toolbar_snap_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_snap_on.png' }
-toolbar_snap_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_snap_on.png' }
-toolbar_undo = { type = 'svg-to-png', at = 1, name = 'toolbar_undo.png' }
-toolbar_undo_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_undo.png' }
-toolbar_undo_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_undo.png' }
-toolbar_xfade_off = { type = 'svg-to-png', at = 1, name = 'toolbar_xfade_off.png' }
-toolbar_xfade_off_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_xfade_off.png' }
-toolbar_xfade_off_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_xfade_off.png' }
-toolbar_xfade_on = { type = 'svg-to-png', at = 1, name = 'toolbar_xfade_on.png' }
-toolbar_xfade_on_150 = { type = 'svg-to-png', at = 2, name = 'toolbar_xfade_on.png' }
-toolbar_xfade_on_200 = { type = 'svg-to-png', at = 3, name = 'toolbar_xfade_on.png' }
-track_recarm_auto = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto.png' }
-track_recarm_auto_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto.png' }
-track_recarm_auto_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto.png' }
-track_recarm_auto_norec = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_norec.png' }
-track_recarm_auto_norec_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_norec.png' }
-track_recarm_auto_norec_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_norec.png' }
-track_recarm_auto_norec_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_norec_ol.png' }
-track_recarm_auto_norec_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_norec_ol.png' }
-track_recarm_auto_norec_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_norec_ol.png' }
-track_recarm_auto_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_ol.png' }
-track_recarm_auto_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_ol.png' }
-track_recarm_auto_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_ol.png' }
-track_recarm_auto_on = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_on.png' }
-track_recarm_auto_on_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_on.png' }
-track_recarm_auto_on_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_on.png' }
-track_recarm_auto_on_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_auto_on_ol.png' }
-track_recarm_auto_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_auto_on_ol.png' }
-track_recarm_auto_on_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_auto_on_ol.png' }
-track_recarm_norec = { type = 'svg-to-png', at = 1, name = 'track_recarm_norec.png' }
-track_recarm_norec_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_norec.png' }
-track_recarm_norec_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_norec.png' }
-track_recarm_norec_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_norec_ol.png' }
-track_recarm_norec_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_norec_ol.png' }
-track_recarm_norec_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_norec_ol.png' }
-track_recarm_off = { type = 'svg-to-png', at = 1, name = 'track_recarm_off.png' }
-track_recarm_off_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_off.png' }
-track_recarm_off_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_off.png' }
-track_recarm_off_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_off_ol.png' }
-track_recarm_off_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_off_ol.png' }
-track_recarm_off_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_off_ol.png' }
-track_recarm_on = { type = 'svg-to-png', at = 1, name = 'track_recarm_on.png' }
-track_recarm_on_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_on.png' }
-track_recarm_on_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_on.png' }
-track_recarm_on_ol = { type = 'svg-to-png', at = 1, name = 'track_recarm_on_ol.png' }
-track_recarm_on_ol_150 = { type = 'svg-to-png', at = 2, name = 'track_recarm_on_ol.png' }
-track_recarm_on_ol_200 = { type = 'svg-to-png', at = 3, name = 'track_recarm_on_ol.png' }
-transport_bg = { type = 'svg-to-png', at = 1, name = 'transport_bg.png' }
-transport_bpm = { type = 'svg-to-png', at = 1, name = 'transport_bpm.png' }
-transport_bpm_bg = { type = 'svg-to-png', at = 1, name = 'transport_bpm_bg.png' }
-transport_end = { type = 'svg-to-png', at = 1, name = 'transport_end.png' }
-transport_end_150 = { type = 'svg-to-png', at = 2, name = 'transport_end.png' }
-transport_end_200 = { type = 'svg-to-png', at = 3, name = 'transport_end.png' }
-transport_home = { type = 'svg-to-png', at = 1, name = 'transport_home.png' }
-transport_home_150 = { type = 'svg-to-png', at = 2, name = 'transport_home.png' }
-transport_home_200 = { type = 'svg-to-png', at = 3, name = 'transport_home.png' }
-transport_knob_bg_large = { type = 'svg-to-png', at = 1, name = 'transport_knob_bg_large.png' }
-transport_knob_bg_large_150 = { type = 'svg-to-png', at = 2, name = 'transport_knob_bg_large.png' }
-transport_knob_bg_large_200 = { type = 'svg-to-png', at = 3, name = 'transport_knob_bg_large.png' }
-transport_next = { type = 'svg-to-png', at = 1, name = 'transport_next.png' }
-transport_next_150 = { type = 'svg-to-png', at = 2, name = 'transport_next.png' }
-transport_next_200 = { type = 'svg-to-png', at = 3, name = 'transport_next.png' }
-transport_pause = { type = 'svg-to-png', at = 1, name = 'transport_pause.png' }
-transport_pause_150 = { type = 'svg-to-png', at = 2, name = 'transport_pause.png' }
-transport_pause_200 = { type = 'svg-to-png', at = 3, name = 'transport_pause.png' }
-transport_pause_on = { type = 'svg-to-png', at = 1, name = 'transport_pause_on.png' }
-transport_pause_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_pause_on.png' }
-transport_pause_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_pause_on.png' }
-transport_play = { type = 'svg-to-png', at = 1, name = 'transport_play.png' }
-transport_play_150 = { type = 'svg-to-png', at = 2, name = 'transport_play.png' }
-transport_play_200 = { type = 'svg-to-png', at = 3, name = 'transport_play.png' }
-transport_play_on = { type = 'svg-to-png', at = 1, name = 'transport_play_on.png' }
-transport_play_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_play_on.png' }
-transport_play_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_play_on.png' }
-transport_play_sync = { type = 'svg-to-png', at = 1, name = 'transport_play_sync.png' }
-transport_play_sync_150 = { type = 'svg-to-png', at = 2, name = 'transport_play_sync.png' }
-transport_play_sync_200 = { type = 'svg-to-png', at = 3, name = 'transport_play_sync.png' }
-transport_play_sync_on = { type = 'svg-to-png', at = 1, name = 'transport_play_sync_on.png' }
-transport_play_sync_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_play_sync_on.png' }
-transport_play_sync_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_play_sync_on.png' }
-transport_playspeedbg = { type = 'svg-to-png', at = 1, name = 'transport_playspeedbg.png' } # WARNING undetected
-transport_previous = { type = 'svg-to-png', at = 1, name = 'transport_previous.png' }
-transport_previous_150 = { type = 'svg-to-png', at = 2, name = 'transport_previous.png' }
-transport_previous_200 = { type = 'svg-to-png', at = 3, name = 'transport_previous.png' }
-transport_record = { type = 'svg-to-png', at = 1, name = 'transport_record.png' }
-transport_record_150 = { type = 'svg-to-png', at = 2, name = 'transport_record.png' }
-transport_record_200 = { type = 'svg-to-png', at = 3, name = 'transport_record.png' }
-transport_record_item = { type = 'svg-to-png', at = 1, name = 'transport_record_item.png' }
-transport_record_item_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_item.png' }
-transport_record_item_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_item.png' }
-transport_record_item_on = { type = 'svg-to-png', at = 1, name = 'transport_record_item_on.png' }
-transport_record_item_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_item_on.png' }
-transport_record_item_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_item_on.png' }
-transport_record_loop = { type = 'svg-to-png', at = 1, name = 'transport_record_loop.png' }
-transport_record_loop_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_loop.png' }
-transport_record_loop_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_loop.png' }
-transport_record_loop_on = { type = 'svg-to-png', at = 1, name = 'transport_record_loop_on.png' }
-transport_record_loop_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_loop_on.png' }
-transport_record_loop_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_loop_on.png' }
-transport_record_on = { type = 'svg-to-png', at = 1, name = 'transport_record_on.png' }
-transport_record_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_record_on.png' }
-transport_record_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_record_on.png' }
-transport_repeat_off = { type = 'svg-to-png', at = 1, name = 'transport_repeat_off.png' }
-transport_repeat_off_150 = { type = 'svg-to-png', at = 2, name = 'transport_repeat_off.png' }
-transport_repeat_off_200 = { type = 'svg-to-png', at = 3, name = 'transport_repeat_off.png' }
-transport_repeat_on = { type = 'svg-to-png', at = 1, name = 'transport_repeat_on.png' }
-transport_repeat_on_150 = { type = 'svg-to-png', at = 2, name = 'transport_repeat_on.png' }
-transport_repeat_on_200 = { type = 'svg-to-png', at = 3, name = 'transport_repeat_on.png' }
-transport_status_bg = { type = 'svg-to-png', at = 1, name = 'transport_status_bg.png' }
-transport_status_bg_err = { type = 'svg-to-png', at = 1, name = 'transport_status_bg_err.png' }
-transport_stop = { type = 'svg-to-png', at = 1, name = 'transport_stop.png' }
-transport_stop_150 = { type = 'svg-to-png', at = 2, name = 'transport_stop.png' }
-transport_stop_200 = { type = 'svg-to-png', at = 3, name = 'transport_stop.png' }
+color_theme = { type = 'text', name = 'Aquarelle_7.0.ReaperTheme' }
+swell_theme = { type = 'text', name = 'libSwell.colortheme' }
+rtconfig    = { type = 'text', at = 1, name = 'rtconfig.txt' }
+
+dropdownBg_h                   = { at = 1, name = 'dropdownBg_h.png' }
+dropdownBg_h_150               = { at = 2, name = 'dropdownBg_h.png' }
+dropdownBg_h_200               = { at = 3, name = 'dropdownBg_h.png' }
+dropdownBg_v                   = { at = 1, name = 'dropdownBg_v.png' }
+dropdownBg_v_150               = { at = 2, name = 'dropdownBg_v.png' }
+dropdownBg_v_200               = { at = 3, name = 'dropdownBg_v.png' }
+envcp_arm_off                  = { at = 1, name = 'envcp_arm_off.png' }
+envcp_arm_off_150              = { at = 2, name = 'envcp_arm_off.png' }
+envcp_arm_off_200              = { at = 3, name = 'envcp_arm_off.png' }
+envcp_arm_off_ol               = { at = 1, name = 'envcp_arm_off_ol.png' }
+envcp_arm_off_ol_150           = { at = 2, name = 'envcp_arm_off_ol.png' }
+envcp_arm_off_ol_200           = { at = 3, name = 'envcp_arm_off_ol.png' }
+envcp_arm_on                   = { at = 1, name = 'envcp_arm_on.png' }
+envcp_arm_on_150               = { at = 2, name = 'envcp_arm_on.png' }
+envcp_arm_on_200               = { at = 3, name = 'envcp_arm_on.png' }
+envcp_bypass_off               = { at = 1, name = 'envcp_bypass_off.png' }
+envcp_bypass_off_150           = { at = 2, name = 'envcp_bypass_off.png' }
+envcp_bypass_off_200           = { at = 3, name = 'envcp_bypass_off.png' }
+envcp_bypass_on                = { at = 1, name = 'envcp_bypass_on.png' }
+envcp_bypass_on_150            = { at = 2, name = 'envcp_bypass_on.png' }
+envcp_bypass_on_200            = { at = 3, name = 'envcp_bypass_on.png' }
+envcp_fader                    = { at = 1, name = 'envcp_fader.png' }
+envcp_fader_150                = { at = 2, name = 'envcp_fader.png' }
+envcp_fader_200                = { at = 3, name = 'envcp_fader.png' }
+envcp_faderbg                  = { at = 1, name = 'envcp_faderbg.png' }
+envcp_faderbg_150              = { at = 2, name = 'envcp_faderbg.png' }
+envcp_faderbg_200              = { at = 3, name = 'envcp_faderbg.png' }
+envcp_hide                     = { at = 1, name = 'envcp_hide.png' }
+envcp_hide_150                 = { at = 2, name = 'envcp_hide.png' }
+envcp_hide_200                 = { at = 3, name = 'envcp_hide.png' }
+envcp_learn                    = { at = 1, name = 'envcp_learn.png' }
+envcp_learn_150                = { at = 2, name = 'envcp_learn.png' }
+envcp_learn_200                = { at = 3, name = 'envcp_learn.png' }
+envcp_learn_ol                 = { at = 1, name = 'envcp_learn_ol.png' }
+envcp_learn_ol_150             = { at = 2, name = 'envcp_learn_ol.png' }
+envcp_learn_ol_200             = { at = 3, name = 'envcp_learn_ol.png' }
+envcp_learn_on                 = { at = 1, name = 'envcp_learn_on.png' }
+envcp_learn_on_150             = { at = 2, name = 'envcp_learn_on.png' }
+envcp_learn_on_200             = { at = 3, name = 'envcp_learn_on.png' }
+envcp_parammod                 = { at = 1, name = 'envcp_parammod.png' }
+envcp_parammod_150             = { at = 2, name = 'envcp_parammod.png' }
+envcp_parammod_200             = { at = 3, name = 'envcp_parammod.png' }
+envcp_parammod_ol              = { at = 1, name = 'envcp_parammod_ol.png' }
+envcp_parammod_ol_150          = { at = 2, name = 'envcp_parammod_ol.png' }
+envcp_parammod_ol_200          = { at = 3, name = 'envcp_parammod_ol.png' }
+envcp_parammod_on              = { at = 1, name = 'envcp_parammod_on.png' }
+envcp_parammod_on_150          = { at = 2, name = 'envcp_parammod_on.png' }
+envcp_parammod_on_200          = { at = 3, name = 'envcp_parammod_on.png' }
+gen_end                        = { at = 1, name = 'gen_end.png' }
+gen_end_150                    = { at = 2, name = 'gen_end.png' }
+gen_end_200                    = { at = 3, name = 'gen_end.png' }
+gen_home                       = { at = 1, name = 'gen_home.png' }
+gen_home_150                   = { at = 2, name = 'gen_home.png' }
+gen_home_200                   = { at = 3, name = 'gen_home.png' }
+gen_knob_bg_small              = { at = 1, name = 'gen_knob_bg_small.png' }
+gen_knob_bg_small_150          = { at = 2, name = 'gen_knob_bg_small.png' }
+gen_knob_bg_small_200          = { at = 3, name = 'gen_knob_bg_small.png' }
+gen_mute_off                   = { at = 1, name = 'gen_mute_off.png' }
+gen_mute_off_150               = { at = 2, name = 'gen_mute_off.png' }
+gen_mute_off_200               = { at = 3, name = 'gen_mute_off.png' }
+gen_mute_on                    = { at = 1, name = 'gen_mute_on.png' }
+gen_mute_on_150                = { at = 2, name = 'gen_mute_on.png' }
+gen_mute_on_200                = { at = 3, name = 'gen_mute_on.png' }
+gen_panbg_horz                 = { at = 1, name = 'gen_panbg_horz.png' }
+gen_panbg_horz_150             = { at = 2, name = 'gen_panbg_horz.png' }
+gen_panbg_horz_200             = { at = 3, name = 'gen_panbg_horz.png' }
+gen_panthumb_horz              = { at = 1, name = 'gen_panthumb_horz.png' }
+gen_panthumb_horz_150          = { at = 2, name = 'gen_panthumb_horz.png' }
+gen_panthumb_horz_200          = { at = 3, name = 'gen_panthumb_horz.png' }
+gen_pause                      = { at = 1, name = 'gen_pause.png' }
+gen_pause_150                  = { at = 2, name = 'gen_pause.png' }
+gen_pause_200                  = { at = 3, name = 'gen_pause.png' }
+gen_pause_on                   = { at = 1, name = 'gen_pause_on.png' }
+gen_pause_on_150               = { at = 2, name = 'gen_pause_on.png' }
+gen_pause_on_200               = { at = 3, name = 'gen_pause_on.png' }
+gen_play                       = { at = 1, name = 'gen_play.png' }
+gen_play_150                   = { at = 2, name = 'gen_play.png' }
+gen_play_200                   = { at = 3, name = 'gen_play.png' }
+gen_play_on                    = { at = 1, name = 'gen_play_on.png' }
+gen_play_on_150                = { at = 2, name = 'gen_play_on.png' }
+gen_play_on_200                = { at = 3, name = 'gen_play_on.png' }
+gen_repeat                     = { at = 1, name = 'gen_repeat_off.png' }
+gen_repeat_150                 = { at = 2, name = 'gen_repeat_off.png' }
+gen_repeat_200                 = { at = 3, name = 'gen_repeat_off.png' }
+gen_repeat_on                  = { at = 1, name = 'gen_repeat_on.png' }
+gen_repeat_on_150              = { at = 2, name = 'gen_repeat_on.png' }
+gen_repeat_on_200              = { at = 3, name = 'gen_repeat_on.png' }
+gen_solo_off                   = { at = 1, name = 'gen_solo_off.png' }
+gen_solo_off_150               = { at = 2, name = 'gen_solo_off.png' }
+gen_solo_off_200               = { at = 3, name = 'gen_solo_off.png' }
+gen_solo_on                    = { at = 1, name = 'gen_solo_on.png' }
+gen_solo_on_150                = { at = 2, name = 'gen_solo_on.png' }
+gen_solo_on_200                = { at = 3, name = 'gen_solo_on.png' }
+gen_stop                       = { at = 1, name = 'gen_stop.png' }
+gen_stop_150                   = { at = 2, name = 'gen_stop.png' }
+gen_stop_200                   = { at = 3, name = 'gen_stop.png' }
+gen_volbg_horz                 = { at = 1, name = 'gen_volbg_horz.png' }
+gen_volbg_horz_150             = { at = 2, name = 'gen_volbg_horz.png' }
+gen_volbg_horz_200             = { at = 3, name = 'gen_volbg_horz.png' }
+gen_volbg_vert                 = { at = 1, name = 'gen_volbg_vert.png' }
+gen_volbg_vert_150             = { at = 2, name = 'gen_volbg_vert.png' }
+gen_volbg_vert_200             = { at = 3, name = 'gen_volbg_vert.png' }
+gen_volthumb_horz              = { at = 1, name = 'gen_volthumb_horz.png' }
+gen_volthumb_horz_150          = { at = 2, name = 'gen_volthumb_horz.png' }
+gen_volthumb_horz_200          = { at = 3, name = 'gen_volthumb_horz.png' }
+gen_volthumb_vert              = { at = 1, name = 'gen_volthumb_vert.png' }
+gen_volthumb_vert_150          = { at = 2, name = 'gen_volthumb_vert.png' }
+gen_volthumb_vert_200          = { at = 3, name = 'gen_volthumb_vert.png' }
+global_bypass                  = { at = 1, name = 'global_bypass.png' }
+global_bypass_150              = { at = 2, name = 'global_bypass.png' }
+global_bypass_200              = { at = 3, name = 'global_bypass.png' }
+global_latch                   = { at = 1, name = 'global_latch.png' }
+global_latch_150               = { at = 2, name = 'global_latch.png' }
+global_latch_200               = { at = 3, name = 'global_latch.png' }
+global_off                     = { at = 1, name = 'global_off.png' }
+global_off_150                 = { at = 2, name = 'global_off.png' }
+global_off_200                 = { at = 3, name = 'global_off.png' }
+global_preview                 = { at = 1, name = 'global_preview.png' }
+global_preview_150             = { at = 2, name = 'global_preview.png' }
+global_preview_200             = { at = 3, name = 'global_preview.png' }
+global_read                    = { at = 1, name = 'global_read.png' }
+global_read_150                = { at = 2, name = 'global_read.png' }
+global_read_200                = { at = 3, name = 'global_read.png' }
+global_touch                   = { at = 1, name = 'global_touch.png' }
+global_touch_150               = { at = 2, name = 'global_touch.png' }
+global_touch_200               = { at = 3, name = 'global_touch.png' }
+global_trim                    = { at = 1, name = 'global_trim.png' }
+global_trim_150                = { at = 2, name = 'global_trim.png' }
+global_trim_200                = { at = 3, name = 'global_trim.png' }
+global_write                   = { at = 1, name = 'global_write.png' }
+global_write_150               = { at = 2, name = 'global_write.png' }
+global_write_200               = { at = 3, name = 'global_write.png' }
+item_bg                        = { at = 1, name = 'item_bg.png' }
+item_bg_sel                    = { at = 1, name = 'item_bg_sel.png' }
+item_env_off                   = { at = 1, name = 'item_env_off.png' }
+item_env_off_200               = { at = 3, name = 'item_env_off.png' }
+item_env_off_hidpi             = { at = 1, name = 'item_env_off_hidpi.png' }
+item_env_on                    = { at = 1, name = 'item_env_on.png' }
+item_env_on_200                = { at = 3, name = 'item_env_on.png' }
+item_env_on_hidpi              = { at = 1, name = 'item_env_on_hidpi.png' }
+item_fx_off                    = { at = 1, name = 'item_fx_off.png' }
+item_fx_off_200                = { at = 3, name = 'item_fx_off.png' }
+item_fx_off_hidpi              = { at = 1, name = 'item_fx_off_hidpi.png' }
+item_fx_on                     = { at = 1, name = 'item_fx_on.png' }
+item_fx_on_200                 = { at = 3, name = 'item_fx_on.png' }
+item_fx_on_hidpi               = { at = 1, name = 'item_fx_on_hidpi.png' }
+item_group                     = { at = 1, name = 'item_group.png' }
+item_group_hidpi               = { at = 1, name = 'item_group_hidpi.png' }
+item_group_hidpi_200           = { at = 3, name = 'item_group_hidpi.png' }
+item_group_sel                 = { at = 1, name = 'item_group_sel.png' }
+item_group_sel_hidpi           = { at = 1, name = 'item_group_sel_hidpi.png' }
+item_group_sel_hidpi_200       = { at = 3, name = 'item_group_sel_hidpi.png' }
+item_lock_off                  = { at = 1, name = 'item_lock_off.png' }
+item_lock_off_hidpi            = { at = 1, name = 'item_lock_off_hidpi.png' }
+item_lock_off_hidpi_200        = { at = 3, name = 'item_lock_off_hidpi.png' }
+item_lock_on                   = { at = 1, name = 'item_lock_on.png' }
+item_lock_on_hidpi             = { at = 1, name = 'item_lock_on_hidpi.png' }
+item_lock_on_hidpi_200         = { at = 3, name = 'item_lock_on_hidpi.png' }
+item_mute_off                  = { at = 1, name = 'item_mute_off.png' }
+item_mute_off_hidpi            = { at = 1, name = 'item_mute_off_hidpi.png' }
+item_mute_off_hidpi_200        = { at = 3, name = 'item_mute_off_hidpi.png' }
+item_mute_on                   = { at = 1, name = 'item_mute_on.png' }
+item_mute_on_hidpi             = { at = 1, name = 'item_mute_on_hidpi.png' }
+item_mute_on_hidpi_200         = { at = 3, name = 'item_mute_on_hidpi.png' }
+item_note_off                  = { at = 1, name = 'item_note_off.png' }
+item_note_off_hidpi            = { at = 1, name = 'item_note_off_hidpi.png' }
+item_note_off_hidpi_200        = { at = 3, name = 'item_note_off_hidpi.png' }
+item_note_on                   = { at = 1, name = 'item_note_on.png' }
+item_note_on_hidpi             = { at = 1, name = 'item_note_on_hidpi.png' }
+item_note_on_hidpi_200         = { at = 3, name = 'item_note_on_hidpi.png' }
+item_pooled                    = { at = 1, name = 'item_pooled.png' }
+item_pooled_hidpi              = { at = 1, name = 'item_pooled_hidpi.png' }
+item_pooled_hidpi_200          = { at = 3, name = 'item_pooled_hidpi.png' }
+item_pooled_on                 = { at = 1, name = 'item_pooled_on.png' }
+item_pooled_on_hidpi           = { at = 1, name = 'item_pooled_on_hidpi.png' }
+item_pooled_on_hidpi_200       = { at = 3, name = 'item_pooled_on_hidpi.png' }
+item_props                     = { at = 1, name = 'item_props.png' }
+item_props_hidpi               = { at = 1, name = 'item_props_hidpi.png' }
+item_props_hidpi_200           = { at = 3, name = 'item_props_hidpi.png' }
+item_props_on                  = { at = 1, name = 'item_props_on.png' }
+item_props_on_hidpi            = { at = 1, name = 'item_props_on_hidpi.png' }
+item_props_on_hidpi_200        = { at = 3, name = 'item_props_on_hidpi.png' }
+mcp_env                        = { at = 1, name = 'mcp_env.png' }
+mcp_env_150                    = { at = 2, name = 'mcp_env.png' }
+mcp_env_200                    = { at = 3, name = 'mcp_env.png' }
+mcp_env_latch                  = { at = 1, name = 'mcp_env_latch.png' }
+mcp_env_latch_150              = { at = 2, name = 'mcp_env_latch.png' }
+mcp_env_latch_200              = { at = 3, name = 'mcp_env_latch.png' }
+mcp_env_latch_ol               = { at = 1, name = 'mcp_env_latch_ol.png' }
+mcp_env_latch_ol_150           = { at = 2, name = 'mcp_env_latch_ol.png' }
+mcp_env_latch_ol_200           = { at = 3, name = 'mcp_env_latch_ol.png' }
+mcp_env_ol                     = { at = 1, name = 'mcp_env_ol.png' }
+mcp_env_ol_150                 = { at = 2, name = 'mcp_env_ol.png' }
+mcp_env_ol_200                 = { at = 3, name = 'mcp_env_ol.png' }
+mcp_env_preview                = { at = 1, name = 'mcp_env_preview.png' }
+mcp_env_preview_150            = { at = 2, name = 'mcp_env_preview.png' }
+mcp_env_preview_200            = { at = 3, name = 'mcp_env_preview.png' }
+mcp_env_preview_ol             = { at = 1, name = 'mcp_env_preview_ol.png' }
+mcp_env_preview_ol_150         = { at = 2, name = 'mcp_env_preview_ol.png' }
+mcp_env_preview_ol_200         = { at = 3, name = 'mcp_env_preview_ol.png' }
+mcp_env_read                   = { at = 1, name = 'mcp_env_read.png' }
+mcp_env_read_150               = { at = 2, name = 'mcp_env_read.png' }
+mcp_env_read_200               = { at = 3, name = 'mcp_env_read.png' }
+mcp_env_read_ol                = { at = 1, name = 'mcp_env_read_ol.png' }
+mcp_env_read_ol_150            = { at = 2, name = 'mcp_env_read_ol.png' }
+mcp_env_read_ol_200            = { at = 3, name = 'mcp_env_read_ol.png' }
+mcp_env_touch                  = { at = 1, name = 'mcp_env_touch.png' }
+mcp_env_touch_150              = { at = 2, name = 'mcp_env_touch.png' }
+mcp_env_touch_200              = { at = 3, name = 'mcp_env_touch.png' }
+mcp_env_touch_ol               = { at = 1, name = 'mcp_env_touch_ol.png' }
+mcp_env_touch_ol_150           = { at = 2, name = 'mcp_env_touch_ol.png' }
+mcp_env_touch_ol_200           = { at = 3, name = 'mcp_env_touch_ol.png' }
+mcp_env_write                  = { at = 1, name = 'mcp_env_write.png' }
+mcp_env_write_150              = { at = 2, name = 'mcp_env_write.png' }
+mcp_env_write_200              = { at = 3, name = 'mcp_env_write.png' }
+mcp_env_write_ol               = { at = 1, name = 'mcp_env_write_ol.png' }
+mcp_env_write_ol_150           = { at = 2, name = 'mcp_env_write_ol.png' }
+mcp_env_write_ol_200           = { at = 3, name = 'mcp_env_write_ol.png' }
+mcp_extmixbg                   = { at = 1, name = 'mcp_extmixbg.png' }
+mcp_fx_dis                     = { at = 1, name = 'mcp_fx_dis.png' }
+mcp_fx_dis_150                 = { at = 2, name = 'mcp_fx_dis.png' }
+mcp_fx_dis_200                 = { at = 3, name = 'mcp_fx_dis.png' }
+mcp_fx_empty                   = { at = 1, name = 'mcp_fx_empty.png' }
+mcp_fx_empty_150               = { at = 2, name = 'mcp_fx_empty.png' }
+mcp_fx_empty_200               = { at = 3, name = 'mcp_fx_empty.png' }
+mcp_fx_norm                    = { at = 1, name = 'mcp_fx_norm.png' }
+mcp_fx_norm_150                = { at = 2, name = 'mcp_fx_norm.png' }
+mcp_fx_norm_200                = { at = 3, name = 'mcp_fx_norm.png' }
+mcp_fxlist_bg                  = { at = 1, name = 'mcp_fxlist_bg.png' }
+mcp_fxlist_byp                 = { at = 1, name = 'mcp_fxlist_byp.png' }
+mcp_fxlist_byp_150             = { at = 2, name = 'mcp_fxlist_byp.png' }
+mcp_fxlist_byp_200             = { at = 3, name = 'mcp_fxlist_byp.png' }
+mcp_fxlist_empty               = { at = 1, name = 'mcp_fxlist_empty.png' }
+mcp_fxlist_empty_150           = { at = 2, name = 'mcp_fxlist_empty.png' }
+mcp_fxlist_empty_200           = { at = 3, name = 'mcp_fxlist_empty.png' }
+mcp_fxlist_norm                = { at = 1, name = 'mcp_fxlist_norm.png' }
+mcp_fxlist_norm_150            = { at = 2, name = 'mcp_fxlist_norm.png' }
+mcp_fxlist_norm_200            = { at = 3, name = 'mcp_fxlist_norm.png' }
+mcp_fxlist_off                 = { at = 1, name = 'mcp_fxlist_off.png' }
+mcp_fxlist_off_150             = { at = 2, name = 'mcp_fxlist_off.png' }
+mcp_fxlist_off_200             = { at = 3, name = 'mcp_fxlist_off.png' }
+mcp_io                         = { at = 1, name = 'mcp_io.png' }
+mcp_io_150                     = { at = 2, name = 'mcp_io.png' }
+mcp_io_200                     = { at = 3, name = 'mcp_io.png' }
+mcp_io_dis                     = { at = 1, name = 'mcp_io_dis.png' }
+mcp_io_dis_150                 = { at = 2, name = 'mcp_io_dis.png' }
+mcp_io_dis_200                 = { at = 3, name = 'mcp_io_dis.png' }
+mcp_io_dis_ol                  = { at = 1, name = 'mcp_io_dis_ol.png' }
+mcp_io_dis_ol_150              = { at = 2, name = 'mcp_io_dis_ol.png' }
+mcp_io_dis_ol_200              = { at = 3, name = 'mcp_io_dis_ol.png' }
+mcp_io_ol                      = { at = 1, name = 'mcp_io_ol.png' }
+mcp_io_ol_150                  = { at = 2, name = 'mcp_io_ol.png' }
+mcp_io_ol_200                  = { at = 3, name = 'mcp_io_ol.png' }
+mcp_io_r                       = { at = 1, name = 'mcp_io_r.png' }
+mcp_io_r_150                   = { at = 2, name = 'mcp_io_r.png' }
+mcp_io_r_200                   = { at = 3, name = 'mcp_io_r.png' }
+mcp_io_r_dis                   = { at = 1, name = 'mcp_io_r_dis.png' }
+mcp_io_r_dis_150               = { at = 2, name = 'mcp_io_r_dis.png' }
+mcp_io_r_dis_200               = { at = 3, name = 'mcp_io_r_dis.png' }
+mcp_io_r_dis_ol                = { at = 1, name = 'mcp_io_r_dis_ol.png' }
+mcp_io_r_dis_ol_150            = { at = 2, name = 'mcp_io_r_dis_ol.png' }
+mcp_io_r_dis_ol_200            = { at = 3, name = 'mcp_io_r_dis_ol.png' }
+mcp_io_r_ol                    = { at = 1, name = 'mcp_io_r_ol.png' }
+mcp_io_r_ol_150                = { at = 2, name = 'mcp_io_r_ol.png' }
+mcp_io_r_ol_200                = { at = 3, name = 'mcp_io_r_ol.png' }
+mcp_io_s                       = { at = 1, name = 'mcp_io_s.png' }
+mcp_io_s_150                   = { at = 2, name = 'mcp_io_s.png' }
+mcp_io_s_200                   = { at = 3, name = 'mcp_io_s.png' }
+mcp_io_s_dis                   = { at = 1, name = 'mcp_io_s_dis.png' }
+mcp_io_s_dis_150               = { at = 2, name = 'mcp_io_s_dis.png' }
+mcp_io_s_dis_200               = { at = 3, name = 'mcp_io_s_dis.png' }
+mcp_io_s_dis_ol                = { at = 1, name = 'mcp_io_s_dis_ol.png' }
+mcp_io_s_dis_ol_150            = { at = 2, name = 'mcp_io_s_dis_ol.png' }
+mcp_io_s_dis_ol_200            = { at = 3, name = 'mcp_io_s_dis_ol.png' }
+mcp_io_s_ol                    = { at = 1, name = 'mcp_io_s_ol.png' }
+mcp_io_s_ol_150                = { at = 2, name = 'mcp_io_s_ol.png' }
+mcp_io_s_ol_200                = { at = 3, name = 'mcp_io_s_ol.png' }
+mcp_io_s_r                     = { at = 1, name = 'mcp_io_s_r.png' }
+mcp_io_s_r_150                 = { at = 2, name = 'mcp_io_s_r.png' }
+mcp_io_s_r_200                 = { at = 3, name = 'mcp_io_s_r.png' }
+mcp_io_s_r_dis                 = { at = 1, name = 'mcp_io_s_r_dis.png' }
+mcp_io_s_r_dis_150             = { at = 2, name = 'mcp_io_s_r_dis.png' }
+mcp_io_s_r_dis_200             = { at = 3, name = 'mcp_io_s_r_dis.png' }
+mcp_io_s_r_dis_ol              = { at = 1, name = 'mcp_io_s_r_dis_ol.png' }
+mcp_io_s_r_dis_ol_150          = { at = 2, name = 'mcp_io_s_r_dis_ol.png' }
+mcp_io_s_r_dis_ol_200          = { at = 3, name = 'mcp_io_s_r_dis_ol.png' }
+mcp_io_s_r_ol                  = { at = 1, name = 'mcp_io_s_r_ol.png' }
+mcp_io_s_r_ol_150              = { at = 2, name = 'mcp_io_s_r_ol.png' }
+mcp_io_s_r_ol_200              = { at = 3, name = 'mcp_io_s_r_ol.png' }
+mcp_volbg                      = { at = 1, name = 'mcp_volbg.png' }
+mcp_volbg_150                  = { at = 2, name = 'mcp_volbg.png' }
+mcp_volbg_200                  = { at = 3, name = 'mcp_volbg.png' }
+mcp_volthumb                   = { at = 1, name = 'mcp_volthumb.png' }
+mcp_volthumb_150               = { at = 2, name = 'mcp_volthumb.png' }
+mcp_volthumb_200               = { at = 3, name = 'mcp_volthumb.png' }
+meter_bg_h                     = { at = 1, name = 'meter_bg_h.png' }
+meter_bg_v                     = { at = 1, name = 'meter_bg_v.png' }
+meter_clip_h                   = { at = 1, name = 'meter_clip_h.png' }
+meter_clip_v                   = { at = 1, name = 'meter_clip_v.png' }
+meter_clip_v_rms2              = { at = 1, name = 'meter_clip_v_rms2.png' }
+meter_strip_h                  = { at = 1, name = 'meter_strip_h.png' }
+meter_strip_h_rms              = { at = 1, name = 'meter_strip_h_rms.png' }
+meter_strip_v                  = { at = 1, name = 'meter_strip_v.png' }
+meter_strip_v_rms              = { at = 1, name = 'meter_strip_v_rms.png' }
+monitor_fx_byp                 = { at = 1, name = 'monitor_fx_byp.png' }
+monitor_fx_byp_150             = { at = 2, name = 'monitor_fx_byp.png' }
+monitor_fx_byp_200             = { at = 3, name = 'monitor_fx_byp.png' }
+monitor_fx_byp_byp             = { at = 1, name = 'monitor_fx_byp_byp.png' }
+monitor_fx_byp_byp_150         = { at = 2, name = 'monitor_fx_byp_byp.png' }
+monitor_fx_byp_byp_200         = { at = 3, name = 'monitor_fx_byp_byp.png' }
+monitor_fx_byp_off             = { at = 1, name = 'monitor_fx_byp_off.png' }
+monitor_fx_byp_off_150         = { at = 2, name = 'monitor_fx_byp_off.png' }
+monitor_fx_byp_off_200         = { at = 3, name = 'monitor_fx_byp_off.png' }
+monitor_fx_byp_on              = { at = 1, name = 'monitor_fx_byp_on.png' }
+monitor_fx_byp_on_150          = { at = 2, name = 'monitor_fx_byp_on.png' }
+monitor_fx_byp_on_200          = { at = 3, name = 'monitor_fx_byp_on.png' }
+monitor_fx_off                 = { at = 1, name = 'monitor_fx_off.png' }
+monitor_fx_off_150             = { at = 2, name = 'monitor_fx_off.png' }
+monitor_fx_off_200             = { at = 3, name = 'monitor_fx_off.png' }
+monitor_fx_on                  = { at = 1, name = 'monitor_fx_on.png' }
+monitor_fx_on_150              = { at = 2, name = 'monitor_fx_on.png' }
+monitor_fx_on_200              = { at = 3, name = 'monitor_fx_on.png' }
+piano_black_key                = { at = 1, name = 'piano_black_key.png' } # NOTE
+piano_black_key_sel            = { at = 1, name = 'piano_black_key_sel.png' } # NOTE
+piano_white_key                = { at = 1, name = 'piano_white_key.png' } # NOTE
+piano_white_key_sel            = { at = 1, name = 'piano_white_key_sel.png' } # NOTE
+scrollbar                      = { at = 1, name = 'scrollbar.png' }
+scrollbar_3                    = { at = 1, name = 'scrollbar_3.png' }
+tcp_fxlist_bg                  = { at = 1, name = 'tcp_fxlist_bg.png' }
+tcp_fxlist_byp                 = { at = 1, name = 'tcp_fxlist_byp.png' }
+tcp_fxlist_byp_150             = { at = 2, name = 'tcp_fxlist_byp.png' }
+tcp_fxlist_byp_200             = { at = 3, name = 'tcp_fxlist_byp.png' }
+tcp_fxlist_empty               = { at = 1, name = 'tcp_fxlist_empty.png' }
+tcp_fxlist_empty_150           = { at = 2, name = 'tcp_fxlist_empty.png' }
+tcp_fxlist_empty_200           = { at = 3, name = 'tcp_fxlist_empty.png' }
+tcp_fxlist_norm                = { at = 1, name = 'tcp_fxlist_norm.png' }
+tcp_fxlist_norm_150            = { at = 2, name = 'tcp_fxlist_norm.png' }
+tcp_fxlist_norm_200            = { at = 3, name = 'tcp_fxlist_norm.png' }
+tcp_fxlist_off                 = { at = 1, name = 'tcp_fxlist_off.png' }
+tcp_fxlist_off_150             = { at = 2, name = 'tcp_fxlist_off.png' }
+tcp_fxlist_off_200             = { at = 3, name = 'tcp_fxlist_off.png' }
+tcp_labelBlock_bg              = { at = 1, name = 'tcp_labelBlock_bg.png' }
+tcp_labelBlock_bg_150          = { at = 2, name = 'tcp_labelBlock_bg.png' }
+tcp_labelBlock_bg_200          = { at = 3, name = 'tcp_labelBlock_bg.png' }
+tcp_labelBlock_bg_sel          = { at = 1, name = 'tcp_labelBlock_bg_sel.png' }
+tcp_labelBlock_bg_sel_150      = { at = 2, name = 'tcp_labelBlock_bg_sel.png' }
+tcp_labelBlock_bg_sel_200      = { at = 3, name = 'tcp_labelBlock_bg_sel.png' }
+tcp_volbg                      = { at = 1, name = 'tcp_volbg.png' }
+tcp_volbg_150                  = { at = 2, name = 'tcp_volbg.png' }
+tcp_volbg_200                  = { at = 3, name = 'tcp_volbg.png' }
+toolbar_blank                  = { at = 1, name = 'toolbar_blank.png' }
+toolbar_blank_150              = { at = 2, name = 'toolbar_blank.png' }
+toolbar_blank_200              = { at = 3, name = 'toolbar_blank.png' }
+toolbar_dock_off               = { at = 1, name = 'toolbar_dock_off.png' }
+toolbar_dock_off_150           = { at = 2, name = 'toolbar_dock_off.png' }
+toolbar_dock_off_200           = { at = 3, name = 'toolbar_dock_off.png' }
+toolbar_dock_on                = { at = 1, name = 'toolbar_dock_on.png' }
+toolbar_dock_on_150            = { at = 2, name = 'toolbar_dock_on.png' }
+toolbar_dock_on_200            = { at = 3, name = 'toolbar_dock_on.png' }
+toolbar_envitem_off            = { at = 1, name = 'toolbar_envitem_off.png' }
+toolbar_envitem_off_150        = { at = 2, name = 'toolbar_envitem_off.png' }
+toolbar_envitem_off_200        = { at = 3, name = 'toolbar_envitem_off.png' }
+toolbar_envitem_on             = { at = 1, name = 'toolbar_envitem_on.png' }
+toolbar_envitem_on_150         = { at = 2, name = 'toolbar_envitem_on.png' }
+toolbar_envitem_on_200         = { at = 3, name = 'toolbar_envitem_on.png' }
+toolbar_filter_off             = { at = 1, name = 'toolbar_filter_off.png' }
+toolbar_filter_off_150         = { at = 2, name = 'toolbar_filter_off.png' }
+toolbar_filter_off_200         = { at = 3, name = 'toolbar_filter_off.png' }
+toolbar_filter_on              = { at = 1, name = 'toolbar_filter_on.png' }
+toolbar_filter_on_150          = { at = 2, name = 'toolbar_filter_on.png' }
+toolbar_filter_on_200          = { at = 3, name = 'toolbar_filter_on.png' }
+toolbar_grid_off               = { at = 1, name = 'toolbar_grid_off.png' }
+toolbar_grid_off_150           = { at = 2, name = 'toolbar_grid_off.png' }
+toolbar_grid_off_200           = { at = 3, name = 'toolbar_grid_off.png' }
+toolbar_grid_on                = { at = 1, name = 'toolbar_grid_on.png' }
+toolbar_grid_on_150            = { at = 2, name = 'toolbar_grid_on.png' }
+toolbar_grid_on_200            = { at = 3, name = 'toolbar_grid_on.png' }
+toolbar_group_off              = { at = 1, name = 'toolbar_group_off.png' }
+toolbar_group_off_150          = { at = 2, name = 'toolbar_group_off.png' }
+toolbar_group_off_200          = { at = 3, name = 'toolbar_group_off.png' }
+toolbar_group_on               = { at = 1, name = 'toolbar_group_on.png' }
+toolbar_group_on_150           = { at = 2, name = 'toolbar_group_on.png' }
+toolbar_group_on_200           = { at = 3, name = 'toolbar_group_on.png' }
+toolbar_load                   = { at = 1, name = 'toolbar_load.png' }
+toolbar_load_150               = { at = 2, name = 'toolbar_load.png' }
+toolbar_load_200               = { at = 3, name = 'toolbar_load.png' }
+toolbar_lock_off               = { at = 1, name = 'toolbar_lock_off.png' }
+toolbar_lock_off_150           = { at = 2, name = 'toolbar_lock_off.png' }
+toolbar_lock_off_200           = { at = 3, name = 'toolbar_lock_off.png' }
+toolbar_lock_on                = { at = 1, name = 'toolbar_lock_on.png' }
+toolbar_lock_on_150            = { at = 2, name = 'toolbar_lock_on.png' }
+toolbar_lock_on_200            = { at = 3, name = 'toolbar_lock_on.png' }
+toolbar_metro_off              = { at = 1, name = 'toolbar_metro_off.png' }
+toolbar_metro_off_150          = { at = 2, name = 'toolbar_metro_off.png' }
+toolbar_metro_off_200          = { at = 3, name = 'toolbar_metro_off.png' }
+toolbar_metro_on               = { at = 1, name = 'toolbar_metro_on.png' }
+toolbar_metro_on_150           = { at = 2, name = 'toolbar_metro_on.png' }
+toolbar_metro_on_200           = { at = 3, name = 'toolbar_metro_on.png' }
+toolbar_midi_itemsel_off       = { at = 1, name = 'toolbar_midi_itemsel_off.png' }
+toolbar_midi_itemsel_off_150   = { at = 2, name = 'toolbar_midi_itemsel_off.png' }
+toolbar_midi_itemsel_off_200   = { at = 3, name = 'toolbar_midi_itemsel_off.png' }
+toolbar_midi_itemsel_on        = { at = 1, name = 'toolbar_midi_itemsel_on.png' }
+toolbar_midi_itemsel_on_150    = { at = 2, name = 'toolbar_midi_itemsel_on.png' }
+toolbar_midi_itemsel_on_200    = { at = 3, name = 'toolbar_midi_itemsel_on.png' }
+toolbar_midi_tracksel_off      = { at = 1, name = 'toolbar_midi_tracksel_off.png' }
+toolbar_midi_tracksel_off_150  = { at = 2, name = 'toolbar_midi_tracksel_off.png' }
+toolbar_midi_tracksel_off_200  = { at = 3, name = 'toolbar_midi_tracksel_off.png' }
+toolbar_midi_tracksel_on       = { at = 1, name = 'toolbar_midi_tracksel_on.png' }
+toolbar_midi_tracksel_on_150   = { at = 2, name = 'toolbar_midi_tracksel_on.png' }
+toolbar_midi_tracksel_on_200   = { at = 3, name = 'toolbar_midi_tracksel_on.png' }
+toolbar_new                    = { at = 1, name = 'toolbar_new.png' }
+toolbar_new_150                = { at = 2, name = 'toolbar_new.png' }
+toolbar_new_200                = { at = 3, name = 'toolbar_new.png' }
+toolbar_projprop               = { at = 1, name = 'toolbar_projprop.png' }
+toolbar_projprop_150           = { at = 2, name = 'toolbar_projprop.png' }
+toolbar_projprop_200           = { at = 3, name = 'toolbar_projprop.png' }
+toolbar_redo                   = { at = 1, name = 'toolbar_redo.png' }
+toolbar_redo_150               = { at = 2, name = 'toolbar_redo.png' }
+toolbar_redo_200               = { at = 3, name = 'toolbar_redo.png' }
+toolbar_relsnap_off            = { at = 1, name = 'toolbar_relsnap_off.png' }
+toolbar_relsnap_off_150        = { at = 2, name = 'toolbar_relsnap_off.png' }
+toolbar_relsnap_off_200        = { at = 3, name = 'toolbar_relsnap_off.png' }
+toolbar_relsnap_on             = { at = 1, name = 'toolbar_relsnap_on.png' }
+toolbar_relsnap_on_150         = { at = 2, name = 'toolbar_relsnap_on.png' }
+toolbar_relsnap_on_200         = { at = 3, name = 'toolbar_relsnap_on.png' }
+toolbar_ripple_all             = { at = 1, name = 'toolbar_ripple_all.png' }
+toolbar_ripple_all_150         = { at = 2, name = 'toolbar_ripple_all.png' }
+toolbar_ripple_all_200         = { at = 3, name = 'toolbar_ripple_all.png' }
+toolbar_ripple_off             = { at = 1, name = 'toolbar_ripple_off.png' }
+toolbar_ripple_off_150         = { at = 2, name = 'toolbar_ripple_off.png' }
+toolbar_ripple_off_200         = { at = 3, name = 'toolbar_ripple_off.png' }
+toolbar_ripple_one             = { at = 1, name = 'toolbar_ripple_one.png' }
+toolbar_ripple_one_150         = { at = 2, name = 'toolbar_ripple_one.png' }
+toolbar_ripple_one_200         = { at = 3, name = 'toolbar_ripple_one.png' }
+toolbar_save                   = { at = 1, name = 'toolbar_save.png' }
+toolbar_save_150               = { at = 2, name = 'toolbar_save.png' }
+toolbar_save_200               = { at = 3, name = 'toolbar_save.png' }
+toolbar_snap_off               = { at = 1, name = 'toolbar_snap_off.png' }
+toolbar_snap_off_150           = { at = 2, name = 'toolbar_snap_off.png' }
+toolbar_snap_off_200           = { at = 3, name = 'toolbar_snap_off.png' }
+toolbar_snap_on                = { at = 1, name = 'toolbar_snap_on.png' }
+toolbar_snap_on_150            = { at = 2, name = 'toolbar_snap_on.png' }
+toolbar_snap_on_200            = { at = 3, name = 'toolbar_snap_on.png' }
+toolbar_undo                   = { at = 1, name = 'toolbar_undo.png' }
+toolbar_undo_150               = { at = 2, name = 'toolbar_undo.png' }
+toolbar_undo_200               = { at = 3, name = 'toolbar_undo.png' }
+toolbar_xfade_off              = { at = 1, name = 'toolbar_xfade_off.png' }
+toolbar_xfade_off_150          = { at = 2, name = 'toolbar_xfade_off.png' }
+toolbar_xfade_off_200          = { at = 3, name = 'toolbar_xfade_off.png' }
+toolbar_xfade_on               = { at = 1, name = 'toolbar_xfade_on.png' }
+toolbar_xfade_on_150           = { at = 2, name = 'toolbar_xfade_on.png' }
+toolbar_xfade_on_200           = { at = 3, name = 'toolbar_xfade_on.png' }
+track_env                      = { at = 1, name = 'track_env.png' }
+track_env_150                  = { at = 2, name = 'track_env.png' }
+track_env_200                  = { at = 3, name = 'track_env.png' }
+track_env_latch                = { at = 1, name = 'track_env_latch.png' }
+track_env_latch_150            = { at = 2, name = 'track_env_latch.png' }
+track_env_latch_200            = { at = 3, name = 'track_env_latch.png' }
+track_env_latch_ol             = { at = 1, name = 'track_env_latch_ol.png' }
+track_env_latch_ol_150         = { at = 2, name = 'track_env_latch_ol.png' }
+track_env_latch_ol_200         = { at = 3, name = 'track_env_latch_ol.png' }
+track_env_ol                   = { at = 1, name = 'track_env_ol.png' }
+track_env_ol_150               = { at = 2, name = 'track_env_ol.png' }
+track_env_ol_200               = { at = 3, name = 'track_env_ol.png' }
+track_env_preview              = { at = 1, name = 'track_env_preview.png' }
+track_env_preview_150          = { at = 2, name = 'track_env_preview.png' }
+track_env_preview_200          = { at = 3, name = 'track_env_preview.png' }
+track_env_preview_ol           = { at = 1, name = 'track_env_preview_ol.png' }
+track_env_preview_ol_150       = { at = 2, name = 'track_env_preview_ol.png' }
+track_env_preview_ol_200       = { at = 3, name = 'track_env_preview_ol.png' }
+track_env_read                 = { at = 1, name = 'track_env_read.png' }
+track_env_read_150             = { at = 2, name = 'track_env_read.png' }
+track_env_read_200             = { at = 3, name = 'track_env_read.png' }
+track_env_read_ol              = { at = 1, name = 'track_env_read_ol.png' }
+track_env_read_ol_150          = { at = 2, name = 'track_env_read_ol.png' }
+track_env_read_ol_200          = { at = 3, name = 'track_env_read_ol.png' }
+track_env_touch                = { at = 1, name = 'track_env_touch.png' }
+track_env_touch_150            = { at = 2, name = 'track_env_touch.png' }
+track_env_touch_200            = { at = 3, name = 'track_env_touch.png' }
+track_env_touch_ol             = { at = 1, name = 'track_env_touch_ol.png' }
+track_env_touch_ol_150         = { at = 2, name = 'track_env_touch_ol.png' }
+track_env_touch_ol_200         = { at = 3, name = 'track_env_touch_ol.png' }
+track_env_write                = { at = 1, name = 'track_env_write.png' }
+track_env_write_150            = { at = 2, name = 'track_env_write.png' }
+track_env_write_200            = { at = 3, name = 'track_env_write.png' }
+track_env_write_ol             = { at = 1, name = 'track_env_write_ol.png' }
+track_env_write_ol_150         = { at = 2, name = 'track_env_write_ol.png' }
+track_env_write_ol_200         = { at = 3, name = 'track_env_write_ol.png' }
+track_fx_dis                   = { at = 1, name = 'track_fx_dis.png' }
+track_fx_dis_150               = { at = 2, name = 'track_fx_dis.png' }
+track_fx_dis_200               = { at = 3, name = 'track_fx_dis.png' }
+track_fx_dis_ol                = { at = 1, name = 'track_fx_dis_ol.png' }
+track_fx_dis_ol_150            = { at = 2, name = 'track_fx_dis_ol.png' }
+track_fx_dis_ol_200            = { at = 3, name = 'track_fx_dis_ol.png' }
+track_fx_empty                 = { at = 1, name = 'track_fx_empty.png' }
+track_fx_empty_150             = { at = 2, name = 'track_fx_empty.png' }
+track_fx_empty_200             = { at = 3, name = 'track_fx_empty.png' }
+track_fx_empty_ol              = { at = 1, name = 'track_fx_empty_ol.png' }
+track_fx_empty_ol_150          = { at = 2, name = 'track_fx_empty_ol.png' }
+track_fx_empty_ol_200          = { at = 3, name = 'track_fx_empty_ol.png' }
+track_fx_in_empty              = { at = 1, name = 'track_fx_in_empty.png' }
+track_fx_in_empty_150          = { at = 2, name = 'track_fx_in_empty.png' }
+track_fx_in_empty_200          = { at = 3, name = 'track_fx_in_empty.png' }
+track_fx_in_norm               = { at = 1, name = 'track_fx_in_norm.png' }
+track_fx_in_norm_150           = { at = 2, name = 'track_fx_in_norm.png' }
+track_fx_in_norm_200           = { at = 3, name = 'track_fx_in_norm.png' }
+track_fx_norm                  = { at = 1, name = 'track_fx_norm.png' }
+track_fx_norm_150              = { at = 2, name = 'track_fx_norm.png' }
+track_fx_norm_200              = { at = 3, name = 'track_fx_norm.png' }
+track_fx_norm_ol               = { at = 1, name = 'track_fx_norm_ol.png' }
+track_fx_norm_ol_150           = { at = 2, name = 'track_fx_norm_ol.png' }
+track_fx_norm_ol_200           = { at = 3, name = 'track_fx_norm_ol.png' }
+track_fxempty_h                = { at = 1, name = 'track_fxempty_h.png' }
+track_fxempty_h_150            = { at = 2, name = 'track_fxempty_h.png' }
+track_fxempty_h_200            = { at = 3, name = 'track_fxempty_h.png' }
+track_fxempty_h_ol             = { at = 1, name = 'track_fxempty_h_ol.png' }
+track_fxempty_h_ol_150         = { at = 2, name = 'track_fxempty_h_ol.png' }
+track_fxempty_h_ol_200         = { at = 3, name = 'track_fxempty_h_ol.png' }
+track_fxempty_v                = { at = 1, name = 'track_fxempty_v.png' }
+track_fxempty_v_150            = { at = 2, name = 'track_fxempty_v.png' }
+track_fxempty_v_200            = { at = 3, name = 'track_fxempty_v.png' }
+track_fxempty_v_ol             = { at = 1, name = 'track_fxempty_v_ol.png' }
+track_fxempty_v_ol_150         = { at = 2, name = 'track_fxempty_v_ol.png' }
+track_fxempty_v_ol_200         = { at = 3, name = 'track_fxempty_v_ol.png' }
+track_fxoff_h                  = { at = 1, name = 'track_fxoff_h.png' }
+track_fxoff_h_150              = { at = 2, name = 'track_fxoff_h.png' }
+track_fxoff_h_200              = { at = 3, name = 'track_fxoff_h.png' }
+track_fxoff_h_ol               = { at = 1, name = 'track_fxoff_h_ol.png' }
+track_fxoff_h_ol_150           = { at = 2, name = 'track_fxoff_h_ol.png' }
+track_fxoff_h_ol_200           = { at = 3, name = 'track_fxoff_h_ol.png' }
+track_fxoff_v                  = { at = 1, name = 'track_fxoff_v.png' }
+track_fxoff_v_150              = { at = 2, name = 'track_fxoff_v.png' }
+track_fxoff_v_200              = { at = 3, name = 'track_fxoff_v.png' }
+track_fxoff_v_ol               = { at = 1, name = 'track_fxoff_v_ol.png' }
+track_fxoff_v_ol_150           = { at = 2, name = 'track_fxoff_v_ol.png' }
+track_fxoff_v_ol_200           = { at = 3, name = 'track_fxoff_v_ol.png' }
+track_fxon_h                   = { at = 1, name = 'track_fxon_h.png' }
+track_fxon_h_150               = { at = 2, name = 'track_fxon_h.png' }
+track_fxon_h_200               = { at = 3, name = 'track_fxon_h.png' }
+track_fxon_h_ol                = { at = 1, name = 'track_fxon_h_ol.png' }
+track_fxon_h_ol_150            = { at = 2, name = 'track_fxon_h_ol.png' }
+track_fxon_h_ol_200            = { at = 3, name = 'track_fxon_h_ol.png' }
+track_fxon_v                   = { at = 1, name = 'track_fxon_v.png' }
+track_fxon_v_150               = { at = 2, name = 'track_fxon_v.png' }
+track_fxon_v_200               = { at = 3, name = 'track_fxon_v.png' }
+track_fxon_v_ol                = { at = 1, name = 'track_fxon_v_ol.png' }
+track_fxon_v_ol_150            = { at = 2, name = 'track_fxon_v_ol.png' }
+track_fxon_v_ol_200            = { at = 3, name = 'track_fxon_v_ol.png' }
+track_io                       = { at = 1, name = 'track_io.png' }
+track_io_150                   = { at = 2, name = 'track_io.png' }
+track_io_200                   = { at = 3, name = 'track_io.png' }
+track_io_dis                   = { at = 1, name = 'track_io_dis.png' }
+track_io_dis_150               = { at = 2, name = 'track_io_dis.png' }
+track_io_dis_200               = { at = 3, name = 'track_io_dis.png' }
+track_io_dis_ol                = { at = 1, name = 'track_io_dis_ol.png' }
+track_io_dis_ol_150            = { at = 2, name = 'track_io_dis_ol.png' }
+track_io_dis_ol_200            = { at = 3, name = 'track_io_dis_ol.png' }
+track_io_ol                    = { at = 1, name = 'track_io_ol.png' }
+track_io_ol_150                = { at = 2, name = 'track_io_ol.png' }
+track_io_ol_200                = { at = 3, name = 'track_io_ol.png' }
+track_io_r                     = { at = 1, name = 'track_io_r.png' }
+track_io_r_150                 = { at = 2, name = 'track_io_r.png' }
+track_io_r_200                 = { at = 3, name = 'track_io_r.png' }
+track_io_r_dis                 = { at = 1, name = 'track_io_r_dis.png' }
+track_io_r_dis_150             = { at = 2, name = 'track_io_r_dis.png' }
+track_io_r_dis_200             = { at = 3, name = 'track_io_r_dis.png' }
+track_io_r_dis_ol              = { at = 1, name = 'track_io_r_dis_ol.png' }
+track_io_r_dis_ol_150          = { at = 2, name = 'track_io_r_dis_ol.png' }
+track_io_r_dis_ol_200          = { at = 3, name = 'track_io_r_dis_ol.png' }
+track_io_r_ol                  = { at = 1, name = 'track_io_r_ol.png' }
+track_io_r_ol_150              = { at = 2, name = 'track_io_r_ol.png' }
+track_io_r_ol_200              = { at = 3, name = 'track_io_r_ol.png' }
+track_io_s                     = { at = 1, name = 'track_io_s.png' }
+track_io_s_150                 = { at = 2, name = 'track_io_s.png' }
+track_io_s_200                 = { at = 3, name = 'track_io_s.png' }
+track_io_s_dis                 = { at = 1, name = 'track_io_s_dis.png' }
+track_io_s_dis_150             = { at = 2, name = 'track_io_s_dis.png' }
+track_io_s_dis_200             = { at = 3, name = 'track_io_s_dis.png' }
+track_io_s_dis_ol              = { at = 1, name = 'track_io_s_dis_ol.png' }
+track_io_s_dis_ol_150          = { at = 2, name = 'track_io_s_dis_ol.png' }
+track_io_s_dis_ol_200          = { at = 3, name = 'track_io_s_dis_ol.png' }
+track_io_s_ol                  = { at = 1, name = 'track_io_s_ol.png' }
+track_io_s_ol_150              = { at = 2, name = 'track_io_s_ol.png' }
+track_io_s_ol_200              = { at = 3, name = 'track_io_s_ol.png' }
+track_io_s_r                   = { at = 1, name = 'track_io_s_r.png' }
+track_io_s_r_150               = { at = 2, name = 'track_io_s_r.png' }
+track_io_s_r_200               = { at = 3, name = 'track_io_s_r.png' }
+track_io_s_r_dis               = { at = 1, name = 'track_io_s_r_dis.png' }
+track_io_s_r_dis_150           = { at = 2, name = 'track_io_s_r_dis.png' }
+track_io_s_r_dis_200           = { at = 3, name = 'track_io_s_r_dis.png' }
+track_io_s_r_dis_ol            = { at = 1, name = 'track_io_s_r_dis_ol.png' }
+track_io_s_r_dis_ol_150        = { at = 2, name = 'track_io_s_r_dis_ol.png' }
+track_io_s_r_dis_ol_200        = { at = 3, name = 'track_io_s_r_dis_ol.png' }
+track_io_s_r_ol                = { at = 1, name = 'track_io_s_r_ol.png' }
+track_io_s_r_ol_150            = { at = 2, name = 'track_io_s_r_ol.png' }
+track_io_s_r_ol_200            = { at = 3, name = 'track_io_s_r_ol.png' }
+track_mono                     = { at = 1, name = 'track_mono.png' }
+track_mono_150                 = { at = 2, name = 'track_mono.png' }
+track_mono_200                 = { at = 3, name = 'track_mono.png' }
+track_mute_off                 = { at = 1, name = 'track_mute_off.png' }
+track_mute_off_150             = { at = 2, name = 'track_mute_off.png' }
+track_mute_off_200             = { at = 3, name = 'track_mute_off.png' }
+track_mute_off_ol              = { at = 1, name = 'track_mute_off_ol.png' }
+track_mute_off_ol_150          = { at = 2, name = 'track_mute_off_ol.png' }
+track_mute_off_ol_200          = { at = 3, name = 'track_mute_off_ol.png' }
+track_mute_on                  = { at = 1, name = 'track_mute_on.png' }
+track_mute_on_150              = { at = 2, name = 'track_mute_on.png' }
+track_mute_on_200              = { at = 3, name = 'track_mute_on.png' }
+track_recarm_auto              = { at = 1, name = 'track_recarm_auto.png' }
+track_recarm_auto_150          = { at = 2, name = 'track_recarm_auto.png' }
+track_recarm_auto_200          = { at = 3, name = 'track_recarm_auto.png' }
+track_recarm_auto_norec        = { at = 1, name = 'track_recarm_auto_norec.png' }
+track_recarm_auto_norec_150    = { at = 2, name = 'track_recarm_auto_norec.png' }
+track_recarm_auto_norec_200    = { at = 3, name = 'track_recarm_auto_norec.png' }
+track_recarm_auto_norec_ol     = { at = 1, name = 'track_recarm_auto_norec_ol.png' }
+track_recarm_auto_norec_ol_150 = { at = 2, name = 'track_recarm_auto_norec_ol.png' }
+track_recarm_auto_norec_ol_200 = { at = 3, name = 'track_recarm_auto_norec_ol.png' }
+track_recarm_auto_ol           = { at = 1, name = 'track_recarm_auto_ol.png' }
+track_recarm_auto_ol_150       = { at = 2, name = 'track_recarm_auto_ol.png' }
+track_recarm_auto_ol_200       = { at = 3, name = 'track_recarm_auto_ol.png' }
+track_recarm_auto_on           = { at = 1, name = 'track_recarm_auto_on.png' }
+track_recarm_auto_on_150       = { at = 2, name = 'track_recarm_auto_on.png' }
+track_recarm_auto_on_200       = { at = 3, name = 'track_recarm_auto_on.png' }
+track_recarm_auto_on_ol        = { at = 1, name = 'track_recarm_auto_on_ol.png' }
+track_recarm_auto_on_ol_150    = { at = 2, name = 'track_recarm_auto_on_ol.png' }
+track_recarm_auto_on_ol_200    = { at = 3, name = 'track_recarm_auto_on_ol.png' }
+track_recarm_norec             = { at = 1, name = 'track_recarm_norec.png' }
+track_recarm_norec_150         = { at = 2, name = 'track_recarm_norec.png' }
+track_recarm_norec_200         = { at = 3, name = 'track_recarm_norec.png' }
+track_recarm_norec_ol          = { at = 1, name = 'track_recarm_norec_ol.png' }
+track_recarm_norec_ol_150      = { at = 2, name = 'track_recarm_norec_ol.png' }
+track_recarm_norec_ol_200      = { at = 3, name = 'track_recarm_norec_ol.png' }
+track_recarm_off               = { at = 1, name = 'track_recarm_off.png' }
+track_recarm_off_150           = { at = 2, name = 'track_recarm_off.png' }
+track_recarm_off_200           = { at = 3, name = 'track_recarm_off.png' }
+track_recarm_off_ol            = { at = 1, name = 'track_recarm_off_ol.png' }
+track_recarm_off_ol_150        = { at = 2, name = 'track_recarm_off_ol.png' }
+track_recarm_off_ol_200        = { at = 3, name = 'track_recarm_off_ol.png' }
+track_recarm_on                = { at = 1, name = 'track_recarm_on.png' }
+track_recarm_on_150            = { at = 2, name = 'track_recarm_on.png' }
+track_recarm_on_200            = { at = 3, name = 'track_recarm_on.png' }
+track_recarm_on_ol             = { at = 1, name = 'track_recarm_on_ol.png' }
+track_recarm_on_ol_150         = { at = 2, name = 'track_recarm_on_ol.png' }
+track_recarm_on_ol_200         = { at = 3, name = 'track_recarm_on_ol.png' }
+track_recmode_in               = { at = 1, name = 'track_recmode_in.png' }
+track_recmode_in_150           = { at = 2, name = 'track_recmode_in.png' }
+track_recmode_in_200           = { at = 3, name = 'track_recmode_in.png' }
+track_recmode_in_ol            = { at = 1, name = 'track_recmode_in_ol.png' }
+track_recmode_in_ol_150        = { at = 2, name = 'track_recmode_in_ol.png' }
+track_recmode_in_ol_200        = { at = 3, name = 'track_recmode_in_ol.png' }
+track_recmode_off              = { at = 1, name = 'track_recmode_off.png' }
+track_recmode_off_150          = { at = 2, name = 'track_recmode_off.png' }
+track_recmode_off_200          = { at = 3, name = 'track_recmode_off.png' }
+track_recmode_off_ol           = { at = 1, name = 'track_recmode_off_ol.png' }
+track_recmode_off_ol_150       = { at = 2, name = 'track_recmode_off_ol.png' }
+track_recmode_off_ol_200       = { at = 3, name = 'track_recmode_off_ol.png' }
+track_recmode_out              = { at = 1, name = 'track_recmode_out.png' }
+track_recmode_out_150          = { at = 2, name = 'track_recmode_out.png' }
+track_recmode_out_200          = { at = 3, name = 'track_recmode_out.png' }
+track_recmode_out_ol           = { at = 1, name = 'track_recmode_out_ol.png' }
+track_recmode_out_ol_150       = { at = 2, name = 'track_recmode_out_ol.png' }
+track_recmode_out_ol_200       = { at = 3, name = 'track_recmode_out_ol.png' }
+track_solo_off                 = { at = 1, name = 'track_solo_off.png' }
+track_solo_off_150             = { at = 2, name = 'track_solo_off.png' }
+track_solo_off_200             = { at = 3, name = 'track_solo_off.png' }
+track_solo_off_ol              = { at = 1, name = 'track_solo_off_ol.png' }
+track_solo_off_ol_150          = { at = 2, name = 'track_solo_off_ol.png' }
+track_solo_off_ol_200          = { at = 3, name = 'track_solo_off_ol.png' }
+track_solo_on                  = { at = 1, name = 'track_solo_on.png' }
+track_solo_on_150              = { at = 2, name = 'track_solo_on.png' }
+track_solo_on_200              = { at = 3, name = 'track_solo_on.png' }
+track_stereo                   = { at = 1, name = 'track_stereo.png' }
+track_stereo_150               = { at = 2, name = 'track_stereo.png' }
+track_stereo_200               = { at = 3, name = 'track_stereo.png' }
+track_stereo_ol                = { at = 1, name = 'track_stereo_ol.png' }
+track_stereo_ol_150            = { at = 2, name = 'track_stereo_ol.png' }
+track_stereo_ol_200            = { at = 3, name = 'track_stereo_ol.png' }
+transport_bpm_bg               = { at = 1, name = 'transport_bpm_bg.png' }
+transport_end                  = { at = 1, name = 'transport_end.png' }
+transport_end_150              = { at = 2, name = 'transport_end.png' }
+transport_end_200              = { at = 3, name = 'transport_end.png' }
+transport_group_bg             = { at = 1, name = 'transport_group_bg.png' }
+transport_home                 = { at = 1, name = 'transport_home.png' }
+transport_home_150             = { at = 2, name = 'transport_home.png' }
+transport_home_200             = { at = 3, name = 'transport_home.png' }
+transport_knob_bg_small        = { at = 1, name = 'transport_knob_bg_small.png' }
+transport_knob_bg_small_150    = { at = 2, name = 'transport_knob_bg_small.png' }
+transport_knob_bg_small_200    = { at = 3, name = 'transport_knob_bg_small.png' }
+transport_next                 = { at = 1, name = 'transport_next.png' }
+transport_next_150             = { at = 2, name = 'transport_next.png' }
+transport_next_200             = { at = 3, name = 'transport_next.png' }
+transport_pause                = { at = 1, name = 'transport_pause.png' }
+transport_pause_150            = { at = 2, name = 'transport_pause.png' }
+transport_pause_200            = { at = 3, name = 'transport_pause.png' }
+transport_pause_on             = { at = 1, name = 'transport_pause_on.png' }
+transport_pause_on_150         = { at = 2, name = 'transport_pause_on.png' }
+transport_pause_on_200         = { at = 3, name = 'transport_pause_on.png' }
+transport_play                 = { at = 1, name = 'transport_play.png' }
+transport_play_150             = { at = 2, name = 'transport_play.png' }
+transport_play_200             = { at = 3, name = 'transport_play.png' }
+transport_play_ol              = { at = 1, name = 'transport_play_ol.png' }
+transport_play_ol_150          = { at = 2, name = 'transport_play_ol.png' }
+transport_play_ol_200          = { at = 3, name = 'transport_play_ol.png' }
+transport_play_on              = { at = 1, name = 'transport_play_on.png' }
+transport_play_on_150          = { at = 2, name = 'transport_play_on.png' }
+transport_play_on_200          = { at = 3, name = 'transport_play_on.png' }
+transport_play_sync            = { at = 1, name = 'transport_play_sync.png' }
+transport_play_sync_150        = { at = 2, name = 'transport_play_sync.png' }
+transport_play_sync_200        = { at = 3, name = 'transport_play_sync.png' }
+transport_play_sync_ol         = { at = 1, name = 'transport_play_sync_ol.png' }
+transport_play_sync_ol_150     = { at = 2, name = 'transport_play_sync_ol.png' }
+transport_play_sync_ol_200     = { at = 3, name = 'transport_play_sync_ol.png' }
+transport_play_sync_on         = { at = 1, name = 'transport_play_sync_on.png' }
+transport_play_sync_on_150     = { at = 2, name = 'transport_play_sync_on.png' }
+transport_play_sync_on_200     = { at = 3, name = 'transport_play_sync_on.png' }
+transport_previous             = { at = 1, name = 'transport_previous.png' }
+transport_previous_150         = { at = 2, name = 'transport_previous.png' }
+transport_previous_200         = { at = 3, name = 'transport_previous.png' }
+transport_record               = { at = 1, name = 'transport_record.png' }
+transport_record_150           = { at = 2, name = 'transport_record.png' }
+transport_record_200           = { at = 3, name = 'transport_record.png' }
+transport_record_item          = { at = 1, name = 'transport_record_item.png' }
+transport_record_item_150      = { at = 2, name = 'transport_record_item.png' }
+transport_record_item_200      = { at = 3, name = 'transport_record_item.png' }
+transport_record_item_ol       = { at = 1, name = 'transport_record_item_ol.png' }
+transport_record_item_ol_150   = { at = 2, name = 'transport_record_item_ol.png' }
+transport_record_item_ol_200   = { at = 3, name = 'transport_record_item_ol.png' }
+transport_record_item_on       = { at = 1, name = 'transport_record_item_on.png' }
+transport_record_item_on_150   = { at = 2, name = 'transport_record_item_on.png' }
+transport_record_item_on_200   = { at = 3, name = 'transport_record_item_on.png' }
+transport_record_loop          = { at = 1, name = 'transport_record_loop.png' }
+transport_record_loop_150      = { at = 2, name = 'transport_record_loop.png' }
+transport_record_loop_200      = { at = 3, name = 'transport_record_loop.png' }
+transport_record_loop_ol       = { at = 1, name = 'transport_record_loop_ol.png' }
+transport_record_loop_ol_150   = { at = 2, name = 'transport_record_loop_ol.png' }
+transport_record_loop_ol_200   = { at = 3, name = 'transport_record_loop_ol.png' }
+transport_record_loop_on       = { at = 1, name = 'transport_record_loop_on.png' }
+transport_record_loop_on_150   = { at = 2, name = 'transport_record_loop_on.png' }
+transport_record_loop_on_200   = { at = 3, name = 'transport_record_loop_on.png' }
+transport_record_ol            = { at = 1, name = 'transport_record_ol.png' }
+transport_record_ol_150        = { at = 2, name = 'transport_record_ol.png' }
+transport_record_ol_200        = { at = 3, name = 'transport_record_ol.png' }
+transport_record_on            = { at = 1, name = 'transport_record_on.png' }
+transport_record_on_150        = { at = 2, name = 'transport_record_on.png' }
+transport_record_on_200        = { at = 3, name = 'transport_record_on.png' }
+transport_repeat_off           = { at = 1, name = 'transport_repeat_off.png' }
+transport_repeat_off_150       = { at = 2, name = 'transport_repeat_off.png' }
+transport_repeat_off_200       = { at = 3, name = 'transport_repeat_off.png' }
+transport_repeat_on            = { at = 1, name = 'transport_repeat_on.png' }
+transport_repeat_on_150        = { at = 2, name = 'transport_repeat_on.png' }
+transport_repeat_on_200        = { at = 3, name = 'transport_repeat_on.png' }
+transport_stop                 = { at = 1, name = 'transport_stop.png' }
+transport_stop_150             = { at = 2, name = 'transport_stop.png' }
+transport_stop_200             = { at = 3, name = 'transport_stop.png' }
+transSectionBg                 = { at = 1, name = 'transSectionBg.png' }
+transSectionBg_150             = { at = 2, name = 'transSectionBg.png' }
+transSectionBg_200             = { at = 3, name = 'transSectionBg.png' }

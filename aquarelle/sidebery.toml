@@ -1,20 +1,21 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Sidebery'
- type = 'text-files'
-about = 'A CSS file for the extension <a href="https://github.com/mbnuqw/sidebery">Sidebery</a>.'
+name = 'Sidebery'
+type = 'text-file' # md
+about = '''
+A CSS file for the extension
+[Sidebery](https://github.com/mbnuqw/sidebery).
+''' # rhai
 
-displaying = '`${arrangement} – ${scheme("main")}`'
-    naming = '`${arrangement} – ${scheme("main")}`'
- extension = '.css'
+display = 'arrangement + " – " + scheme("main")' # rhai
+nomenclature = 'arrangement + " – " + scheme("main") + ".css"'
 
-[schemes]
-main = { name = 'Main Color Scheme' }
+schemes.main.name = 'Main'
 
 [options]
-accent = { default.set = 'any', name = 'Accent Color Set' }
+accent = { name = 'Accent', default.set = 'any' }
 
 [suggested-paths]
 default = { default = 'sidebery' }

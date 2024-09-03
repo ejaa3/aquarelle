@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -124,20 +124,20 @@ fn show_path(buffer: &gtk::TextBuffer, path: &str) {
 
 pub fn scan_error(Tags { buffer, cyan, .. }: &Tags, error: cache::ScanError, _: ()) {
 	match error {
-		cache::ScanError::Path { local, path, error } => insert! {
-			buffer: (&match local {
+		cache::ScanError::Path { user, path, error } => insert! {
+			buffer: (&match user {
 				true  => i18n("Unable to read local namespaces path at"),
 				false => i18n("Unable to read system namespaces path at")
 			}), "\n", [cyan; &path.to_string_lossy()], "\n", (&error.to_string())
 		},
-		cache::ScanError::Entry { local, path, error } => insert! {
-			buffer: (&match local {
+		cache::ScanError::Entry { user, path, error } => insert! {
+			buffer: (&match user {
 				true  => i18n("Unable to read local namespace entry at"),
 				false => i18n("Unable to read system namespace entry at")
 			}), "\n", [cyan; &path.to_string_lossy()], "\n", (&error.to_string())
 		},
-		cache::ScanError::Unicode { local, path } => insert! {
-			buffer: (&match local {
+		cache::ScanError::Unicode { user, path } => insert! {
+			buffer: (&match user {
 				true  => i18n("Invalid Unicode directory name for local namespace at"),
 				false => i18n("Invalid Unicode directory name for system namespace at")
 			}), "\n", [cyan; &path.to_string_lossy()]
@@ -270,9 +270,9 @@ pub fn scheme_error(tags @ Tags { buffer, yellow, red, green, cyan, .. }: &Tags,
 		
 		scheme::Error::Namespace { namespace_id, error } => namespace_error(tags, error, namespace_id),
 		
-		scheme::Error::OptionType { option_id, current, required } => {
+		scheme::Error::OptionType { option_id, value, required } => {
 			let text = i18n("The data assigned to option {id} is of type {current} instead of {required}");
-			let (current, required) = (current.type_str(), required.type_str());
+			let (current, required) = (value.type_str(), required.type_str());
 			
 			if let Some((left_1, right_1)) = text.split_once("{id}") {
 				if let Some((left_2, right_2)) = left_1.split_once("{current}") {
@@ -429,22 +429,22 @@ pub fn pathing_errors(tags @ Tags { buffer, blue, yellow, red, green, .. }: &Tag
 			}
 			insert!(buffer: "Suggested path ", [red: include_id], " not found in map ", [green: map_id], " at namespace ", [green: namespace_id])
 		}
-		pathing::Error::MissingPath { id, located } => {
+		pathing::Error::MissingPath { id, location } => {
 			let text = i18n("Unable to parse {id} with value {value}");
 			
 			if let Some((left_1, right_1)) = text.split_once("{id}") {
 				if let Some((left_2, right_2)) = left_1.split_once("{value}") {
 					insert!(buffer: left_2, [blue; "[[maps."], [yellow: id], [blue; ".custom-paths]]"], right_2);
-					show_located_path(tags, located);
+					show_location(tags, location);
 					return insert!(buffer; right_1)
 				} else if let Some((left_2, right_2)) = right_1.split_once("{value}") {
 					insert!(buffer: left_1);
-					show_located_path(tags, located);
+					show_location(tags, location);
 					return insert!(buffer; left_2, [blue; "[[maps."], [yellow: id], [blue; ".custom-paths]]"], right_2)
 				}
 			}
 			insert!(buffer: "Unable to parse ", [blue; "[[maps."], [yellow: id], [blue; ".custom-paths]]"], " with value ");
-			show_located_path(tags, located);
+			show_location(tags, location);
 		}
 		pathing::Error::BadNaming { id, map_id, error } => {
 			failed(id);
@@ -457,11 +457,11 @@ pub fn pathing_errors(tags @ Tags { buffer, blue, yellow, red, green, .. }: &Tag
 	}
 }
 
-fn show_located_path(Tags { buffer, yellow, blue, .. }: &Tags, path: &aquarelle::path::Located) {
-	if let aquarelle::path::Location::None = path.location {
-		return insert!(buffer; [yellow: &path.path])
+fn show_location(Tags { buffer, yellow, blue, .. }: &Tags, location: &aquarelle::path::Location) {
+	if let aquarelle::path::Prefix::Custom = location.prefix {
+		return insert!(buffer; [yellow: &location.path])
 	}
-	insert!(buffer; [blue; "{ ", <&str>::from(path.location), " = "], [yellow: &path.path], [blue; " }"])
+	insert!(buffer; [blue; "{ ", <&str>::from(location.prefix), " = "], [yellow: &location.path], [blue; " }"])
 }
 
 pub fn mapping_error(tags @ Tags { buffer, .. }: &Tags, mapping::Error { id, map_id, of }: mapping::Error, _: ()) {

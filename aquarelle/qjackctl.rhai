@@ -1,10 +1,10 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const   main = cfg::scheme("main");
+const main   = cfg::scheme("main");
 const accent = cfg::option("accent");
 
 fn out() { '#' + this.to_hex_rgb(true) }
@@ -17,7 +17,7 @@ const SHADOW = lab::mix(main.lower.like, 0, { const x = main.lower.like.luma(); 
 
 `[ColorThemes]
 ${cfg::name}\AlternateBase = ${main.lower.like.out()}, ${main.lower.like.out()}, ${main.lower.like.out()}
-${cfg::name}\Base = ${main.upper.like.out()}, ${main.upper.like.out()}, ${main.upper.like.out()}
+${cfg::name}\Base = ${main.upper.area.out()}, ${main.upper.area.out()}, ${main.upper.area.out()}
 ${cfg::name}\BrightText = #ffffff, #ffffff, #ffffff
 ${cfg::name}\Button = ${main.lower.area.out()}, ${main.lower.area.out()}, ${main.lower.area.out()}
 ${cfg::name}\ButtonText = ${main.lower.text.out()}, ${main.lower.text.out()}, ${main.lower.text.out()}
@@ -30,10 +30,10 @@ ${cfg::name}\LinkVisited = ${main.magenta.like.out()}, ${main.magenta.like.out()
 ${cfg::name}\Mid = ${MID}, ${MID}, ${MID}
 ${cfg::name}\Midlight = ${MIDLIGHT}, ${MIDLIGHT}, ${MIDLIGHT}
 ${cfg::name}\NoRole = #000000, #000000, #000000
-${cfg::name}\PlaceholderText = #${main.lower.text.fade(main.dim).to_hex_argb(true)}
+${cfg::name}\PlaceholderText = #${main.lower.text.fade(0.625).to_hex_argb(true)}
 ${cfg::name}\Shadow = ${SHADOW}, ${SHADOW}, ${SHADOW}
 ${cfg::name}\Text = ${main.upper.text.out()}, ${main.upper.text.out()}, ${main.upper.text.out()}
-${cfg::name}\ToolTipBase = ${main.upper.area.out()}, ${main.upper.area.out()}, ${main.upper.area.out()}
+${cfg::name}\ToolTipBase = ${main.upper.like.out()}, ${main.upper.like.out()}, ${main.upper.like.out()}
 ${cfg::name}\ToolTipText = ${main.lower.text.out()}, ${main.lower.text.out()}, ${main.lower.text.out()}
 ${cfg::name}\Window = ${main.lower.like.out()}, ${main.lower.like.out()}, ${main.lower.like.out()}
 ${cfg::name}\WindowText = ${main.lower.text.out()}, ${main.lower.text.out()}, ${main.lower.text.out()}`

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -31,148 +31,126 @@ impl Themes<'_> {
 		transition_type: gtk::RevealerTransitionType::SwingRight
 		
 		child: &_ @ gtk::Stack stack {
-			~transition_type: gtk::StackTransitionType::SlideLeftRight
-			
+			transition_type: gtk::StackTransitionType::SlideLeftRight
+			~
 			add_child: &_ @ gtk::Button next {
-				~icon_name: icons::GO_NEXT
-				
-				connect_clicked: clone![root; move |_| {
-					root.navigate(adw::NavigationDirection::Forward);
-				}]
+				icon_name: icons::GO_NEXT ~
+				connect_clicked: clone![root; move |_| root.set_show_content(true)]
 			}
-			
 			add_child: &_ @ gtk::Button previous {
-				~icon_name: icons::GO_PREVIOUS
-				
-				connect_clicked: clone![root; move |_| {
-					root.navigate(adw::NavigationDirection::Back);
-				}]
+				icon_name: icons::GO_PREVIOUS ~
+				connect_clicked: clone![root; move |_| root.set_show_content(false)]
 			}
 		}
 	}
 	
-	adw::Leaflet pub root {
-		can_navigate_back: true
-		can_navigate_forward: true
-		~transition_type: adw::LeafletTransitionType::Slide
+	adw::NavigationSplitView pub root {
+		max_sidebar_width: 648.0
+		min_sidebar_width: 324.0
+		sidebar_width_fraction: 0.375
+		vexpand: true
 		
-		bind_property: "folded", &buttons, "reveal-child" 'back { sync_create; }
-		
-		append: &_.root @ namespaces::pane(window) pane {
-			root.set_hexpand: false
-			vbox.append: &_ @ adw::PreferencesGroup group { }
+		sidebar: &_ @ adw::NavigationPage {
+			css_classes: ["background"]
+			title: i18n("Themes")
 			
-			vbox.prepend: &_ @ gtk::CheckButton {
-				active: true
-				label: i18n("_Do not filter by namespace or theme")
-				~use_underline: true
-				namespaces::populate: &_, &tags, &cache, &group, &selection, &tx
+			child: &_.root @ namespaces::pane() {
+				root.set_hexpand: false
+				vbox.append: &_ @ adw::PreferencesGroup group { }
 				
-				connect_toggled: clone![schemes.tx; move |this| if this.is_active() {
-					let mut selected = selection.borrow_mut();
-					selected.namespace.clear();
-					selected.group.clear();
-					send!(schemes::Msg::SelectItem => tx);
-				}]
-			}
-			
-			vbox.append: &_.root @ crate::colors::start() colors { }
-			
-			vbox.append: &_ @ adw::PreferencesGroup option_group {
-				title: i18n("Shared options")
-				description: i18n("Bindable to dynamic schemes")
-				
-				header_suffix: &_ @ gtk::MenuButton {
-					css_classes: ["circular"]
-					icon_name: icons::LIST_ADD
-					valign: gtk::Align::Center
-					
-					menu_model: &_ @ gio::Menu {
-						append: Some(&i18n("Boolean")       ), Some("win.boolean")
-						append: Some(&i18n("Integer")       ), Some("win.integer")
-						append: Some(&i18n("Decimal number")), Some("win.float")
-						append: Some(&i18n("Text")          ), Some("win.string")
-						append: Some(&i18n("Color Set")     ), Some("win.set")
-						append: Some(&i18n("Color Role")    ), Some("win.role")
-						freeze;
-					}!
+				vbox.prepend: &_ @ gtk::CheckButton {
+					active: true
+					label: i18n("_Do not filter by namespace or theme")
+					namespaces::populate: &_, &tags, &cache, &group, &selection, &tx
+					use_underline: true
+					~
+					connect_toggled: clone![schemes.tx; move |this| if this.is_active() {
+						let mut selected = selection.borrow_mut();
+						selected.namespace.clear();
+						selected.group.clear();
+						send!(schemes::Msg::SelectItem => tx);
+					}]
 				}
+				
+				vbox.append: &_.root @ crate::colors::start() colors { }
+				
+				/* REMOVE vbox.append: &_ @ adw::PreferencesGroup option_group {
+					title: i18n("Shared options")
+					description: i18n("Bindable to dynamic schemes")
+					
+					header_suffix: &_ @ gtk::MenuButton {
+						css_classes: ["circular"]
+						icon_name: icons::LIST_ADD
+						valign: gtk::Align::Center
+						
+						menu_model: &_ @ gio::Menu {
+							append: Some(&i18n("Boolean")       ), Some("win.boolean")
+							append: Some(&i18n("Integer")       ), Some("win.integer")
+							append: Some(&i18n("Decimal number")), Some("win.float")
+							append: Some(&i18n("Text")          ), Some("win.string")
+							append: Some(&i18n("Color Set")     ), Some("win.set")
+							append: Some(&i18n("Color Role")    ), Some("win.role")
+							freeze;
+						}!
+					}
+				} */
 			}
-		} 'back { set_name: Some("pane") }!
+		}
 		
-		append: &gtk::Separator::default() 'back { set_navigatable: false }!
-		append: &_.root @ schemes::Schemes schemes {
-			cache: Rc::clone(&cache)
-			scheme: Rc::clone(&scheme)
-			selection: Rc::clone(&selection)
-			settings: settings.clone()
-			tags: tags.clone()
-			themes: tx.clone()
-			window;
-		}? 'back { set_name: Some("schemes") }!
+		content: &_ @ adw::NavigationPage {
+			title: i18n("Schemes")
+			child: &_.root @ schemes::Schemes schemes {
+				cache: Rc::clone(&cache)
+				scheme: Rc::clone(&scheme)
+				selection: Rc::clone(&selection)
+				settings: settings.clone()
+				tags: tags.clone()
+				themes: tx.clone()
+				window;
+			}?
+		} ~
 		
-		connect_visible_child_notify: clone![stack, next, previous;
-			move |this| match this.visible_child_name().as_deref() {
-				Some("pane") => stack.set_visible_child(&next),
-				Some("schemes") => stack.set_visible_child(&previous),
-				_ => unreachable!(),
-			}]
+		bind_property: "collapsed", &buttons, "reveal-child" 'back { sync_create; }
+		
+		connect_show_content_notify: clone![stack, next, previous; move |this|
+			stack.set_visible_child(if this.shows_content() { &previous } else { &next })]
 	}
 }]
 
 fn start(Themes { cache, selection, settings, tags, window }: Themes) -> Template {
-	let (tx, rx) = glib::MainContext::channel(glib::Priority::DEFAULT);
-	
+	let (tx, rx) = async_channel::bounded(1);
 	let scheme = SelectedScheme::default();
 	
 	expand_view_here! { }
 	
-	let mut option_rows = vec![];
-	
-	let mut update = move |msg| Some(match msg {
+	let update = move |msg| Some(match msg {
 		namespaces::Msg::Select =>
 			send!(schemes::Msg::SelectItem => schemes.tx),
 		
 		namespaces::Msg::SelectItem => {
 			let scheme = scheme.borrow();
-			let scheme::Scheme { data, namespace_id, theme_id, .. }
-			  = scheme.as_ref().unwrap().borrow();
-			
-			(colors.refresh) (&data.sets);
-			
-			let (namespace, bin) = cache.namespace(&namespace_id)
-				.log(|_| log::critical, log::cache_error, (), &tags, true)?;
-			
-			let theme = namespace.theme(&theme_id, bin)
-				.log(|_| log::critical, log::namespace_error, &namespace_id, &tags, true)?;
-			
-			for row in &option_rows { option_group.remove(row); }
-			option_rows.clear();
-			
-			for (id, option) in &theme.options {
-				let row = option_row(id, option);
-				option_group.add(&row);
-				option_rows.push(row);
-			}
+			let scheme::Scheme { data, .. } = scheme.as_ref().unwrap().borrow();
+			(colors.refresh) (&data);
 		}
 	});
 	
-	rx.attach(None, move |msg| { update(msg); glib::ControlFlow::Continue });
+	glib::spawn_future_local(async move {
+		while let Ok(msg) = rx.recv().await { update(msg); }
+	});
 	
 	Template { root, buttons }
 }
 
 #[view[ adw::EntryRow root {
+	text: id
 	title: match value {
-		Value::Bool (_) => i18n("Boolean"),
-		Value::Int (_) => i18n("Integer"),
-		Value::Float   (_) => i18n("Decimal number"),
-		Value::String  (_) => i18n("Text"),
-		Value::Set    {..} => i18n("Color Set"),
-		Value::Role   {..} => i18n("Color Role"),
-		Value::Binding (_) | Value::Bind(_) => unreachable!()
-	}
-	~text: id
+		Value::Bool   (_) => i18n("Boolean"),
+		Value::Int    (_) => i18n("Integer"),
+		Value::Float  (_) => i18n("Decimal number"),
+		Value::String (_) => i18n("Text"),
+		Value::Set   {..} => i18n("Color Set"),
+		Value::Role  {..} => i18n("Color Role"),
+	} ~
 	
 	add_suffix: &_ @ gtk::Box {
 		if let Value::Bool(..) = value
@@ -241,7 +219,6 @@ fn start(Themes { cache, selection, settings, tags, window }: Themes) -> Templat
 				valign: gtk::Align::Center
 				with_list: &_, &ROLES
 			}
-			Value::Binding(_) | Value::Bind(_) => { }
 		}
 	}!
 } ]]

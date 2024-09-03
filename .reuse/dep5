@@ -1,8 +1,0 @@
-Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: Aquarelle
-Upstream-Contact: Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
-Source: https://github.com/ejaa3/aquarelle
-
-Files: data/icons/*.svg
-Copyright: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
-License: CC0-1.0

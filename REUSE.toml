@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Unlicense
+
+version = 1
+SPDX-PackageName = 'Aquarelle'
+SPDX-PackageSupplier = 'Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>'
+SPDX-PackageDownloadLocation = 'https://github.com/ejaa3/aquarelle'
+
+[[annotations]]
+path = 'data/icons/**.svg'
+precedence = 'aggregate'
+SPDX-FileCopyrightText = '2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>'
+SPDX-License-Identifier = 'CC0-1.0'

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -11,28 +11,24 @@ use serde::{Serialize, Deserialize};
 use crate::{cache, map, mapping, namespace, path};
 
 #[derive(Serialize, Deserialize)]
-#[serde(untagged)]
+#[serde(rename_all = "kebab-case")]
 pub enum Paths {
-	Suggested (bool),
-	Include { include: Vec<CompactString> },
-	Exclude { exclude: Vec<CompactString> },
-	Requests (BTreeMap<CompactString, BTreeMap<CompactString, MapPaths>>)
+	Include (Vec<CompactString>),
+	Exclude (Vec<CompactString>),
+	Request (BTreeMap<CompactString, BTreeMap<CompactString, MapPaths>>)
 }
 
-impl Default for Paths {
-	fn default() -> Self { Paths::Suggested(false) }
-}
+impl Default for Paths { fn default() -> Self { Paths::Include(Vec::new()) } }
 
-pub fn no_suggestions(paths: &Paths) -> bool {
-	if let Paths::Suggested(false) = *paths { true } else { false }
+pub(crate) fn includes_nothing(paths: &Paths) -> bool {
+	if let Paths::Include(vec) = paths { vec.is_empty() } else { false }
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(untagged)]
+#[serde(rename_all = "kebab-case")]
 pub enum MapPaths {
-	Suggested (()),
-	Include { include: Vec<CompactString> },
-	Exclude { exclude: Vec<CompactString> },
+	Include (Vec<CompactString>),
+	Exclude (Vec<CompactString>),
 }
 
 pub fn resolve<'a>(
@@ -45,16 +41,16 @@ pub fn resolve<'a>(
 	previous_paths: &mut Vec<path::ParsedFrom<'a>>,
 ) -> Result<mapping::Files<'a>, Error<'a>> {
 	let request_paths: Box<dyn Iterator<Item = _>> = match request.paths {
-		Paths::Suggested(false) =>
+		Paths::Include(ref include) if include.is_empty() =>
 			Box::new(request.custom_paths.iter().map(|path| Ok((None, path)))),
 		
-		Paths::Suggested(true) => Box::new(
+		Paths::Exclude(ref exclude) if exclude.is_empty() => Box::new(
 			map.suggested_paths.iter()
 				.map(|(id, path)| Ok((Some(id), path)))
 				.chain(request.custom_paths.iter().map(|path| Ok((None, path))))
 		),
 		
-		Paths::Include { ref include } => Box::new(
+		Paths::Include(ref include) => Box::new(
 			include.iter().map(
 				|include_id| Ok((
 					Some(include_id), map.suggested_paths.get(include_id)
@@ -63,14 +59,14 @@ pub fn resolve<'a>(
 			).chain(request.custom_paths.iter().map(|path| Ok((None, path))))
 		),
 		
-		Paths::Exclude { ref exclude } => Box::new(
+		Paths::Exclude(ref exclude) => Box::new(
 			map.suggested_paths.iter()
 				.filter_map(|(id, path)| (!exclude.contains(id)).then(|| Ok((Some(id), path))))
 				.chain(request.custom_paths.iter().map(|path| Ok((None, path))))
 		),
 		
-		Paths::Requests(ref map) => Box::new(
-			map.iter().map(|(namespace_id, map_paths)| {
+		Paths::Request(ref namespaces) => Box::new(
+			namespaces.iter().map(|(namespace_id, map_paths)| {
 				let (namespace, bin) = cache.namespace(namespace_id)
 					.map_err(|error| Error::Namespace { id, error })?;
 				
@@ -79,17 +75,18 @@ pub fn resolve<'a>(
 						.map_err(|error| Error::Map { id, namespace_id, error })?;
 					
 					Ok::<Box<dyn Iterator<Item = Result<_, Error>>>, Error>(match paths {
-						MapPaths::Suggested(_) =>
-							Box::new(map.suggested_paths.iter().map(|(id, path)| Ok((Some(id), path)))),
-						
-						MapPaths::Include { include } => Box::new(
+						MapPaths::Include(include) => Box::new(
 							include.iter().map(|include_id| Ok((
 								Some(include_id), map.suggested_paths.get(include_id)
 									.ok_or(Error::PathsIncludeNotFound { id, namespace_id, map_id, include_id })?
 							)))
 						),
 						
-						MapPaths::Exclude { exclude } => Box::new(
+						MapPaths::Exclude(exclude) if exclude.is_empty() => Box::new(
+							map.suggested_paths.iter().map(|(id, path)| Ok((Some(id), path)))
+						),
+						
+						MapPaths::Exclude(exclude) => Box::new(
 							map.suggested_paths.iter().filter_map(|(id, path)|
 								if exclude.contains(id) { None } else { Some(Ok((Some(id), path))) })
 						),
@@ -100,41 +97,26 @@ pub fn resolve<'a>(
 	};
 	
 	match map.variant {
-		mapping::Type::TextFileEdit => todo!(), // TODO
+		mapping::Type::EditTextFile => todo!(), // TODO
 		
-		mapping::Type::TextFile     | mapping::Type::TextFiles     |
-		mapping::Type::SvgToPngFile | mapping::Type::SvgToPngFiles |
-		mapping::Type::ZipFile      | mapping::Type::ZipFiles      => {
+		mapping::Type::TextFile | mapping::Type::SvgToPngFile | mapping::Type::ZipFile => {
 			let mut paths = vec![];
 			
 			for request_path in request_paths.into_iter() {
-				let (suggested_id, located) = request_path?;
+				let (suggested_id, location) = request_path?;
 				
-				/* if let mapping::Type::TextFile  |
-				       mapping::Type::SvgToPngFile |
-				       mapping::Type::ZipFile      = map.variant
-				{ if located.path.is_empty() { Err(Error::EmptyPath { id, map_id, located })? } } */
+				let get_path = || location.to_path_buf(Some(default_path))
+					.ok_or(Error::MissingPath { id, location });
 				
-				let get_path = || located.to_path_buf(Some(default_path))
-					.ok_or(Error::MissingPath { id, located });
-				
-				let buf = match map.variant {
-					mapping::Type::TextFiles     |
-					mapping::Type::SvgToPngFiles |
-					mapping::Type::ZipFiles      => {
-						let string = format!("{name}{}", map.extension);
-						
-						path::is_bad(&string)
-							.map_err(|error| Error::BadNaming { id, map_id, error })?;
-						
-						let mut path = get_path()?; path.push(string);
-						path
-					}
-					_ => get_path()?
+				let buf = if name.is_empty() { get_path()? } else {
+					path::is_bad(name)
+						.map_err(|error| Error::BadNaming { id, map_id, error })?;
+					
+					let mut path = get_path()?; path.push(name); path
 				};
 				
 				let suggested_id = suggested_id.map(|id| id as _);
-				let path = path::Parsed { suggested_id, located, file: None, buf };
+				let path = path::Parsed { suggested_id, location, file: None, buf };
 				
 				if is_unique_among_maps(path.clone(), previous_paths, id)? {
 					paths.push(path.clone());
@@ -145,11 +127,9 @@ pub fn resolve<'a>(
 			if paths.is_empty() { None } else { Some(mapping::Files::Single(paths)) }
 		}
 		
-		mapping::Type::Directory   |
-		mapping::Type::Directories => {
-			if let mapping::Type::Directories = map.variant {
-				path::is_bad(&name)
-					.map_err(|error| Error::BadNaming { id, map_id, error })?;
+		mapping::Type::Directory => {
+			if !name.is_empty() {
+				path::is_bad(&name).map_err(|error| Error::BadNaming { id, map_id, error })?;
 			}
 			
 			let request_paths = request_paths.collect::<Result<Box<_>, _>>()?;
@@ -159,11 +139,11 @@ pub fn resolve<'a>(
 			for (file_id, file) in &map.files {
 				let mut file_paths = vec![];
 				
-				for (suggested_id, located) in request_paths.iter() {
-					let mut buf = located.to_path_buf(Some(default_path))
-						.ok_or(Error::MissingPath { id, located })?;
+				for (suggested_id, location) in request_paths.iter() {
+					let mut buf = location.to_path_buf(Some(default_path))
+						.ok_or(Error::MissingPath { id, location })?;
 					
-					if let mapping::Type::Directories = map.variant { buf.push(name); }
+					if !name.is_empty() { buf.push(name); }
 					
 					let subdir = if file.at > 0 {
 						let subdir = map.subdirectories.get(file.at as usize - 1)
@@ -177,7 +157,7 @@ pub fn resolve<'a>(
 					
 					let suggested_id = suggested_id.map(|id| id as _);
 					let file = Some(path::File { file_id, file, subdir });
-					let path = path::Parsed { suggested_id, located, file, buf };
+					let path = path::Parsed { suggested_id, location, file, buf };
 					
 					if is_unique_among_maps(path.clone(), previous_paths, id)? {
 						file_paths.push(path.clone());
@@ -187,7 +167,9 @@ pub fn resolve<'a>(
 				
 				no_paths &= file_paths.is_empty();
 				
-				paths.push(mapping::ParsedFile { file_id, variant: file.variant, file_paths });
+				paths.push(mapping::ParsedFile {
+					file_id, variant: file.variant.unwrap_or(map.default_file_type), file_paths
+				});
 			}
 			
 			if no_paths { None } else { Some(mapping::Files::Several(paths)) }
@@ -238,8 +220,7 @@ pub enum Error<'a> {
            Namespace { id: &'a str, error: Box<cache::Error<'a>> },
                  Map { id: &'a str, namespace_id: &'a str, error: Box<namespace::Error<'a>> },
 PathsIncludeNotFound { id: &'a str, namespace_id: &'a str, map_id: &'a str, include_id: &'a str },
-//         EmptyPath { id: &'a str, map_id: &'a str, located: &'a path::Located },
-         MissingPath { id: &'a str, located: &'a path::Located },
+         MissingPath { id: &'a str, location: &'a path::Location },
            BadNaming { id: &'a str, map_id: &'a str, error: &'static str },
       NoSubdirectory { id: &'a str, map_id: &'a str, file_id: &'a str, at: u32, available: usize },
              NoPaths { id: &'a str },
@@ -281,13 +262,13 @@ impl Error<'_> {
 				
 				Ok(exitcode::CONFIG)
 			}
-			Self::MissingPath { id, located } => {
+			Self::MissingPath { id, location } => {
 				write!(out, crate::csi! {
 					"Unable to parse " /fg blue; "[[maps." /fg yellow; "{:?}" /fg blue; ".custom-paths]]"!
 					" with value "
 				}, id)?;
 				
-				path::show_located(out, &located)?; writeln!(out)?;
+				path::show_location(out, &location)?; writeln!(out)?;
 				
 				Ok(exitcode::SOFTWARE)
 			}
@@ -298,16 +279,6 @@ impl Error<'_> {
 				
 				Ok(exitcode::CONFIG)
 			}
-			/* Self::EmptyPath { id, map_id, located } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ']'! " failed\n"
-					"The path " /fg blue; "{{ {} = " /fg yellow; "''" /fg blue; " }}"!
-					" has been provided or suggested to the map " /fg yellow; "{:?}"!
-					" which is not of a plural type, so its path cannot be just the location"
-				}, map_id, <&str>::from(located.location), id)?;
-				
-				Ok(exitcode::CONFIG)
-			} */
 			Self::NoSubdirectory { id, map_id, file_id, at, available } => {
 				writeln!(out, crate::csi! {
 					"Request for " /fg blue; "[maps." /fg green; "{:?}" /fg blue; "]"! " failed\n"
@@ -343,7 +314,7 @@ fn show_conflict(out: &mut impl std::io::Write, parsed: path::ParsedFrom, pos: &
 		"\t{} cause: " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; "]"! "\n\t     at path: "
 	}, pos, parsed.id)?;
 	
-	path::show_located(out, parsed.path.located)?;
+	path::show_location(out, parsed.path.location)?;
 	
 	if let Some(id) = parsed.suggested_id {
 		write!(out, crate::csi!(" suggested as " /fg yellow; "{:?}"!), id)?;

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -76,6 +76,7 @@ impl Role {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Optional {
 	pub name: compact_str::CompactString,
 	
@@ -86,41 +87,37 @@ pub struct Optional {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-#[serde(untagged)]
+#[serde(untagged, rename_all = "kebab-case")]
 pub enum Value {
-	Bool (bool),
-	Int (rhai::INT),
-	Float   (rhai::FLOAT),
-	String  (rhai::ImmutableString),
-	Set     {  set: Set },
-	Role    { role: Role },
-	Binding ((compact_str::CompactString,)),
-	Bind    ([(); 0]),
+	Bool   (bool),
+	Int    (rhai::INT),
+	Float  (rhai::FLOAT),
+	String (rhai::ImmutableString),
+	Set    { set: Set },
+	Role   { role: Role },
 }
 
 impl Value {
 	const fn has_same_type(&self, other: &Value) -> bool {
 		match (self, other) {
-			(Value::Bool (..), Value::Bool (..)) |
-			(Value::Int (..), Value::Int (..)) |
-			(Value::Float   (..), Value::Float   (..)) |
-			(Value::String  (..), Value::String  (..)) |
-			(Value::Set     {..}, Value::Set     {..}) |
-			(Value::Role    {..}, Value::Role    {..}) => true,
+			(Value::Bool   (_), Value::Bool   (_)) |
+			(Value::Int    (_), Value::Int    (_)) |
+			(Value::Float  (_), Value::Float  (_)) |
+			(Value::String (_), Value::String (_)) |
+			(Value::Set   {..}, Value::Set   {..}) |
+			(Value::Role  {..}, Value::Role  {..}) => true,
 			_ => false
 		}
 	}
 	
 	pub const fn type_str(&self) -> &'static str {
 		match self {
-			Value::Bool (..) => "boolean",
-			Value::Int (..) => "integer",
-			Value::Float   (..) => "float",
-			Value::String  (..) => "string",
-			Value::Set     {..} => "color-set",
-			Value::Role    {..} => "color-role",
-			Value::Binding {..} |
-			Value::Bind    {..} => "binding",
+			Value::Bool   (_) => "boolean",
+			Value::Int    (_) => "integer",
+			Value::Float  (_) => "float",
+			Value::String (_) => "string",
+			Value::Set   {..} => "color-set",
+			Value::Role  {..} => "color-role",
 		}
 	}
 }
@@ -190,8 +187,8 @@ macro_rules! impl_csi {
 }
 
 #[cfg(feature = "cli")]
-pub const fn location(local: bool) -> &'static str {
-	if local { "local" } else { "system" }
+pub const fn location(user: bool) -> &'static str {
+	if user { "user" } else { "system" }
 }
 
 #[cfg(feature = "cli")]
@@ -214,18 +211,18 @@ pub mod errors {
 		["some", "file", "or", "directory", "path"].iter().collect()
 	}
 	
-	fn toml_error() -> Box<toml_edit::de::Error> {
-		match toml_edit::de::from_str::<()>("invalid-toml") {
-			Ok(_) => panic!("the TOML is valid"), Err(error) => Box::new(error)
+	fn toml_error() -> Box<toml::de::Error> {
+		match toml::de::from_str::<()>("invalid-toml") {
+			Ok(_) => panic!("the TOML is valid"), Err(error) => Box::from(error)
 		}
 	}
 	
 	pub fn scan_errors(path: &Path) -> [cache::ScanError; 3] {
 		use cache::ScanError::*;
 		
-		[  Path { local: false, path, error: io::Error::new(io::ErrorKind::Other, MSG) },
-		  Entry { local: true , path, error: io::Error::new(io::ErrorKind::Other, MSG) },
-		Unicode { local: false, path }]
+		[  Path { user: false, path, error: io::Error::new(io::ErrorKind::Other, MSG) },
+		  Entry { user: true , path, error: io::Error::new(io::ErrorKind::Other, MSG) },
+		Unicode { user: false, path }]
 	}
 	
 	pub fn cache_errors(path: &Path) -> [cache::Error; 3] {
@@ -259,7 +256,7 @@ pub mod errors {
 		[first, second]
 	}
 	
-	pub fn scheme_errors<'a>(path: &'a Path, current: &'a Value, required: &'a Value) -> [scheme::Error<'a>; 7] {
+	pub fn scheme_errors<'a>(path: &'a Path, value: &'a Value, required: &'a Value) -> [scheme::Error<'a>; 7] {
 		let [(script_1, error_1), (script_2, error_2)] = script_errors();
 		
 		[scheme::Error::Cache(Box::new(
@@ -271,7 +268,7 @@ pub mod errors {
 			)
 		},
 		scheme::Error::OptionType {
-			option_id: "option-id", current, required
+			option_id: "option-id", value, required
 		},
 		scheme::Error::Loading {
 			scheme_id: "scheme-id", path, error: io::Error::new(io::ErrorKind::Other, MSG)
@@ -315,7 +312,7 @@ pub mod errors {
 	}
 	
 	pub fn pathing_errors<'a>(
-		located: &'a path::Located, previous: path::ParsedFrom<'a>, current: path::ParsedFrom<'a>
+		location: &'a path::Location, previous: path::ParsedFrom<'a>, current: path::ParsedFrom<'a>
 	) -> [pathing::Error<'a>; 9] {
 		let (id, map_id, include_id, namespace_id) = ("map-id", "map-request", "suggested-id", "namespace-id");
 		[
@@ -325,8 +322,8 @@ pub mod errors {
 				namespace::Error(namespace::Object::Map, map_id, false, namespace::Of::NotFound)
 			) },
 			pathing::Error::PathsIncludeNotFound { id, namespace_id, map_id, include_id },
-			// pathing::Error::EmptyPath { id, map_id, located },
-			pathing::Error::MissingPath { id, located },
+			// pathing::Error::EmptyPath { id, map_id, location },
+			pathing::Error::MissingPath { id, location },
 			pathing::Error::BadNaming { id, map_id, error: MSG },
 			pathing::Error::NoSubdirectory { id, map_id, file_id: "file-id", at: 4, available: 2 },
 			pathing::Error::NoPaths { id },

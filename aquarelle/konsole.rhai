@@ -1,23 +1,21 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 const main = cfg::scheme("main");
 
-const  normal = if cfg::option("bold") { "like" } else { "area" };
+const normal  = if cfg::option("bold") { "like" } else { "area" };
 const intense = if cfg::option("bold") { "area" } else { "like" };
 
 const base = if cfg::option("embedded") { main.lower.like } else { main.lower.area };
 
 fn out() { '#' + this.to_hex_rgb(true) }
 
-fn faint(set) {
-	lab::mix(global::base, global::main[set].like, global::main.dim).out()
-}
+fn faint(set) { lab::mix(global::base, global::main[set].like, 0.625).out() }
 
-`
+/* INI */ `
 [General]
 Description = ${cfg::display}
 Blur = ${cfg::option("blur")}
@@ -30,25 +28,25 @@ Color = ${main.lower.text.out()}
 Color = ${main.any[intense].out()}
 
 [ForegroundFaint]
-Color = ${lab::mix(base, main.lower.text, main.dim).out()}
+Color = ${lab::mix(base, main.lower.text, 0.625).out()}
 
 [Background]
 Color = ${base.out()}
 
 [BackgroundIntense]
-Color = ${main.upper.area.out()}
+Color = ${main.upper.like.out()}
 
 [BackgroundFaint]
-Color = ${lab::mix(base, main.lower.text, main.border).out()}
+Color = ${lab::mix(base, main.lower.text, 0.25).out()}
 
 [Color0]
 Color = ${ // HACK better solarized
 	if main.lower.like.luma() != main.lower.area.luma()
-		{ main.lower.like.out() } else { main.upper.area.out() }
+		{ main.lower.like.out() } else { main.upper.like.out() }
 }
 
 [Color0Intense]
-Color = ${lab::mix(main.lower.text, base, main.dim).out()}
+Color = ${lab::mix(main.lower.text, base, 0.625).out()}
 
 [Color0Faint]
 Color = ${faint("any")}
@@ -114,5 +112,5 @@ Color = ${main.any[normal].out()}
 Color = ${main.upper.text.out()}
 
 [Color7Faint]
-Color = ${lab::mix(base, main.upper.text, main.dim).out()}
+Color = ${lab::mix(base, main.upper.text, 0.625).out()}
 `

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name = 'obsidian-border'
+type = 'text-file' # md
+about = '''
+A preset for [obsidian-border](https://github.com/Akifyss/obsidian-border).
+'''
+
+schemes.main.name = 'Main'
+
+[options]
+accent = { name = 'Accent', default.set = 'any' }
+
+[suggested-paths]
+default = { default = 'obsidian-border.json' }

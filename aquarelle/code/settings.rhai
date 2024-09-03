@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,7 +8,7 @@ const editor = cfg::scheme("editor");
 
 const dark = editor.lower.text.luma() > editor.lower.like.luma();
 
-fn out() { `"#${this.to_hex_rgb(true)}"` }
+fn out() { `"#${this.to_hex_rgb(true)}"` } // json
 
 fn shadow() {
 	const L = this.luma();
@@ -84,7 +84,7 @@ fn shadow() {
 	"latex-workshop.view.pdf.color.dark.backgroundColor": ${editor.lower.like.out()},
 	"latex-workshop.view.pdf.color.dark.pageBorderColor": ${editor.lower.like.shadow()},
 	"latex-workshop.view.pdf.color.dark.pageColorsBackground": ${editor.upper.like.out()},
-	"latex-workshop.view.pdf.color.dark.pageColorsForeground": ${editor.upper.text.out()},
+	"latex-workshop.view.pdf.color.dark.pageColorsForeground": ${editor.lower.text.out()},
 	"latex-workshop.view.pdf.color.light.backgroundColor": ${editor.lower.like.out()},
 	"latex-workshop.view.pdf.color.light.pageBorderColor": ${editor.lower.like.shadow()},
 	"latex-workshop.view.pdf.color.light.pageColorsBackground": ${editor.lower.area.out()},

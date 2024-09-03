@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -97,32 +97,32 @@ fn print_listing_errors() -> io::Result<()> {
 fn print_pathing_errors() -> io::Result<()> {
 	let stdout = &mut io::stdout();
 	
-	let located = path::Located {
-		location: path::Location::Home,
-		    path: ".local/share".to_owned()
+	let location = path::Location {
+		prefix: path::Prefix::Home,
+		  path: String::const_new(".local/share"),
 	};
 	
 	let parsed = path::ParsedFrom {
 		  id: "first-parsed-id",
 		path: path::Parsed {
 			suggested_id: None,
-			     located: &located,
+			    location: &location,
 			        file: None,
-			         buf: located.to_path_buf(None).unwrap()
+			         buf: location.to_path_buf(None).unwrap()
 		}
 	};
 	
-	let located_2 = path::Located {
-		location: path::Location::None,
-		    path: "/sub/directory".to_owned()
+	let location_2 = path::Location {
+		prefix: path::Prefix::Custom,
+		  path: String::const_new("/sub/directory"),
 	};
 	
 	let file = path::File {
 		file_id: "file-id",
-		   file: &aquarelle::mapping::File {
-			variant: aquarelle::mapping::FileType::SvgToPng,
+		file: &aquarelle::mapping::File {
+			variant: Some(aquarelle::mapping::FileType::SvgToPng),
 			     at: 4,
-			   name: String::new_inline("file_name.txt"),
+			   name: String::const_new("file_name.txt"),
 		},
 		subdir: "hello/world"
 	};
@@ -131,14 +131,14 @@ fn print_pathing_errors() -> io::Result<()> {
 		  id: "second-parsed-id",
 		path: path::Parsed {
 			suggested_id: Some("suggested-id"),
-			     located: &located_2,
+			    location: &location_2,
 			        file: Some(file),
-			         buf: std::path::PathBuf::from("/sub/directory/hello/world/file_name.txt")
+			         buf: std::path::PathBuf::from("/sub/directory/hello/world/file_name.txt"),
 		}
 	};
 	
 	writeln!(stdout, "=== START ===")?;
-	for error in pathing_errors(&located, parsed, parsed_2) {
+	for error in pathing_errors(&location, parsed, parsed_2) {
 		aquarelle::warn(stdout, true)?;
 		error.show(stdout)?;
 	}

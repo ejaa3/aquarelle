@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name = 'CSS Colors'
+type = 'text-file'
+about = 'Aquarelle colors as CSS variables or classes.'
+
+[schemes]
+main = { name = 'Main' }
+
+[options]
+emph = { name = 'Emphasis (accent)', default.set = 'any' }
+
+filter = { name = 'Prefix for filter colors'       , default = 'fltr-' }
+fill   = { name = 'Prefix for fill color classes'  , default = 'fill-' }
+stroke = { name = 'Prefix for stroke color classes', default = 'strk-' }
+area   = { name = 'Suffix for area color variables', default = '-bg' }
+text   = { name = 'Suffix for text color variables', default = '-fg' }
+
+filter-selector = { name = 'Child selector for filter color classes', default = '' }
+  fill-selector = { name = 'Child selector for fill color classes'  , default = '' }
+stroke-selector = { name = 'Child selector for stroke color classes', default = '' }
+
+[options.prefix]
+name = 'Prefix for everything'
+about = 'Variable or class name prefix'
+default = 'aqua-'
+
+[options.initial]
+name = 'Use only the initial of the color names'
+about = 'If enabled, e.g. `r` will be written instead of `red`'
+default = false
+
+[suggested-paths]
+default = { default = 'aquarelle.css' }

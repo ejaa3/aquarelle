@@ -1,11 +1,11 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const   name = cfg::option("name");
-const    hue = cfg::option("hue");
+const hue    = cfg::option("hue");
+const name   = cfg::option("name");
 const rotate = cfg::option("rotate");
 
 const sc = cfg::option("surface-chroma");
@@ -60,16 +60,15 @@ lib::print_colors(colors, "colors");
 lib::print_colors(like, "like");
 lib::print_colors(area, "area"); */
 
-`  name = '${if name.is_empty() { "Neon Cake" } else { name }}'
- border =  ${cfg::option("border")}
-    dim =  ${cfg::option("dim")}
-  lower = { like = ${colors[1]}, area = ${colors[0]}, text = ${colors[4]} }
-  upper = { like = ${colors[3]}, area = ${colors[2]}, text = ${colors[5]} }
-    red = { like = ${  like[0]}, area = ${  area[0]}, text = ${colors[0]} }
- yellow = { like = ${  like[1]}, area = ${  area[1]}, text = ${colors[0]} }
-  green = { like = ${  like[2]}, area = ${  area[2]}, text = ${colors[0]} }
-   cyan = { like = ${  like[3]}, area = ${  area[3]}, text = ${colors[0]} }
-   blue = { like = ${  like[4]}, area = ${  area[4]}, text = ${colors[0]} }
+/* TOML */ `
+name    = '${if name.is_empty() { "Neon Cake Dark" } else { name }}'
+lower   = { like = ${colors[1]}, area = ${colors[0]}, text = ${colors[4]} }
+upper   = { like = ${colors[2]}, area = ${colors[3]}, text = ${colors[5]} }
+red     = { like = ${  like[0]}, area = ${  area[0]}, text = ${colors[0]} }
+yellow  = { like = ${  like[1]}, area = ${  area[1]}, text = ${colors[0]} }
+green   = { like = ${  like[2]}, area = ${  area[2]}, text = ${colors[0]} }
+cyan    = { like = ${  like[3]}, area = ${  area[3]}, text = ${colors[0]} }
+blue    = { like = ${  like[4]}, area = ${  area[4]}, text = ${colors[0]} }
 magenta = { like = ${  like[5]}, area = ${  area[5]}, text = ${colors[0]} }
-    any = { like = ${colors[6]}, area = ${colors[7]}, text = ${colors[0]} }
+any     = { like = ${colors[6]}, area = ${colors[7]}, text = ${colors[0]} }
 `

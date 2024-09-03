@@ -1,22 +1,21 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'GIMP Palette'
- type = 'text-files'
+name = 'GIMP Palette'
+type = 'text-file' # md
 about = '''
-A color palette for <a href='https://www.gimp.org'>GIMP</a>, the GNU Image Manipulation Program.
-'''
+A color palette for [GIMP](https://www.gimp.org),
+the GNU Image Manipulation Program.
+''' # rhai
 
-displaying = '`${arrangement} – ${scheme("main")}`'
-    naming = '`${arrangement} – ${scheme("main")}`'
- extension = '.gpl'
+display      = 'arrangement + " – " + scheme("main")' # rhai
+nomenclature = 'arrangement + " – " + scheme("main") + ".gpl"'
 
-[schemes]
-main = { name = 'Main Color Scheme' }
+schemes.main.name = 'Main'
 
 [suggested-paths]
 default = { default = 'gimp_palettes' }
 flatpak = { home = '.var/app/org.gimp.GIMP/config/GIMP/2.10/palettes' }
- user-1 = { data = 'GIMP/2.10/palettes' }
- user-2 = { home = '.local/share/GIMP/2.10/palettes' }
+user-1  = { data = 'GIMP/2.10/palettes' }
+user-2  = { home = '.local/share/GIMP/2.10/palettes' }

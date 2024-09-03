@@ -1,97 +1,79 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Telegram Desktop'
- type = 'zip-files'
-about = """
-An experimental theme for the instant messaging application \
-<a href='https://desktop.telegram.org'>Telegram Desktop</a>.
-"""
+name = 'Telegram Desktop'
+type = 'zip-file' # md
+about = '''
+Experimental theme for [Telegram Desktop](https://desktop.telegram.org).
+''' # rhai
 
-displaying = '`${arrangement} – ${scheme("main")}`'
-
-naming = '''
-	let scheme = "";
-	
-	for word in `${scheme("main")}`.split()
-	{ scheme += `${word.to_lower()}-` }
-	
-	if scheme.pop() == () { arrangement_id }
-	else { `${arrangement_id}-${scheme}` }
+display = 'arrangement + " – " + scheme("main")' # rhai
+nomenclature = '''
+  let scheme = "";
+  for word in `${scheme("main")}`.split() { scheme += word.to_lower() + '-' }
+  arrangement_id + if scheme.pop() == () { () } else { '.' + scheme } + ".tdesktop-theme"
 '''
 
-extension = '.tdesktop-theme'
+[options]
+accent = { name = 'Accent', default.set = 'any' }
+
+[options.title-shadow]
+name = 'Draw a shadow line below the title bar'
+about = 'Visible if the in-app option “native window” is disabled'
+default = true
+
+[options.title-border]
+name = 'Use border color on shadow line'
+about = 'Requires “title-shadow” option enabled (a.k.a shadow line)'
+default = false
+
+[options.incoming-selected]
+name = 'Color set for the selected incoming message'
+about = 'Use an emphasis color set for best results'
+default.set = 'magenta'
+
+[options.outgoing-selected]
+name = 'Color set for the selected outgoing message'
+about = 'Use an emphasis color set for best results'
+default.set = 'blue'
+
+[schemes]
+incoming = { name = 'Incoming messages', fallback = 'history' }
+outgoing = { name = 'Outgoing messages', fallback = 'history' }
+
+[schemes.main]
+name = 'Main'
+about = 'Used by almost everything, like menus and the emoji panel'
+
+[schemes.title]
+name = 'Title bar'
+about = 'Visible if the in-app option “native window” is disabled'
+fallback = 'main'
+
+[schemes.call]
+name = 'Call window (defective)'
+about = 'A dark scheme works better than a light one'
+fallback = 'main'
+
+[schemes.dialogs]
+name = 'Dialogs (chat list)'
+about = 'Where groups, channels and personal conversations appear'
+fallback = 'main'
+
+[schemes.sidebar]
+name = 'Sidebar (or folder bar)'
+about = 'Visible if chat folders are set up'
+fallback = 'dialogs'
+
+[schemes.history]
+name = 'Message history'
+about = 'Includes the message input field'
+fallback = 'main'
 
 [suggested-paths]
 default = { default = 'telegram_desktop' }
 
 [files]
-  image = { type = 'svg-to-png', name = 'background.png' }
-palette = { type = 'text', name = 'colors.tdesktop-palette' }
-
-# Options:
-
-[options]
-accent = { default.set = 'any', name = 'Accent Color Set' }
-
-[options.title-shadow]
-   name = 'Draw a shadow line below the title bar'
-  about = 'Visible if the in-app option “native window” is disabled'
-default = true
-
-[options.title-border]
-   name = 'Use border color on shadow line'
-  about = 'Requires “title-shadow” option enabled (a.k.a shadow line)'
-default = false
-
-[options.incoming-selected]
-   name = 'Color set for the selected incoming message'
-  about = 'Use an emphasis color set for best results'
-default = { set = 'magenta' }
-
-[options.outgoing-selected]
-   name = 'Color set for the selected outgoing message'
-  about = 'Use an emphasis color set for best results'
-default = { set = 'blue' }
-
-# Schemes:
-
-[schemes.main]
- name = 'Main Color Scheme'
-about = 'Used by almost everything, like menus and the emoji panel'
-
-[schemes.title]
-    name = 'Title bar'
-   about = 'Visible if the in-app option “native window” is disabled'
-fallback = 'main'
-
-[schemes.call]
-    name = 'Call window (defective)'
-   about = 'A dark scheme works better than a light one'
-fallback = 'main'
-
-[schemes.dialogs]
-    name = 'Dialogs (chat list)'
-   about = 'Where groups, channels and personal conversations appear'
-fallback = 'main'
-
-[schemes.sidebar]
-    name = 'Sidebar (or folder bar)'
-   about = 'Visible if chat folders are set up'
-fallback = 'dialogs'
-
-[schemes.history]
-    name = 'Message history'
-   about = 'Includes the message input field'
-fallback = 'main'
-
-[schemes.incoming]
-    name = 'Incoming messages'
-   about = 'history'
-fallback = 'main'
-
-[schemes.outgoing]
-    name = 'Outgoing messages'
-   about = 'history'
-fallback = 'main'
+image = { type = 'svg-to-png', name = 'background.png' }
+palette = { name = 'colors.tdesktop-palette' }

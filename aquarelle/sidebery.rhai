@@ -1,15 +1,15 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const   main = cfg::scheme("main");
+const main   = cfg::scheme("main");
 const accent = cfg::option("accent");
 
 fn out() { '#' + this.to_hex_rgba(true) }
 
-`
+/* CSS */ `
 #root.root {--toolbar-el-overlay-clicked-bg: ${main.lower.text.fade(0.2).out()};}
 #root.root {--toolbar-el-overlay-hover-bg: ${main.lower.text.fade(0.15).out()};}
 #root.root {--toolbar-bg: ${main.lower.area.out()};}
@@ -25,7 +25,7 @@ fn out() { '#' + this.to_hex_rgba(true) }
 #root.root {--tabs-normal-fg: ${main.lower.text.out()};}
 #root.root {--popup-fg: ${main.lower.text.out()};}
 #root.root {--popup-bg: ${main.lower.like.out()};}
-#root.root {--ctx-menu-separator: ${main.lower.text.fade(main.border).out()};}
+#root.root {--ctx-menu-separator: ${main.lower.text.fade(0.25).out()};}
 #root.root {--ctx-menu-fg: ${main.lower.text.out()};}
 #root.root {--ctx-menu-bg: ${main.lower.like.out()};}
 #root.root {--notification-fg: ${main.lower.text.out()};}

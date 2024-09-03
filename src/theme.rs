@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -7,19 +7,15 @@
 use std::{collections::BTreeMap, rc::Rc};
 use compact_str::CompactString;
 use serde::{Serialize, Deserialize};
-use crate::{arrangement, cache, namespace, scheme, Value};
+use crate::{arrangement, cache, namespace, scheme};
 
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Theme {
-	pub name: CompactString,
-	
 	#[serde(default, skip_serializing_if = "str::is_empty")]
-	pub about: CompactString,
-	
+	pub   about: CompactString,
+	pub    name: CompactString,
 	pub schemes: BTreeMap<CompactString, scheme::Scheme>,
-	
-	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-	pub options: BTreeMap<CompactString, Value>,
 }
 
 impl Theme {
@@ -28,11 +24,9 @@ impl Theme {
 	namespace_id: &'a str,
 	       cache: &'a cache::Cache,
 	      safety: arrangement::EngineSafety,
-	) -> Result<&'a Rc<scheme::Static>, Error<'a>> {
-		self.schemes.get(id)
-			.ok_or(Error::NotFound { id })?
-			.data(namespace_id, cache, &safety, &self.options)
-			.map_err(|error| Error::Scheme { id, error })
+	) -> Result<&'a Rc<scheme::Data>, Error<'a>> {
+		self.schemes.get(id).ok_or(Error::NotFound { id })?
+			.data(namespace_id, cache, &safety).map_err(|error| Error::Scheme { id, error })
 	}
 }
 
@@ -65,16 +59,8 @@ impl Error<'_> {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Request {
-	#[serde(rename = "request")]
-	params: Params,
-	
-	#[serde(default, skip_serializing_if = "arrangement::EngineSafety::is_default")]
-	engine: arrangement::EngineSafety,
-}
-
-#[derive(Serialize, Deserialize)]
-struct Params {
 	#[serde(default, rename = "theme")]
 	theme_id: CompactString,
 	
@@ -83,6 +69,9 @@ struct Params {
 	
 	#[serde(default, rename = "from")]
 	namespace_id: CompactString,
+	
+	#[serde(default, skip_serializing_if = "arrangement::EngineSafety::is_default")]
+	engine: arrangement::EngineSafety,
 }
 
 pub(crate) fn list_schemes<'a>(
@@ -91,21 +80,18 @@ pub(crate) fn list_schemes<'a>(
 	main_namespace_id: &'a str,
 	            cache: &'a cache::Cache,
 	           safety: & arrangement::EngineSafety,
-) -> Result<BTreeMap<&'a str, Rc<scheme::Static>>, Box<ListingError<'a>>> {
+) -> Result<BTreeMap<&'a str, Rc<scheme::Data>>, Box<ListingError<'a>>> {
 	let requests = arrangement.schemes.get(schemes_id)
 		.ok_or(ListingError::NotFound { schemes_id })?;
 	
-	let mut schemes = BTreeMap::<&str, Rc<scheme::Static>>::new();
+	let mut schemes = BTreeMap::<&str, Rc<scheme::Data>>::new();
 	
 	for (id, request) in requests {
-		let scheme = 'block: {
-			let Params { theme_id, scheme_id, namespace_id } = &request.params;
-			
-			if scheme_id.is_empty() {
-				break 'block Rc::clone(schemes.get(scheme_id as &str)
-					.ok_or(ListingError::LocalNotFound { schemes_id, id, scheme_id })?)
-			}
-			
+		let Request { theme_id, scheme_id, namespace_id, engine } = &request;
+		let scheme = if scheme_id.is_empty() {
+			Rc::clone(schemes.get(scheme_id as &str)
+				.ok_or(ListingError::LocalNotFound { schemes_id, id, scheme_id })?)
+		} else {
 			let namespace_id = if namespace_id.is_empty()
 				{ main_namespace_id } else { namespace_id };
 			
@@ -115,15 +101,11 @@ pub(crate) fn list_schemes<'a>(
 			let theme = namespace.theme(theme_id, bin).map_err(|error|
 				ListingError::GlobalNotFound { schemes_id, id, namespace_id, error })?;
 			
-			break 'block Rc::clone(
-				theme.scheme(scheme_id, namespace_id, cache, request.engine.or(safety))
-					.map_err(|error| ListingError::Theme { schemes_id, id, theme_id, error })?
-			)
+			Rc::clone(theme.scheme(scheme_id, namespace_id, cache, engine.or(safety))
+				.map_err(|error| ListingError::Theme { schemes_id, id, theme_id, error })?)
 		};
-		
 		schemes.insert(id, scheme);
 	}
-	
 	Ok(schemes)
 }
 

@@ -1,23 +1,22 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'ghostwriter'
- type = 'text-files'
-about = """
-A JSON file that defines a color theme for the \
-<a href='https://github.com/KDE/ghostwriter'>ghostwriter</a> text editor.
-"""
+name = 'ghostwriter'
+type = 'text-file' # md
+about = '''
+A JSON file that defines a color theme for the [ghostwriter] text editor.
+[ghostwriter]: https://github.com/KDE/ghostwriter
+''' # rhai
 
-   naming = '`${arrangement} – ${scheme("main")}`'
-extension = '.json'
+nomenclature = 'arrangement + " – " + scheme("main") + ".json"'
 
 [schemes]
-light = { name = 'Light Color Scheme' }
- dark = { name = 'Dark Color Scheme' }
+light.name = 'Light'
+ dark.name = 'Dark'
 
 [suggested-paths]
 default = { default = 'ghostwriter' }
-flatpak = { home = '.var/app/io.github.wereturtle.ghostwriter/config/ghostwriter/themes' }
- user-1 = { config = 'ghostwriter/themes' }
- user-2 = { home = '.config/ghostwriter/themes' }
+flatpak = { home = '.var/app/io.github.wereturtle.ghostwriter/data/ghostwriter/themes' }
+user-1  = { config = 'ghostwriter/themes' }
+user-2  = { home = '.config/ghostwriter/themes' }

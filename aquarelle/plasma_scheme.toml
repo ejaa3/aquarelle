@@ -1,52 +1,51 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
- name = 'Plasma Color Scheme'
- type = 'text-files'
-about = """
-A KDE Plasma Color Scheme focused on the visual styles \
-<a href='https://invent.kde.org/plasma/breeze'>Breeze</a> \
-and <a href='https://github.com/boehs/Lightly'>Lightly</a>.
-"""
+name = 'Plasma Color Scheme'
+type = 'text-file' # md
+about = '''
+A KDE Plasma Color Scheme focused on the visual styles
+[Breeze](https://invent.kde.org/plasma/breeze)
+and [Lightly](https://github.com/boehs/Lightly).
+''' # rhai
 
-displaying = '`${arrangement} – ${scheme("main")}`'
-    naming = '`${arrangement} – ${scheme("main")}`'
- extension = '.colors'
-
-[options]
-accent = { default.set = 'any', name = 'Accent Color Set' }
-
-[options.dim-header]
-   name = 'Inactive header color'
-  about = 'Use another color for headers when the window is out of focus'
-default = true
-
-[options.dim-selection]
-   name = 'Inactive selection color'
-  about = 'Dim the selection color for out-of-focus windows or views'
-default = true
-
-[options.lightly]
-   name = 'Lightly Mode'
-  about = 'Optimize Scheme for Lightly Style'
-default = false
-
-[options.opacity]
-   name = 'Window opacity'
-  about = 'Better with the Lightly style'
-default = 1.0
+display      = 'arrangement + " – " + scheme("main")' # rhai
+nomenclature = 'arrangement + " – " + scheme("main") + ".colors"'
 
 [schemes.main]
- name = 'Main Color Scheme'
+name = 'Main'
 about = 'Used for non-dark parts of windows'
 
 [schemes.complementary]
-    name = 'Complementary Color Scheme'
-   about = 'Used for dark parts of windows'
+name = 'Complementary'
+about = 'Used for dark parts of windows'
 fallback = 'main'
+
+[options]
+accent = { default.set = 'any', name = 'Accent' }
+
+[options.dim-header]
+name = 'Inactive header color'
+about = 'Use another color for headers when the window is out of focus'
+default = true
+
+[options.dim-selection]
+name = 'Inactive selection color'
+about = 'Dim the selection color for out-of-focus windows or views'
+default = true
+
+[options.lightly]
+name = 'Lightly Mode'
+about = 'Optimize Scheme for Lightly Style'
+default = false
+
+[options.opacity]
+name = 'Window opacity'
+about = 'Better with the Lightly style'
+default = 1.0
 
 [suggested-paths]
 default = { default = 'breeze_style' }
- user-1 = { data = 'color-schemes' }
- user-2 = { home = '.local/share/color-schemes' }
+user-1  = { data = 'color-schemes' }
+user-2  = { home = '.local/share/color-schemes' }

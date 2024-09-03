@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -10,17 +10,9 @@ use serde::{Serialize, Deserialize};
 use crate::{arrangement, cache, namespace, script, Value};
 
 #[derive(Serialize, Deserialize)]
-pub struct Static {
-	pub   name: rhai::ImmutableString,
-	pub    dim: rhai::FLOAT,
-	pub border: rhai::FLOAT,
-	
-	#[serde(flatten)]
-	pub sets: Sets,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Sets {
+#[serde(deny_unknown_fields)]
+pub struct Data {
+	pub    name: rhai::ImmutableString,
 	pub   lower: Roles,
 	pub   upper: Roles,
 	pub     red: Roles,
@@ -33,11 +25,12 @@ pub struct Sets {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Roles { pub like: u32, pub area: u32, pub text: u32 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct Dynamic {
+#[serde(deny_unknown_fields)]
+pub struct Parametric {
 	pub name: rhai::ImmutableString,
 	
 	#[serde(default, skip_serializing_if = "str::is_empty")]
@@ -50,32 +43,32 @@ pub struct Dynamic {
 	pub script_path: Option<Rc<std::path::Path>>,
 }
 
-pub struct Scheme { variant: Variant, pub metadata: OnceCell<Box<dyn std::any::Any>> }
+// FIXME try to get rid of the metadata field
+pub struct Scheme { class: Class, pub metadata: OnceCell<Box<dyn std::any::Any>> }
 
 impl Scheme {
 	pub fn data<'a>(&'a self,
 	  namespace_id: &'a str,
 	         cache: &'a cache::Cache,
 	        safety: & arrangement::EngineSafety,
-	       options: &'a BTreeMap<CompactString, Value>,
-	) -> Result<&'a Rc<Static>, Box<Error<'a>>> {
-		match &self.variant {
-			Variant::Static(scheme) => Ok(scheme),
-			Variant::Dynamic(request) => data(request, namespace_id, cache, safety, options),
+	) -> Result<&'a Rc<Data>, Box<Error<'a>>> {
+		match &self.class {
+			Class::Simple(scheme) => Ok(scheme),
+			Class::Parametric(request) => data(request, namespace_id, cache, safety),
 		}
 	}
 }
 
 impl Serialize for Scheme {
 	fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-		self.variant.serialize(serializer)
+		self.class.serialize(serializer)
 	}
 }
 
 impl<'de> Deserialize<'de> for Scheme {
 	fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
 		Ok(Scheme {
-			 variant: Variant::deserialize(deserializer)?,
+			   class: Class::deserialize(deserializer)?,
 			metadata: Default::default(),
 		})
 	}
@@ -83,10 +76,10 @@ impl<'de> Deserialize<'de> for Scheme {
 
 #[derive(Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum Variant { Static(Rc<Static>), Dynamic(Request) }
+pub enum Class { Simple(Rc<Data>), Parametric(Request) }
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
 pub struct Request {
 	#[serde(rename = "request")]
 	pub params: Params,
@@ -95,10 +88,11 @@ pub struct Request {
 	pub options: BTreeMap<CompactString, Value>,
 	
 	#[serde(skip)]
-	pub data: std::cell::OnceCell<Rc<Static>>,
+	pub data: std::cell::OnceCell<Rc<Data>>,
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Params {
 	#[serde(rename = "scheme")]
 	pub scheme_id: CompactString,
@@ -112,8 +106,7 @@ pub fn data<'a>(
 	main_namespace_id: &'a str,
 	            cache: &'a cache::Cache,
 	           safety: & arrangement::EngineSafety,
-	   global_options: &'a BTreeMap<CompactString, Value>,
-) -> Result<&'a Rc<Static>, Box<Error<'a>>> {
+) -> Result<&'a Rc<Data>, Box<Error<'a>>> {
 	if let Some(data) = request.data.get() { return Ok(data) }
 	
 	let Params { scheme_id, namespace_id } = &request.params;
@@ -130,16 +123,9 @@ pub fn data<'a>(
 	
 	for (option_id, option) in &scheme.options {
 		request.options.get(option_id)
-			.and_then(|value| {
-				let current = match value {
-					Value::Binding((bind,)) => global_options.get(bind)?,
-					Value::Bind(..) => global_options.get(option_id)?,
-					_ => value
-				};
-				Some(current.has_same_type(&option.default)
-					.then(|| options.insert(option_id.clone(), current.clone()))
-					.ok_or(Error::OptionType { option_id, current, required: &option.default }))
-			})
+			.and_then(|value| Some(value.has_same_type(&option.default)
+				.then(|| options.insert(option_id.clone(), value.clone()))
+				.ok_or(Error::OptionType { option_id, value, required: &option.default })))
 			.or_else(|| Some(Ok(options.insert(option_id.clone(), option.default.clone()))))
 			.transpose()?;
 	}
@@ -160,9 +146,9 @@ pub fn data<'a>(
 		.register_fn("to_string", |rgba: rhai::INT| (rgba as u32).to_string())
 		.register_static_module("cfg", Rc::new(cfg_module)));
 	
-	let data = toml_edit::de::from_str(&engine.eval::<rhai::ImmutableString>(slice)
+	let data = toml::de::from_str(&engine.eval::<rhai::ImmutableString>(slice)
 		.map_err(|error| Error::Rhai { scheme_id, path, script, error })?
-	).map_err(|error| Box::new(Error::Toml { scheme_id, path, error: Box::new(error) }))?;
+	).map_err(|error| Box::new(Error::Toml { scheme_id, path, error: Box::from(error) }))?;
 	
 	Ok(request.data.get_or_init(|| data))
 }
@@ -170,10 +156,10 @@ pub fn data<'a>(
 pub enum Error<'a> {
 	     Cache (Box<cache::Error<'a>>),
 	 Namespace { namespace_id: &'a str, error: Box<namespace::Error<'a>> },
-	OptionType { option_id: &'a str, current: &'a Value, required: &'a Value },
+	OptionType { option_id: &'a str, value: &'a Value, required: &'a Value },
 	   Loading { scheme_id: &'a str, path: &'a Path, error: std::io::Error },
 	      Rhai { scheme_id: &'a str, path: &'a Path, script: String, error: Box<rhai::EvalAltResult> },
-	      Toml { scheme_id: &'a str, path: &'a Path, error: Box<toml_edit::de::Error> },
+	      Toml { scheme_id: &'a str, path: &'a Path, error: Box<toml::de::Error> },
 }
 
 impl Error<'_> {
@@ -184,11 +170,11 @@ impl Error<'_> {
 			
 			Self::Namespace { namespace_id, error } => error.show(out, namespace_id),
 			
-			Self::OptionType { option_id, current, required } => {
+			Self::OptionType { option_id, value, required } => {
 				writeln!(out, crate::csi! {
 					"The data assigned to option " /fg yellow; "{:?}"! " is of type "
 					/fg red; "{}"! " instead of " /fg green; "{}"!
-				}, option_id, current.type_str(), required.type_str())?;
+				}, option_id, value.type_str(), required.type_str())?;
 				
 				Ok(exitcode::DATAERR)
 			}

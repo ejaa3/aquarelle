@@ -1,17 +1,16 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 use std::{collections::BTreeMap, io::Write, rc::Rc, result};
 use compact_str::CompactString;
-use serde::{Serialize, Deserialize};
-use usvg_text_layout::{fontdb, TreeTextToPath};
+use serde::{Deserialize, Serialize};
 use crate::{arrangement, map, path, scheme, script, Value};
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub struct Map {
 	pub name: CompactString,
 	
@@ -22,13 +21,10 @@ pub struct Map {
 	pub(crate) variant: Type,
 	
 	#[serde(default, skip_serializing_if = "str::is_empty")]
-	pub(crate) displaying: CompactString,
+	pub(crate) display: CompactString,
 	
 	#[serde(default, skip_serializing_if = "str::is_empty")]
-	pub(crate) naming: CompactString,
-	
-	#[serde(default, skip_serializing_if = "str::is_empty")]
-	pub(crate) extension: CompactString,
+	pub(crate) nomenclature: CompactString,
 	
 	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
 	pub(crate) schemes: BTreeMap<CompactString, Scheme>,
@@ -37,7 +33,10 @@ pub struct Map {
 	pub(crate) options: BTreeMap<CompactString, crate::Optional>,
 	
 	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-	pub(crate) suggested_paths: BTreeMap<CompactString, path::Located>,
+	pub(crate) suggested_paths: BTreeMap<CompactString, path::Location>,
+	
+	#[serde(default, skip_serializing_if = "FileType::is_default")]
+	pub(crate) default_file_type: FileType,
 	
 	#[serde(default, skip_serializing_if = "<[_]>::is_empty")]
 	pub(crate) subdirectories: Vec<CompactString>,
@@ -49,31 +48,12 @@ pub struct Map {
 	pub(crate) script_path: Option<Rc<std::path::Path>>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Default, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub(crate) enum Type {
-	Directory, Directories,
-	SvgToPngFile, SvgToPngFiles,
-	TextFile, TextFiles, TextFileEdit,
-	ZipFile, ZipFiles,
-}
+pub(crate) enum Type { Directory, EditTextFile, SvgToPngFile, #[default] TextFile, ZipFile }
 
 #[derive(Serialize, Deserialize)]
-pub struct File {
-	#[serde(rename = "type")]
-	pub variant: FileType,
-	
-	#[serde(default)]
-	pub at: u32,
-	
-	pub name: CompactString,
-}
-
-#[derive(Clone, Copy, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum FileType { Text, TextEdit, SvgToPng }
-
-#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct Scheme {
 	name: CompactString,
 	
@@ -83,6 +63,26 @@ pub(crate) struct Scheme {
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub(crate) fallback: Option<CompactString>,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct File {
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub variant: Option<FileType>,
+	
+	#[serde(default, skip_serializing_if = "is_zero")]
+	pub at: u32,
+	
+	#[serde(default, skip_serializing_if = "str::is_empty")]
+	pub name: CompactString,
+}
+
+fn is_zero(number: &u32) -> bool { *number == 0 }
+
+#[derive(Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum FileType { #[default] Text, TextEdit, SvgToPng }
+
+impl FileType { fn is_default(&self) -> bool { *self == Self::Text } }
 
 pub enum Files<'c> {
 	Single  (Vec<path::Parsed<'c>>),
@@ -102,7 +102,7 @@ pub struct Ready<'a> {
 	pub options: BTreeMap<CompactString, Value>,
 	pub display: rhai::ImmutableString,
 	pub    name: rhai::ImmutableString,
-	pub schemes: Rc<BTreeMap<CompactString, Rc<scheme::Static>>>,
+	pub schemes: Rc<BTreeMap<CompactString, Rc<scheme::Data>>>,
 	pub  safety: arrangement::EngineSafety,
 	pub   paths: Option<Files<'a>>,
 	pub replica: (map::Replica, arrangement::Replica),
@@ -112,9 +112,8 @@ impl<'a> Ready<'a> {
 	pub fn perform(self) -> Result<'a> { perform(self) }
 }
 
-fn perform<'a>(Ready {
-	map, id, map_id, options, display, name, schemes, safety, paths, replica
-}: Ready<'a>) -> Result<'a> {
+fn perform<'a>(ready: Ready<'a>) -> Result<'a> {
+	let Ready { map, id, map_id, options, display, name, schemes, safety, paths, replica } = ready;
 	let path = map.script_path.as_ref().unwrap();
 	
 	let script = std::fs::read_to_string(&path)
@@ -139,18 +138,28 @@ fn perform<'a>(Ready {
 	let mut engine = script::engine(path.parent().unwrap());
 	
 	safety.set(engine
+		.set_optimization_level(rhai::OptimizationLevel::None)
 		.register_global_module(script::MAP_MODULE.with(|module| Rc::clone(module)))
 		.register_static_module("cfg", Rc::new(cfg_module)));
 	
+	let (mut scope, ast) = (rhai::Scope::new(), match engine.compile(slice) {
+		Ok(ast) => ast,
+		Err(error) => return Err(Error { id, map_id, of: Of::Rhai { path, script, error: error.into() } })
+	});
+	
+	for (name, _, value) in ast.iter_literal_variables(true, false) { scope.push_constant(name, value); }
+	engine.set_optimization_level(rhai::OptimizationLevel::Full);
+	let ast = engine.optimize_ast(&scope, ast, engine.optimization_level());
+	
 	let Some(paths) = paths else {
-		return Ok(Success { id, errors: Box::new([]), text: Some(engine.eval(slice)
+		return Ok(Success { id, errors: Box::new([]), text: Some(engine.eval_ast(&ast)
 			.map_err(|error| Error { id, map_id, of: Of::Rhai { path, script, error } })?) })
 	};
 	
 	let mut io_errors = vec![];
 	
 	if let Files::Single(paths) = paths {
-		if let Type::ZipFile | Type::ZipFiles = map.variant {
+		if let Type::ZipFile = map.variant {
 			let mut zip = zip::ZipWriter::new(std::io::Cursor::new(vec![]));
 			
 			for (at, subdir) in map.subdirectories.iter().enumerate() {
@@ -165,12 +174,12 @@ fn perform<'a>(Ready {
 					
 					for str in value.iter() { string.extend([str, "/"]) }
 					
-					zip.add_directory(string, Default::default())
+					zip.add_directory::<_, ()>(string, Default::default())
 						.map_err(|error| Error { id, map_id, of: Of::ZipDir { at, subdir, error } })?
 				}
 			}
 			
-			let rmap: rhai::Map = engine.eval(slice)
+			let rmap: rhai::Map = engine.eval_ast(&ast)
 				.map_err(|error| Error { id, map_id, of: Of::Rhai { path, script, error } })?;
 			
 			for (file_id, file) in map.files.iter() {
@@ -179,7 +188,7 @@ fn perform<'a>(Ready {
 				let content = value.clone().into_immutable_string()
 					.map_err(|type_name| Error { id, map_id, of: Of::InvalidType { file_id, type_name } })?;
 				
-				let png = if let FileType::SvgToPng = file.variant {
+				let png = if let FileType::SvgToPng = file.variant.unwrap_or(map.default_file_type) {
 					Some(svg_to_png(id, map_id, content.as_bytes())?)
 				} else { None };
 				
@@ -196,7 +205,7 @@ fn perform<'a>(Ready {
 				let no_slash = subdir.is_empty() || subdir.ends_with('/');
 				let name = String::from_iter([subdir, if no_slash {""} else {"/"}, &file.name]);
 				
-				zip.start_file(name, Default::default())
+				zip.start_file::<_, ()>(name, Default::default())
 					.map_err(|error| Error { id, map_id, of: Of::ZipFile { file_id, file, subdir, error } })?;
 				
 				zip.write_all(content)
@@ -206,10 +215,10 @@ fn perform<'a>(Ready {
 			write(paths, &mut io_errors, replica, &zip.finish()
 				.map_err(|error| Error { id, map_id, of: Of::Zip(error) })?.into_inner())?
 		} else {
-			let content: rhai::ImmutableString = engine.eval(slice)
+			let content: rhai::ImmutableString = engine.eval_ast(&ast)
 				.map_err(|error| Error { id, map_id, of: Of::Rhai { path, script, error } })?;
 			
-			let png = if let Type::SvgToPngFile | Type::SvgToPngFiles = map.variant {
+			let png = if let Type::SvgToPngFile = map.variant {
 				Some(svg_to_png(id, map_id, content.as_bytes())?)
 			} else { None };
 			
@@ -217,7 +226,7 @@ fn perform<'a>(Ready {
 			write(paths, &mut io_errors, replica, content)?
 		}
 	} else if let Files::Several(paths) = paths {
-		let map: rhai::Map = engine.eval(slice)
+		let map: rhai::Map = engine.eval_ast(&ast)
 			.map_err(|error| Error { id, map_id, of: Of::Rhai { path, script, error } })?;
 		
 		for ParsedFile { file_id, variant, file_paths } in paths {
@@ -293,23 +302,18 @@ fn write<'a>(
 
 // WATCH https://github.com/RazrFalcon/resvg/blob/master/crates/resvg/examples/minimal.rs
 fn svg_to_png<'a>(id: &'a str, map_id: &'a str, svg: &[u8]) -> result::Result<Vec<u8>, Error<'a>> {
-	let options = usvg::Options::default();
+	let mut options = resvg::usvg::Options::default();
+	options.fontdb_mut().load_system_fonts();
 	
-	let mut fontdb = fontdb::Database::new();
-	fontdb.load_system_fonts();
-	
-	let mut tree: usvg::Tree = usvg::TreeParsing::from_data(svg, &options)
+	let tree = resvg::usvg::Tree::from_data(svg, &options)
 		.map_err(|error| Error { id, map_id, of: Of::Svg(error) })?;
 	
-	tree.convert_text(&fontdb);
-	
-	let tree = resvg::Tree::from_usvg(&tree);
-	let size = tree.size.to_int_size();
+	let size = tree.size().to_int_size();
 	
 	let mut pixmap = resvg::tiny_skia::Pixmap::new(size.width(), size.height())
 		.ok_or(Error { id, map_id, of: Of::NoPixmap })?;
 	
-	tree.render(usvg::Transform::default(), &mut pixmap.as_mut());
+	resvg::render(&tree, resvg::usvg::Transform::default(), &mut pixmap.as_mut());
 	
 	pixmap.encode_png().map_err(|error| Error { id, map_id, of: Of::Png(error) })
 }
@@ -343,7 +347,7 @@ pub enum Of<'a> {
 MissingFile { file_id: &'a str },
 InvalidType { file_id: &'a str, type_name: &'static str },
    NoSubdir { file_id: &'a str, at: u32, available: usize },
-        Svg (usvg::Error),
+        Svg (resvg::usvg::Error),
    NoPixmap,
    NoRender,
         Png (png::EncodingError),

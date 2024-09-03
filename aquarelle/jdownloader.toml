@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name = 'JDownloader'
+type = 'directory' # md
+about = '''
+[FlatLaf](https://www.formdev.com/flatlaf) based
+[JDownloader](https://jdownloader.org) theme.
+''' # rhai
+
+display = 'arrangement + " – " + scheme("main")' # rhai
+nomenclature = '''
+let scheme = "";
+for word in `${scheme("main")}`.split() { scheme += word.to_lower() + '-' }
+arrangement_id + if scheme.pop() == () { () } else { '.' + scheme }
+'''
+
+schemes.main.name = 'Main'
+default-file-type = 'svg-to-png'
+subdirectories = ['images']
+
+[options]
+accent = { name = 'Accent', default.set = 'any' }
+
+[suggested-paths]
+default = { default = 'jdownloader' }
+
+[files]
+json       = { type = 'text', name = 'Aquarelle.json' }
+properties = { type = 'text', name = 'Aquarelle.properties' }
+
+auto_reconnect       = { at = 1, name = 'auto-reconnect.png' }
+clipboard            = { at = 1, name = 'clipboard.png' }
+extract              = { at = 1, name = 'extract.png' }
+false_               = { at = 1, name = 'false.png' }
+false_orange         = { at = 1, name = 'false-orange.png' }
+go_bottom            = { at = 1, name = 'go-bottom.png' }
+go_down              = { at = 1, name = 'go-down.png' }
+go_top               = { at = 1, name = 'go-top.png' }
+go_up                = { at = 1, name = 'go-up.png' }
+media_playback_pause = { at = 1, name = 'media-playback-pause.png' }
+media_playback_start = { at = 1, name = 'media-playback-start.png' }
+media_playback_stop  = { at = 1, name = 'media-playback-stop.png' }
+package_closed       = { at = 1, name = 'package_closed.png' }
+package_open         = { at = 1, name = 'package_open.png' }
+popDownLarge         = { at = 1, name = 'popDownLarge.png' }
+popUpLarge           = { at = 1, name = 'popUpLarge.png' }
+premium              = { at = 1, name = 'premium.png' }
+reconnect            = { at = 1, name = 'reconnect.png' }
+silentmode           = { at = 1, name = 'silentmode.png' }
+tree_minus           = { at = 1, name = 'tree_minus.png' }
+tree_plus            = { at = 1, name = 'tree_plus.png' }
+true_                = { at = 1, name = 'true.png' }
+true_orange          = { at = 1, name = 'true-orange.png' }
+update_b             = { at = 1, name = 'update_b.png' }
+update               = { at = 1, name = 'update.png' }
