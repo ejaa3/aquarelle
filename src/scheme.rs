@@ -4,10 +4,28 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-use std::{cell::OnceCell, collections::BTreeMap, path::Path, rc::Rc};
+use std::{borrow::Cow, cell::OnceCell, collections::BTreeMap};
+use annotate_snippets::{Level, Message, Snippet};
 use compact_str::CompactString;
 use serde::{Serialize, Deserialize};
-use crate::{arrangement, cache, namespace, script, Value};
+use crate::{arrangement, script, Key, Spanned, Src, Value};
+
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Parametric {
+	pub name: CompactString,
+	
+	#[serde(default, skip_serializing_if = "str::is_empty")]
+	pub about: CompactString,
+	
+	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+	pub options: BTreeMap<Key, crate::Optional>,
+	
+	pub script: crate::Script,
+	
+	#[serde(skip)]
+	pub(crate) source: OnceCell<Src>,
+}
 
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -28,178 +46,119 @@ pub struct Data {
 #[serde(deny_unknown_fields)]
 pub struct Roles { pub like: u32, pub area: u32, pub text: u32 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Parametric {
-	pub name: rhai::ImmutableString,
-	
-	#[serde(default, skip_serializing_if = "str::is_empty")]
-	pub about: CompactString,
-	
-	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-	pub options: BTreeMap<CompactString, crate::Optional>,
-	
-	#[serde(skip)]
-	pub script_path: Option<Rc<std::path::Path>>,
-}
-
-// FIXME try to get rid of the metadata field
-pub struct Scheme { class: Class, pub metadata: OnceCell<Box<dyn std::any::Any>> }
-
-impl Scheme {
+impl Parametric {
 	pub fn data<'a>(&'a self,
-	  namespace_id: &'a str,
-	         cache: &'a cache::Cache,
-	        safety: & arrangement::EngineSafety,
-	) -> Result<&'a Rc<Data>, Box<Error<'a>>> {
-		match &self.class {
-			Class::Simple(scheme) => Ok(scheme),
-			Class::Parametric(request) => data(request, namespace_id, cache, safety),
+		scheme_options: &'a BTreeMap<Key, Value>,
+		       presets: &'a BTreeMap<CompactString, Value>,
+		    option_src: &'a Src,
+		     scheme_id: Option<&'a Spanned>,
+		        safety: & arrangement::EngineSafety,
+	) -> Result<Data, Box<Error<'a>>> {
+		let mut options = BTreeMap::new();
+		let src = self.source.get().unwrap();
+		
+		for (option_id, option) in &self.options {
+			scheme_options.get_key_value(option_id.0.get_ref() as &str)
+				.and_then(|(key, value)| {
+					let value = match value {
+						Value::Bind { bind } if bind.is_empty() => presets.get(key.0.get_ref())?,
+						Value::Bind { bind } => presets.get(bind)?,
+						_ => value
+					};
+					Some(value.has_same_type(&option.default)
+						.then(|| options.insert(option_id.0.get_ref().clone(), value.clone()))
+						.ok_or(Error::Types {
+							sources: [src, option_src],
+							options: [option_id, key],
+							 values: [&option.default, value], scheme_id
+						}))
+				})
+				.or_else(|| Some(Ok(options.insert(option_id.0.get_ref().clone(), option.default.clone()))))
+				.transpose()?;
 		}
+		
+		let prefix = src.1.parent().unwrap();
+		let mut script_path = None;
+		
+		let (script, path, code): (_, &str, Cow<str>) = match &self.script {
+			crate::Script::Path(script) => {
+				(script, script.get_ref(), Cow::Owned(std::fs::read_to_string(script_path
+					.get_or_insert(prefix.join(script.get_ref() as &str)))
+					.map_err(|error| Error::Io { src, script, error })?))
+			}
+			crate::Script::Embedded(script) => (script, "", Cow::Borrowed(script.get_ref())),
+		};
+		
+		let slice = if code.starts_with("#!") {
+			&code[code.find('\n').unwrap_or(0)..]
+		} else { &code };
+		
+		let mut engine = script::engine(script_path.as_deref()
+			.and_then(std::path::Path::parent).unwrap_or(prefix));
+		
+		let cfg_module = script::cfg_module(scheme_id.map(Spanned::get_ref)
+			.map(CompactString::as_str).unwrap_or("unnamed"), options);
+		
+		safety.set(engine
+			.register_fn("to_string", |rgba: rhai::INT| (rgba as u32).to_string())
+			.register_static_module("cfg", std::rc::Rc::new(cfg_module)));
+		
+		toml::de::from_str(&engine.eval::<rhai::ImmutableString>(slice)
+			.map_err(|error| Error::Rhai { src, script, code, path, error })?
+		).map_err(|error| Box::new(Error::Toml { src, script, error: Box::from(error) }))
 	}
-}
-
-impl Serialize for Scheme {
-	fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-		self.class.serialize(serializer)
-	}
-}
-
-impl<'de> Deserialize<'de> for Scheme {
-	fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-		Ok(Scheme {
-			   class: Class::deserialize(deserializer)?,
-			metadata: Default::default(),
-		})
-	}
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum Class { Simple(Rc<Data>), Parametric(Request) }
-
-#[derive(Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Request {
-	#[serde(rename = "request")]
-	pub params: Params,
-	
-	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-	pub options: BTreeMap<CompactString, Value>,
-	
-	#[serde(skip)]
-	pub data: std::cell::OnceCell<Rc<Data>>,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Params {
-	#[serde(rename = "scheme")]
-	pub scheme_id: CompactString,
-	
-	#[serde(default, rename = "from")]
-	pub namespace_id: CompactString,
-}
-
-pub fn data<'a>(
-	          request: &'a Request,
-	main_namespace_id: &'a str,
-	            cache: &'a cache::Cache,
-	           safety: & arrangement::EngineSafety,
-) -> Result<&'a Rc<Data>, Box<Error<'a>>> {
-	if let Some(data) = request.data.get() { return Ok(data) }
-	
-	let Params { scheme_id, namespace_id } = &request.params;
-	
-	let namespace_id = if namespace_id.is_empty()
-		{ main_namespace_id } else { namespace_id };
-	
-	let (namespace, bin) = cache.namespace(namespace_id).map_err(Error::Cache)?;
-	
-	let (scheme_id, scheme) = namespace.scheme(scheme_id, bin)
-		.map_err(|error| Error::Namespace { namespace_id, error })?;
-	
-	let mut options = BTreeMap::new();
-	
-	for (option_id, option) in &scheme.options {
-		request.options.get(option_id)
-			.and_then(|value| Some(value.has_same_type(&option.default)
-				.then(|| options.insert(option_id.clone(), value.clone()))
-				.ok_or(Error::OptionType { option_id, value, required: &option.default })))
-			.or_else(|| Some(Ok(options.insert(option_id.clone(), option.default.clone()))))
-			.transpose()?;
-	}
-	
-	let path = scheme.script_path.as_ref().unwrap();
-	
-	let script = std::fs::read_to_string(&path)
-		.map_err(|error| Error::Loading { scheme_id, path, error })?;
-	
-	let slice = if script.starts_with("#!") {
-		&script[script.find('\n').unwrap_or(0)..]
-	} else { &script };
-	
-	let mut engine = script::engine(path.parent().unwrap());
-	let cfg_module = script::cfg_module(scheme_id.clone(), options);
-	
-	safety.set(engine
-		.register_fn("to_string", |rgba: rhai::INT| (rgba as u32).to_string())
-		.register_static_module("cfg", Rc::new(cfg_module)));
-	
-	let data = toml::de::from_str(&engine.eval::<rhai::ImmutableString>(slice)
-		.map_err(|error| Error::Rhai { scheme_id, path, script, error })?
-	).map_err(|error| Box::new(Error::Toml { scheme_id, path, error: Box::from(error) }))?;
-	
-	Ok(request.data.get_or_init(|| data))
 }
 
 pub enum Error<'a> {
-	     Cache (Box<cache::Error<'a>>),
-	 Namespace { namespace_id: &'a str, error: Box<namespace::Error<'a>> },
-	OptionType { option_id: &'a str, value: &'a Value, required: &'a Value },
-	   Loading { scheme_id: &'a str, path: &'a Path, error: std::io::Error },
-	      Rhai { scheme_id: &'a str, path: &'a Path, script: String, error: Box<rhai::EvalAltResult> },
-	      Toml { scheme_id: &'a str, path: &'a Path, error: Box<toml::de::Error> },
+	Types { sources: [&'a Src; 2], options: [&'a Spanned; 2], values: [&'a Value; 2], scheme_id: Option<&'a Spanned> },
+	   Io { src: &'a Src, script: &'a Spanned, error: std::io::Error },
+	 Rhai { src: &'a Src, script: &'a Spanned, code: Cow<'a, str>, path: &'a str, error: Box<rhai::EvalAltResult> },
+	 Toml { src: &'a Src, script: &'a Spanned, error: Box<toml::de::Error> },
 }
 
-impl Error<'_> {
-	#[cfg(feature = "cli")]
-	pub fn show(self, out: &mut impl std::io::Write) -> std::io::Result<i32> {
+impl<'a, 'b> crate::Msg<'a, 'b, 3> for Error<'a> {
+	fn msg(self, [cow_0, cow_1, cow_2]: [&'b mut Cow<'a, str>; 3]) -> Message<'b> {
 		match self {
-			Self::Cache(error) => error.show(out),
-			
-			Self::Namespace { namespace_id, error } => error.show(out, namespace_id),
-			
-			Self::OptionType { option_id, value, required } => {
-				writeln!(out, crate::csi! {
-					"The data assigned to option " /fg yellow; "{:?}"! " is of type "
-					/fg red; "{}"! " instead of " /fg green; "{}"!
-				}, option_id, value.type_str(), required.type_str())?;
+			Self::Types { sources, options, values, scheme_id } => {
+				*cow_0 = sources[0].1.to_string_lossy();
+				*cow_1 = sources[1].1.to_string_lossy();
 				
-				Ok(exitcode::DATAERR)
+				let snippet = Snippet::source(&sources[1].0).origin(cow_1).fold(true)
+					.annotation(Level::Error.span(options[1].span()).label(values[1].other()));
+				
+				Level::Error.title("incorrect optional value type")
+					.snippet(if let Some(scheme_id) = scheme_id { snippet.annotation(Level::Warning
+						.span(scheme_id.span()).label("in this requested scheme")) } else { snippet })
+					.snippet(Snippet::source(&sources[0].0).origin(cow_0).fold(true)
+						.annotation(Level::Warning.span(options[0].span()).label(values[0].original())))
 			}
-			Self::Loading { scheme_id, path, error } => {
-				writeln!(out, crate::csi! {
-					"Unable to read script for scheme " /fg yellow; "{:?}"!
-					" at\n" /fg cyan; "{}"! "\n{}"
-				}, scheme_id, path.to_string_lossy(), error)?;
+			Self::Io { src, script, error } => {
+				*cow_0 = src.1.to_string_lossy();
+				*cow_1 = Cow::Owned(error.to_string());
 				
-				Ok(exitcode::IOERR)
+				Level::Warning.title("unable to read script")
+					.snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+						.annotation(Level::Warning.span(script.span()).label("this script")))
+					.footer(Level::Error.title(cow_1))
 			}
-			Self::Rhai { scheme_id, path, script, error } => {
-				writeln!(out, crate::csi! {
-					"In the script for scheme " /fg yellow; "{:?}"! " located at\n" /fg cyan; "{}"!
-				}, scheme_id, path.to_string_lossy())?;
+			Self::Rhai { src, script, code, path, error } => {
+				*cow_0 = src.1.to_string_lossy();
+				*cow_1 = code;
 				
-				script::show_error(out, error, &script)
+				let level = if error.position().is_none() { Level::Error } else { Level::Warning };
+				
+				script::error_msg(error, cow_2, cow_1, (path, cow_0), &src.0, script)
+					.snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+					.annotation(level.span(script.span()).label("when evaluating this script")))
 			}
-			Self::Toml { scheme_id, path, error } => {
-				write!(out, crate::csi! {
-					"Script for scheme " /fg yellow; "{:?}"! " returns invalid TOML, located at\n"
-					/fg cyan; "{}"! "\n\n{}"
-				}, scheme_id, path.to_string_lossy(), error)?;
+			Self::Toml { src, script, error } => {
+				*cow_0 = src.1.to_string_lossy();
+				*cow_1 = Cow::Owned(error.to_string());
 				
-				Ok(exitcode::DATAERR)
+				Level::Error.title("invalid TOML")
+					.snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+						.annotation(Level::Error.span(script.span()).label("when evaluating this script")))
+					.footer(Level::Info.title(cow_1))
 			}
 		}
 	}

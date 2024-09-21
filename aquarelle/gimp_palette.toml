@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'GIMP Palette'
-type = 'text-file' # md
-about = '''
-A color palette for [GIMP](https://www.gimp.org),
+type = 'text-file' # xml
+about = """
+A color palette for <a href='https://www.gimp.org'>GIMP</a>, \
 the GNU Image Manipulation Program.
-''' # rhai
+""" # rhai
 
 display      = 'arrangement + " – " + scheme("main")' # rhai
 nomenclature = 'arrangement + " – " + scheme("main") + ".gpl"'
@@ -17,5 +17,51 @@ schemes.main.name = 'Main'
 [suggested-paths]
 default = { default = 'gimp_palettes' }
 flatpak = { home = '.var/app/org.gimp.GIMP/config/GIMP/2.10/palettes' }
-user-1  = { data = 'GIMP/2.10/palettes' }
-user-2  = { home = '.local/share/GIMP/2.10/palettes' }
+data    = { data = 'GIMP/2.10/palettes' }
+
+[script] # rhai
+embedded = '''
+const main = cfg::scheme("main");
+
+const text    = main.lower.text;
+const red     = main.red.area;
+const yellow  = main.yellow.area;
+const green   = main.green.area;
+const cyan    = main.cyan.area;
+const blue    = main.blue.area;
+const magenta = main.magenta.area;
+const any     = main.any.area;
+
+fn pad() {
+	if this <  10 { "  " + this } else
+	if this < 100 { " "  + this } else { this }
+}
+
+fn out() {
+	let rgb = rgb::coords(this);
+	`${rgb.red.pad()} ${rgb.green.pad()} ${rgb.blue.pad()}${'\n'}`
+}
+
+let palette = `GIMP Palette
+Name: ${cfg::display}
+Columns: 6
+#
+`;
+
+for i in 0..10 {
+	i /= 10.0;
+	for role in [main.lower.area, main.lower.like, main.upper.like] {
+		palette +=
+			lab::mix(role, text   , i).out() +
+			lab::mix(role, red    , i).out() +
+			lab::mix(role, yellow , i).out() +
+			lab::mix(role, green  , i).out() +
+			lab::mix(role, cyan   , i).out() +
+			lab::mix(role, blue   , i).out() +
+			lab::mix(role, magenta, i).out() +
+			lab::mix(role, any    , i).out() ;
+	}
+}
+
+palette
+'''

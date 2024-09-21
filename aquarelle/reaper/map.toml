@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'REAPER'
-type = 'directory' # md
-about = '''
-An experimental theme for [REAPER](https://www.reaper.fm),
+type = 'directory' # xml
+about = """
+An experimental theme for <a href='https://www.reaper.fm'>REAPER</a>, \
 a digital audio workstation, based on the default theme for version 7.
 
 The version 7 theme must be extracted and overwritten by the files exported by this map.
-''' # rhai
+""" # rhai
 
 display = 'arrangement + " – " + scheme("main")' # rhai
 nomenclature = '''
@@ -18,12 +18,13 @@ for word in `${scheme("main")}`.split() { scheme += word.to_lower() + '-' }
 arrangement_id + if scheme.pop() == () { () } else { '.' + scheme }
 '''
 
+script.path = 'map.rhai'
 schemes.main.name = 'Main'
 default-file-type = 'svg-to-png'
 subdirectories = ['Aquarelle_7.0', 'Aquarelle_7.0/150', 'Aquarelle_7.0/200']
 
 [options]
-accent = { name = 'Accent', default.set = 'any' }
+accent = { name = 'Accent', default.accent = 'any' }
 
 [suggested-paths]
 default = { default = 'reaper' }

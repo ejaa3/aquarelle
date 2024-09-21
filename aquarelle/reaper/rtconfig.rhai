@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-private fn rgb () { let rgb = rgb::coords(this); `${rgb.red} ${rgb.green} ${rgb.blue}` }
-private fn rgba() { let rgb = rgb::coords(this); `${rgb.red} ${rgb.green} ${rgb.blue} ${rgb.alpha}` }
+private fn rgb () { let rgb = srgb::coords(this); `${rgb.red} ${rgb.green} ${rgb.blue}` }
+private fn rgba() { let rgb = srgb::coords(this); `${rgb.red} ${rgb.green} ${rgb.blue} ${rgb.alpha}` }
 
 export const TEXT = /* REAPER */ `
 ; Copyright (C) 2015 and onward Cockos Inc
@@ -195,7 +195,7 @@ define_parameter yMargin 						'Y-Axis spacing' 6 2 12
 define_parameter tcpfolderIndentSize			'TCP Folder Indent' 20 0 40
 define_parameter tcpfolderBalanceType			'TCP Folder Balance Type' 0 0 2
 define_parameter tcpDivOpacity 					'TCP Div Opacity' 80 0 255
-${ let rgb = rgb::coords(lab::mix(main.lower.like, main.lower.text, 0.1)); `
+${ let rgb = srgb::coords(lab::mix(main.lower.like, main.lower.text, 0.1)); `
 define_parameter tcpBgColR 						'TCP background colour' ${rgb.red} 0 255
 define_parameter tcpBgColG 						'TCP background colour G' ${rgb.green} 0 255
 define_parameter tcpBgColB 						'TCP background colour B' ${rgb.blue} 0 255` }
@@ -769,9 +769,9 @@ define_parameter masterTcpMeterBorder 				'Master TCP Meter Border' 2 0 8
 define_parameter masterTcpMeterVals					'Master TCP Meter Values' 1 0 1
 define_parameter masterTcpVals						'Master TCP Values' 1 0 1
 define_parameter masterTcpLabels					'Master TCP Labels' 1 0 1
-define_parameter masterTcpBgColR 					'Master TCP background colour' ${rgb::coords(main.lower.like).red} 0 255
-define_parameter masterTcpBgColG 					'Master TCP background colour G' ${rgb::coords(main.lower.like).green} 0 255
-define_parameter masterTcpBgColB 					'Master TCP background colour B' ${rgb::coords(main.lower.like).blue} 0 255
+define_parameter masterTcpBgColR 					'Master TCP background colour' ${srgb::coords(main.lower.like).red} 0 255
+define_parameter masterTcpBgColG 					'Master TCP background colour G' ${srgb::coords(main.lower.like).green} 0 255
+define_parameter masterTcpBgColB 					'Master TCP background colour B' ${srgb::coords(main.lower.like).blue} 0 255
 define_parameter masterTcpVolumeLength 				'Master TCP Volume Length' 40 40 600
 
 
@@ -951,9 +951,9 @@ define_parameter envcpLabelLength 					'Env Label Length' 160 40 300
 define_parameter envcpFaderLength 					'Env Fader Length' 100 40 300
 define_parameter envcpFontSize 						'Env Label Font Size' 2 1 5
 define_parameter envcpDivOpacity 					'Env Div Opacity' 80 0 255
-define_parameter envcpBgColR 						'EnvCP background colour' ${rgb::coords(main.lower.like).red} 0 255
-define_parameter envcpBgColG 						'EnvCP background colour G' ${rgb::coords(main.lower.like).green} 0 255
-define_parameter envcpBgColB 						'EnvCP background colour B' ${rgb::coords(main.lower.like).blue} 0 255
+define_parameter envcpBgColR 						'EnvCP background colour' ${srgb::coords(main.lower.like).red} 0 255
+define_parameter envcpBgColG 						'EnvCP background colour G' ${srgb::coords(main.lower.like).green} 0 255
+define_parameter envcpBgColB 						'EnvCP background colour B' ${srgb::coords(main.lower.like).blue} 0 255
 define_parameter envCustomColorDepth 				'Env Custom Color Strength' 0 0 100
 
 set envCustomColorRatio 							?trackcolor_valid / envCustomColorDepth{0} 100 0
@@ -1058,7 +1058,7 @@ endLayout
 
 define_parameter mcpfolderIndentSize		'MCP Folder Indent' 10 0 40
 define_parameter mcpDivOpacity 				'MCP Div Opacity' 80 0 255
-${ let rgb = rgb::coords(lab::mix(main.lower.like, main.lower.text, 0.1)); `
+${ let rgb = srgb::coords(lab::mix(main.lower.like, main.lower.text, 0.1)); `
 define_parameter mcpBgColR 					'MCP background colour' ${rgb.red} 0 255
 define_parameter mcpBgColG 					'MCP background colour G' ${rgb.green} 0 255
 define_parameter mcpBgColB 					'MCP background colour B' ${rgb.blue} 0 255` }
@@ -1657,9 +1657,9 @@ define_parameter masterMcpWidth						'Master Mixer Panel Width' 132 90 400
 define_parameter masterMcpMeterVals					'Master MCP Meter Values' 1 0 1
 define_parameter masterMcpVals						'Master MCP Values' 1 0 1
 define_parameter masterMcpLabels					'Master MCP Labels' 1 0 1
-define_parameter masterMcpBgColR 					'Master MCP background colour' ${rgb::coords(main.lower.like).red} 0 255
-define_parameter masterMcpBgColG 					'Master MCP background colour G' ${rgb::coords(main.lower.like).green} 0 255
-define_parameter masterMcpBgColB 					'Master MCP background colour B' ${rgb::coords(main.lower.like).blue} 0 255
+define_parameter masterMcpBgColR 					'Master MCP background colour' ${srgb::coords(main.lower.like).red} 0 255
+define_parameter masterMcpBgColG 					'Master MCP background colour G' ${srgb::coords(main.lower.like).green} 0 255
+define_parameter masterMcpBgColB 					'Master MCP background colour B' ${srgb::coords(main.lower.like).blue} 0 255
 
 macro masterMcpFollow this thisW thisH yOffs noSpace
 

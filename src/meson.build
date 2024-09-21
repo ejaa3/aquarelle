@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -41,7 +41,7 @@ if get_option('profile') == 'dev'
 	rust_target = 'debug'
 else
 	message('RELEASE MODE')
-	cargo_options += [ '--release' ]
+	cargo_options += ['--release']
 	rust_target = 'release'
 endif
 
@@ -59,7 +59,6 @@ custom_target('cli',
 )
 
 custom_target('gui',
-	build_by_default: true,
 	output: '@0@-gui'.format(meson.project_name()),
 	console: true,
 	command: [

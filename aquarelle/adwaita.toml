@@ -3,17 +3,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'Adwaita'
-type = 'text-file' # md
-about = '''
-A basic style sheet that works for many applications using
-[libadwaita](https://gitlab.gnome.org/GNOME/libadwaita) or the
-[adw-gtk3](https://github.com/lassekongo83/adw-gtk3) style.
-'''
+type = 'text-file' # xml
+about = """
+A basic style sheet that works for many applications using \
+<a href='https://gitlab.gnome.org/GNOME/libadwaita'>libadwaita</a> or the \
+<a href='https://github.com/lassekongo83/adw-gtk3'>adw-gtk3</a> style.
+"""
 
 schemes.main.name = 'Main'
 
 [options]
-accent = { name = 'Accent', default.set = 'any' }
+accent = { name = 'Accent', default.accent = 'any' }
 custom-css = { name = 'Custom CSS', default = '' }
 
 [options.dim-header]
@@ -23,7 +23,6 @@ default = true
 
 [suggested-paths]
 default = { default = 'adwaita.css' }
-firefox = { home = '.var/app/org.mozilla.firefox/config/gtk-3.0/gtk.css' }
 
 gtk4-1 = { config = 'gtk-4.0/gtk.css' }
 gtk3-1 = { config = 'gtk-3.0/gtk.css' }
@@ -138,7 +137,7 @@ celluloid        = { home = '.var/app/io.github.celluloid_player.Celluloid/confi
 clapper          = { home = '.var/app/com.github.rafostar.Clapper/config/gtk-4.0/gtk.css' }
 colorway         = { home = '.var/app/io.github.lainsce.Colorway/config/gtk-4.0/gtk.css' }
 countdown        = { home = '.var/app/io.github.lainsce.Countdown/config/gtk-4.0/gtk.css' }
-cozy            = { home = '.var/app/com.github.geigi.cozy/config/gtk-4.0/gtk.css' }
+cozy             = { home = '.var/app/com.github.geigi.cozy/config/gtk-4.0/gtk.css' }
 # dev-toolbox    = { home = '.var/app/me.iepure.devtoolbox/config/gtk-4.0/gtk.css' } # Wrong in light scheme
 dot-matrix       = { home = '.var/app/io.github.lainsce.DotMatrix/config/gtk-4.0/gtk.css' }
 easy-effects     = { home = '.var/app/com.github.wwmm.easyeffects/config/gtk-4.0/gtk.css' }
@@ -175,6 +174,10 @@ qalculate       = { home = '.var/app/io.github.Qalculate/config/gtk-3.0/gtk.css'
 quod-libet      = { home = '.var/app/io.github.quodlibet.QuodLibet/config/gtk-3.0/gtk.css' }
 synfig          = { home = '.var/app/org.synfig.SynfigStudio/config/gtk-3.0/gtk.css' }
 
+# XUL apps
+firefox = { home = '.var/app/org.mozilla.firefox/config/gtk-3.0/gtk.css' }
+zotero  = { home = '.var/app/org.zotero.Zotero/config/gtk-3.0/gtk.css' }
+
 # Chromium-like and Electron Flatpak apps
 chromium = { home = '.var/app/org.chromium.Chromium/config/gtk-3.0/gtk.css' }
 code     = { home = '.var/app/com.visualstudio.code/config/gtk-3.0/gtk.css' }
@@ -182,4 +185,93 @@ code-oss = { home = '.var/app/com.visualstudio.code-oss/config/gtk-3.0/gtk.css' 
 codium   = { home = '.var/app/com.vscodium.codium/config/gtk-3.0/gtk.css' }
 element  = { home = '.var/app/im.riot.Riot/config/gtk-3.0/gtk.css' }
 skype    = { home = '.var/app/com.skype.Client/config/gtk-3.0/gtk.css' }
-zotero   = { home = '.var/app/org.zotero.Zotero/config/gtk-3.0/gtk.css' }
+
+# https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1-latest/css-variables.html
+
+[script] # rhai
+embedded = '''
+const main   = cfg::scheme("main");
+const accent = cfg::option("accent");
+
+const bad  = if accent == "red" { "magenta" } else { "red" };
+const good = if accent == "green" { "blue" } else { "green" };
+const warn = if accent == "yellow" { "any" } else { "yellow" };
+
+const dark = main.lower.text.luma() > main.lower.like.luma();
+
+const view = if !dark || main.lower.area.luma() < main.lower.like.luma()
+	{ main.lower.area } else { main.upper.like }; // HACK better solarized
+
+fn shadow() { const L = this.luma(); 2 ** -L + 0.2 * L - 0.6 }
+
+fn out() { '#' + this.to_hex_rgb(true) } // css
+`
+@define-color accent_color ${main[accent].like.out()};
+@define-color accent_bg_color ${main[accent].area.out()};
+@define-color accent_fg_color ${main[accent].text.out()};
+
+@define-color destructive_color ${main[bad].like.out()};
+@define-color destructive_bg_color ${main[bad].area.out()};
+@define-color destructive_fg_color ${main[bad].text.out()};
+
+@define-color success_color ${main[good].like.out()};
+@define-color success_bg_color ${main[good].area.out()};
+@define-color success_fg_color ${main[good].text.out()};
+
+@define-color warning_color ${main[warn].like.out()};
+@define-color warning_bg_color ${main[warn].area.out()};
+@define-color warning_fg_color ${main[warn].text.out()};
+
+@define-color error_color ${main[bad].like.out()};
+@define-color error_bg_color ${main[bad].area.out()};
+@define-color error_fg_color ${main[bad].text.out()};
+
+@define-color window_bg_color ${main.lower.like.out()};
+@define-color window_fg_color ${main.lower.text.out()};
+
+@define-color view_bg_color ${view.out()};
+@define-color view_fg_color ${ // HACK better solarized
+	if main.lower.area.luma() < main.upper.area.luma()
+		{ main.lower.text.out() } else { main.upper.text.out() }
+};
+
+@define-color headerbar_bg_color ${main.upper.like.out()};
+@define-color headerbar_fg_color ${main.lower.text.out()};
+@define-color headerbar_border_color ${main.lower.text.out()};
+@define-color headerbar_backdrop_color ${
+	if cfg::option("dim-header") { main.lower.like.out() } else { main.upper.like.out() }
+};
+@define-color headerbar_shade_color alpha(black, ${view.shadow()});
+@define-color headerbar_darker_shade_color alpha(black, ${view.shadow() * 2});
+
+@define-color sidebar_bg_color ${main.upper.like.out()};
+@define-color sidebar_fg_color ${main.lower.text.out()};
+@define-color sidebar_backdrop_color ${lab::mix(main.upper.like, main.lower.like, 0.5).out()};
+@define-color sidebar_shade_color alpha(black, ${main.lower.like.shadow()});
+
+@define-color secondary_sidebar_bg_color ${lab::mix(main.upper.like, main.lower.like, 0.5).out()};
+@define-color secondary_sidebar_fg_color ${main.lower.text.out()};
+@define-color secondary_sidebar_backdrop_color ${lab::mix(main.upper.like, main.lower.like, 0.75).out()};
+@define-color secondary_sidebar_shade_color alpha(black, ${main.lower.like.shadow()});
+
+@define-color card_bg_color ${main.upper.area.out()};
+@define-color card_fg_color ${main.upper.text.out()};
+@define-color card_shade_color alpha(black, ${main.upper.area.shadow()});
+
+@define-color thumbnail_bg_color ${main.upper.area.out()};
+@define-color thumbnail_fg_color ${main.upper.text.out()};
+
+@define-color dialog_bg_color ${main.upper.area.out()};
+@define-color dialog_fg_color ${main.upper.text.out()};
+
+@define-color popover_bg_color ${main.upper.area.out()};
+@define-color popover_fg_color ${main.upper.text.out()};
+@define-color popover_shade_color alpha(black, ${main.upper.area.shadow()});
+
+@define-color shade_color alpha(black, ${main.lower.like.shadow()});
+@define-color scrollbar_outline_color ${
+	if dark { "alpha(black, 0.5)" } else { "#FFFFFF" } // FIXME
+};
+
+${cfg::option("custom-css")}`
+'''

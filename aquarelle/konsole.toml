@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'Konsole'
-type = 'text-file' # md
-about = '''
-An INI file that provides a color scheme for
-[Konsole](https://konsole.kde.org), a KDE terminal emulator.
-''' # rhai
+type = 'text-file' # xml
+about = """
+An INI file that provides a color scheme for \
+<a href='https://konsole.kde.org'>Konsole</a>, the KDE terminal emulator.
+""" # rhai
 
 display      = 'arrangement + " – " + scheme("main")' # rhai
 nomenclature = 'arrangement + " – " + scheme("main") + ".colorscheme"'
@@ -18,9 +18,14 @@ schemes.main.name = 'Main'
 blur    = { name = 'Background Blur', default = false }
 opacity = { name = 'Background Opacity', default = 1.0 }
 
-[options.bold]
-name = 'Swaps the roles “like” and “area” for emphasis colors'
-about = 'It is better if the bold text uses intense colors'
+[options.basic-area]
+name = 'Role `area` for basic colors'
+about = 'Use role `area` instead of `like` for basic colors'
+default = false
+
+[options.bright-area]
+name = 'Role `area` for bright colors'
+about = 'Use role `area` instead of `like` for bright colors'
 default = false
 
 [options.embedded]
@@ -30,5 +35,117 @@ default = false
 
 [suggested-paths]
 default = { default = 'konsole' }
-user-1  = { data = 'konsole' }
-user-2  = { home = '.local/share/konsole' }
+data    = { data = 'konsole' }
+
+[script] # rhai
+embedded = '''
+const main = cfg::scheme("main");
+
+const basic  = if cfg::option("basic-area")  { "area" } else { "like" };
+const bright = if cfg::option("bright-area") { "area" } else { "like" };
+
+const base = if cfg::option("embedded") { main.lower.like } else { main.lower.area };
+
+fn faint(set) { lab::mix(global::base, global::main[set].like, 0.625).out() }
+
+fn out() { '#' + this.to_hex_rgb(true) } // ini
+`
+[General]
+Description = ${cfg::display}
+Blur = ${cfg::option("blur")}
+Opacity = ${cfg::option("opacity")}
+
+[Foreground]
+Color = ${main.lower.text.out()}
+
+[ForegroundIntense]
+Color = ${main.lower.text.out()}
+
+[ForegroundFaint]
+Color = ${lab::mix(base, main.lower.text, 0.625).out()}
+
+[Background]
+Color = ${base.out()}
+
+[BackgroundIntense]
+Color = ${main.upper.like.out()}
+
+[BackgroundFaint]
+Color = ${lab::mix(base, main.lower.text, 0.25).out()}
+
+[Color0]
+Color = ${ // HACK better solarized
+	if main.lower.like.luma() != main.lower.area.luma()
+		{ main.lower.like.out() } else { main.upper.like.out() }
+}
+
+[Color0Intense]
+Color = ${lab::mix(main.lower.text, base, 0.625).out()}
+
+[Color0Faint]
+Color = ${faint("any")}
+
+[Color1]
+Color = ${main.red[basic].out()}
+
+[Color1Intense]
+Color = ${main.red[bright].out()}
+
+[Color1Faint]
+Color = ${faint("red")}
+
+[Color2]
+Color = ${main.green[basic].out()}
+
+[Color2Intense]
+Color = ${main.green[bright].out()}
+
+[Color2Faint]
+Color = ${faint("green")}
+
+[Color3]
+Color = ${main.yellow[basic].out()}
+
+[Color3Intense]
+Color = ${main.yellow[bright].out()}
+
+[Color3Faint]
+Color = ${faint("yellow")}
+
+[Color4]
+Color = ${main.blue[basic].out()}
+
+[Color4Intense]
+Color = ${main.blue[bright].out()}
+
+[Color4Faint]
+Color = ${faint("blue")}
+
+[Color5]
+Color = ${main.magenta[basic].out()}
+
+[Color5Intense]
+Color = ${main.magenta[bright].out()}
+
+[Color5Faint]
+Color = ${faint("magenta")}
+
+[Color6]
+Color = ${main.cyan[basic].out()}
+
+[Color6Intense]
+Color = ${main.cyan[bright].out()}
+
+[Color6Faint]
+Color = ${faint("cyan")}
+
+[Color7]
+Color = ${main.any[basic].out()}
+
+[Color7Intense]
+Color = ${main.any[bright].out()}
+
+[Color7Faint]
+Color = ${faint("any")}
+`
+'''

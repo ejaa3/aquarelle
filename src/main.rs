@@ -4,15 +4,43 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-use std::io::{Cursor, Result, Stderr, Write};
-use aquarelle::{arrangement, cache, mapping, path, scheme, csi, location};
+use std::{array::from_fn, borrow::Cow, io::{Stderr, Stdout, Write}, ops::Deref};
+use aquarelle::{arrangement, cache, namespace::Namespace, scheme, csi, Key, Msg};
+use clap::builder::styling;
 use compact_str::CompactString;
 use palette::{rgb::channels::Rgba, Srgb};
 
-fn main() -> Result<()> { std::process::exit(start()?) }
+enum Error { Aquarelle, Io(std::io::Error) }
+
+impl Error {
+	fn io(self) -> Result<(), std::io::Error> {
+		if let Self::Io(error) = self { Err(error) } else { Ok(()) }
+	}
+}
+
+impl From<std::io::Error> for Error {
+	fn from(value: std::io::Error) -> Self { Self::Io(value) }
+}
+
+fn main() -> std::process::ExitCode {
+	match start() {
+		Ok(_) => std::process::ExitCode::SUCCESS,
+		Err(Error::Aquarelle) => std::process::ExitCode::FAILURE,
+		Err(Error::Io(error)) => {
+			eprintln!("{error}");
+			std::process::ExitCode::FAILURE
+		}
+	}
+}
+
+const STYLES: styling::Styles = styling::Styles::styled()
+	.usage(styling::AnsiColor::Green.on_default().bold())
+	.header(styling::AnsiColor::Green.on_default().bold())
+	.literal(styling::AnsiColor::Blue.on_default().bold())
+	.placeholder(styling::AnsiColor::Yellow.on_default());
 
 #[derive(clap::Parser)]
-#[command(name = "Aquarelle", version, about)]
+#[command(version, about, styles = STYLES)]
 enum Cli {
 	/// List available items
 	List { #[command(subcommand)] subcommand: List },
@@ -25,7 +53,7 @@ enum Cli {
 		
 		/// Arrangement to apply
 		#[arg(short, long)]
-		arrangement: String,
+		arrangement: CompactString,
 		
 		/// Variant of schemes to be applied from the arrangement
 		#[arg(short, long)]
@@ -36,7 +64,7 @@ enum Cli {
 		map: Option<CompactString>,
 	},
 	
-	/// Print a scheme of a theme
+	/// Print schemes of a theme
 	Print {
 		/// Namespace where the theme is located
 		#[arg(short, long)]
@@ -69,7 +97,7 @@ enum Cli {
 		bg: u8,
 		
 		/// Scheme options in TOML
-		options: Option<CompactString>,
+		options: Option<String>,
 	},
 }
 
@@ -91,282 +119,140 @@ enum List {
 	Themes,
 }
 
-fn start() -> Result<i32> {
-	let mut io_errors = vec![];
+fn start() -> Result<(), Error> {
+	let mut cache = cache::Cache::default();
 	let mut scan_error = false;
 	let mut stderr = std::io::stderr();
+	let mut io_errors = vec![];
 	
-	let cache = cache::Cache::new(|error| {
+	cache.update(|error| {
 		scan_error = true;
-		error.show(&mut stderr).unwrap_or_else(|error| io_errors.push(error));
+		writeln!(stderr, "{}", annotate_snippets::Renderer::styled()
+			.render(error.msg(<[Cow<_>; 2]>::default().each_mut())))
+			.unwrap_or_else(|error| io_errors.push(error));
+		true
 	});
 	
 	for error in io_errors { Err(error)? }
 	
-	let code = match clap::Parser::parse() {
+	match clap::Parser::parse() {
 		Cli::List { subcommand } => list(subcommand, stderr, cache),
 		
 		Cli::Arrange { from, arrangement, schemes, map } => {
-			let arrangement = arrangement.into();
-			let result = arrangement::arrange(&cache, &from, &arrangement, &schemes, map.as_deref());
+			let mappings = arrangement::arrange(
+				&cache, &from, arrangement.as_str().into(), &schemes, map.as_deref()
+			).log(&mut stderr)?;
 			
-			match result {
-				Ok(mappings) => show_mapping_results(stderr, mappings),
-				Err(error) => arrangement::show_error(stderr, error, &arrangement)
+			let mut successful = 0_u8;
+			let mut failures   = 0_u8;
+			
+			for mapping in mappings {
+				if let Err(error) = mapping.perform().log(&mut stderr)
+					{ error.io()?; failures += 1; } else { successful += 1 }
 			}
+			
+			Ok(writeln!(std::io::stdout(), csi! { '\n'
+				"{2} SUCCESSFUL:"! " {0}\n"
+				"{3}   FAILURES:"! " {1}\n"
+			}, successful, failures,
+				if successful > 0 { csi!(/b:fg green;)  } else { csi!(/d;) },
+				if   failures > 0 { csi!(/b:fg red;)    } else { csi!(/d;) },
+			)?)
 		}
 		
-		Cli::Print { from, theme: theme_id, schemes, bg } => {
-			let (namespace, bin) = match cache.namespace(&from) {
-				Ok(namespace) => namespace, Err(error) => {
-					write!(stderr, csi!(/b:fg red; "ERROR:"! ' '))?;
-					return error.show(&mut stderr)
+		Cli::Print { from, theme, schemes, bg } => {
+			let (namespace, bin) = cache.namespace(&from).log(&mut stderr)?;
+			let theme = namespace.theme(&theme, bin).log(&mut stderr)?;
+			let safety = Default::default(); // FIXME
+			
+			if schemes.is_empty() {
+				for (i, scheme) in theme.schemes.keys().map(Key::deref).map(aquarelle::Spanned::get_ref).enumerate() {
+					let scheme = theme.scheme(scheme, (namespace, bin), &cache, &safety).log(&mut stderr)?;
+					print_scheme(scheme, bg, i as _)?;
 				}
-			};
-			let theme = match namespace.theme(&theme_id, bin) {
-				Ok(theme) => theme, Err(error) => {
-					write!(stderr, csi!(/b:fg red; "ERROR:"! ' '))?;
-					return error.show(&mut stderr, &from)
-				}
-			};
+			}
 			for (i, scheme) in schemes.into_iter().enumerate() {
-				let scheme = match theme.scheme(&scheme, &from, &cache, Default::default()) {
-					Ok(data) => data, Err(error) => {
-						write!(stderr, csi!(/b:fg red; "ERROR:"! ' '))?;
-						return error.show(&mut stderr, &theme_id)
-					}
-				};
+				let scheme = theme.scheme(&scheme, (namespace, bin), &cache, &safety).log(&mut stderr)?;
 				print_scheme(scheme, bg, i as _)?;
 			};
-			Ok(exitcode::OK)
+			Ok(())
 		}
 		
 		Cli::Debug { from, scheme, options, bg } => {
-			let params = scheme::Params {
-				scheme_id: scheme,
-				namespace_id: CompactString::const_new(""),
-			};
+			let (namespace, bin) = cache.namespace(&from).log(&mut stderr)?;
+			let scheme = namespace.scheme(&scheme, bin).log(&mut stderr)?;
 			
-			let options = if let Some(options) = options {
-				match toml::de::from_str(&options) {
-					Ok(options) => options, Err(error) => {
-						write!(stderr, csi!(/b:fg red; "ERROR:"! "invalid TOML\n" /F 7 "{}"), error)?;
-						return Ok(exitcode::USAGE)
-					}
+			let (map, cow) = if let Some(mut options) = options {
+				while let Some((left, _)) = options.split_once(", ") {
+					options.replace_range(left.len()..(left.len() + 2), " \n");
 				}
+				(toml::de::from_str(&options).or_else(|error| {
+					writeln!(stderr, "{error}")?; Err(Error::Aquarelle)
+				})?, Cow::Owned(options))
 			} else { Default::default() };
 			
-			let request = scheme::Request { params, options, data: Default::default() };
+			let src = &(std::rc::Rc::new(cow), Default::default());
 			
-			match scheme::data(&request, &from, &cache, &Default::default()) {
-				Ok(scheme) => { print_scheme(scheme, bg, 0)?; Ok(exitcode::OK) }
-				Err(error) => {
-					write!(stderr, csi!(/b:fg red; "ERROR:"! ' '))?;
-					error.show(&mut stderr)
-				}
-			}
+			print_scheme(&scheme.data(
+				&map, &Default::default(), src, None, &Default::default() // FIXME safety
+			).log(&mut stderr)?, bg, 0)
 		}
-	}?;
-	
-	Ok(if code == exitcode::OK {
-		if scan_error { exitcode::UNAVAILABLE } else { code }
-	} else { code })
+	}
 }
 
-fn list(command: List, mut stderr: Stderr, cache: cache::Cache) -> Result<i32> {
-	let mut stdout = std::io::stdout();
-	let mut errors = Cursor::new(vec![]);
+fn list(command: List, mut stderr: Stderr, cache: cache::Cache) -> Result<(), Error> {
+	let stdout = &mut std::io::stdout();
+	let mut errors = std::io::Cursor::new(vec![]);
+	let mut first = true;
+	NL.set("\n");
+	
+	let print_namespace = |out: &mut Stdout, id, bin: &cache::Bin, namespace: &Namespace|
+		writeln!(out, csi!(/fg blue; "in {} namespace:"! " {:?} " /d; "({})"!),
+			if bin.user { "user" } else { "system" }, id, namespace.name);
+	
+	let print_item = |out: &mut Stdout, id: &aquarelle::Spanned, name: &str|
+		writeln!(out, csi!("- {:?}" /d; ": {}"!), id.get_ref(), name);
+	
+	macro_rules! print_items(($item:ident) => (for (id, bin) in &cache.namespaces {
+		match bin.get().log(&mut errors) {
+			Ok(namespace) => if !namespace.$item.is_empty() {
+				if first { first = false } else { writeln!(stdout)? }
+				print_namespace(stdout, id, bin, namespace)?;
+				
+				for (id, item) in &namespace.$item {
+					match item.get(id, bin, namespace.source.as_ref().unwrap()).log(&mut errors) {
+						Ok(item) => print_item(stdout, id, &item.name), Err(error) => error.io()
+					}?
+				}
+			}, Err(error) => error.io()?
+		}
+	}));
 	
 	match command {
 		List::Namespaces => {
 			for (id, bin) in &cache.namespaces {
-				match bin.get(id) {
-					Ok(namespace) => write!(stdout, csi! {
-						"\n{} {}: " /fg green; "{:?}"! ' ' /d; "({})"!
-					}, if bin.user { "-  " } else { "-" }, location(bin.user), id, namespace.name)?,
-					
-					Err(error) => {
-						aquarelle::warn(&mut errors, if let cache::Error::Io(..) = *error { false } else { true })?;
-						error.show(&mut errors)?;
-					}
-				}
+				match bin.get().log(&mut errors) {
+					Ok(namespace) => writeln!(stdout, csi!(/fg blue; "{}:"! " {:?} " /d; "({})"!),
+						if bin.user { "  user" } else { "system" }, id, namespace.name),
+					Err(error) => error.io(),
+				}?
 			}
-			if errors.position() == 0 { writeln!(stdout)?; }
-			
-			write!(stdout, csi!("\n  user path: " /fg blue; "{}\n"! "system path: " /fg blue; "{}"! '\n'),
+			writeln!(stdout, csi!("\n  " /fg green; "user path:"! " {}\n" /fg green; "system path:"! " {}"!),
 				cache::user_path().to_string_lossy(), cache::system_path().to_string_lossy())?;
 		}
-		List::Arrangements => for (at, bin) in &cache.namespaces {
-			match bin.get(at) {
-				Ok(namespace) => if !namespace.arrangements.is_empty() {
-					writeln!(stdout,
-						csi!("\nAt {} namespace " /fg magenta; "{:?}"! ":"),
-						location(bin.user), at)?;
-					
-					for (id, item) in &namespace.arrangements {
-						match item.get(id, bin) {
-							Ok(arrangement) => writeln!(stdout,
-								csi!("- " /fg green; "{:?}"! ' ' /d; "({})"!), id, arrangement.name)?,
-							
-							Err(error) => {
-								aquarelle::warn(&mut errors, true)?;
-								error.show(&mut errors, at)?;
-								continue
-							}
-						}
-					}
-				}
-				Err(error) => {
-					aquarelle::warn(&mut errors, true)?;
-					error.show(&mut errors)?;
-				}
-			}
-		}
-		List::Maps => for (at, bin) in &cache.namespaces {
-			match bin.get(at) {
-				Ok(namespace) => if !namespace.maps.is_empty() {
-					writeln!(stdout,
-						csi!("\nAt {} namespace " /fg magenta; "{:?}"! ":"),
-						location(bin.user), at)?;
-					
-					for (id, item) in &namespace.maps {
-						match item.get(id, bin) {
-							Ok(map) => writeln!(stdout,
-								csi!("- " /fg green; "{:?}"! ' ' /d; "({})"!), id, map.name)?,
-							
-							Err(error) => {
-								aquarelle::warn(&mut errors, true)?;
-								error.show(&mut errors, at)?;
-								continue
-							}
-						}
-					}
-				}
-				Err(error) => {
-					aquarelle::warn(&mut errors, true)?;
-					error.show(&mut errors)?;
-				}
-			}
-		}
-		List::Schemes => for (at, bin) in &cache.namespaces {
-			match bin.get(at) {
-				Ok(namespace) => if !namespace.schemes.is_empty() {
-					writeln!(stdout,
-						csi!("\nAt {} namespace " /fg magenta; "{:?}"! ":"),
-						location(bin.user), at)?;
-					
-					for (id, item) in &namespace.schemes {
-						match item.get(id, bin) {
-							Ok(palette) => writeln!(stdout,
-								csi!("- " /fg green; "{:?}"! ' ' /d; "({})"!), id, palette.name)?,
-							
-							Err(error) => {
-								aquarelle::warn(&mut errors, true)?;
-								error.show(&mut errors, at)?;
-								continue
-							}
-						}
-					}
-				}
-				Err(error) => {
-					aquarelle::warn(&mut errors, true)?;
-					error.show(&mut errors)?;
-				}
-			}
-		}
-		List::Themes => for (at, bin) in &cache.namespaces {
-			match bin.get(at) {
-				Ok(namespace) => if !namespace.themes.is_empty() {
-					writeln!(stdout,
-						csi!("\nAt {} namespace " /fg magenta; "{:?}"! ":"),
-						location(bin.user), at)?;
-					
-					for (id, item) in &namespace.themes {
-						match item.get(id, bin) {
-							Ok(theme) => writeln!(stdout,
-								csi!("- " /fg green; "{:?}"! ' ' /d; "({})"!), id, theme.name)?,
-							
-							Err(error) => {
-								aquarelle::warn(&mut errors, true)?;
-								error.show(&mut errors, at)?;
-								continue
-							}
-						}
-					}
-				}
-				Err(error) => {
-					aquarelle::warn(&mut errors, true)?;
-					error.show(&mut errors)?;
-				}
-			}
-		}
+		List::Arrangements => print_items!(arrangements),
+		List::Maps => print_items!(maps),
+		List::Schemes => print_items!(schemes),
+		List::Themes => print_items!(themes),
 	}
-	
-	writeln!(stdout)?;
-	
-	let errors = errors.into_inner();
-	Write::write_all(&mut stderr, &errors)?;
-	
-	Ok(if errors.is_empty() { exitcode::OK } else { exitcode::UNAVAILABLE })
+	Ok(stderr.write_all(&errors.into_inner())?)
 }
 
-fn show_mapping_results<'a>(
-	mut out: impl Write, mappings: Vec<impl FnOnce() -> mapping::Result<'a>>
-) -> Result<i32> {
-	let mut   successful = 0_u8;
-	let mut missmappings = 0_u8;
-	let mut     failures = 0_u8;
-	
-	for mapping in mappings {
-		match mapping() {
-			Ok(mapping::Success { id, errors, .. }) => if errors.is_empty() { successful += 1 } else {
-				missmappings += 1;
-				
-				writeln!(out, csi! { '\n' /b:fg magenta; "WARNING:"! ' '
-					"There were some errors for "
-					/fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ".paths]"! ':'
-				}, id)?;
-				
-				for mapping::IoError { error, path } in errors.iter() {
-					write!(out, csi!('\n' /6 F "for: "))?;
-					path::show_location(&mut out, &path.location)?;
-					writeln!(out, csi! {
-						'\n' /7 F "as: " /fg cyan; "{}"! '\n' /4 F /b:fg red; "error:"! " {}"
-					}, path.buf.to_string_lossy(), error)?;
-				}
-			}
-			
-			Err(error) => {
-				failures += 1;
-				mapping::show_error(&mut out, error)?
-			}
-		}
-	}
-	
-	writeln!(std::io::stdout(), csi! { '\n'
-		"{3} SUCCESSFUL:"! " {0}\n"
-		"{4}MISMAPPINGS:"! " {1}\n"
-		"{5}   FAILURES:"! " {2}\n"
-	}, successful, missmappings, failures,
-		if   successful > 0 { csi!(/b:fg green;)  } else { csi!(/d;) },
-		if missmappings > 0 { csi!(/b:fg yellow;) } else { csi!(/d;) },
-		if     failures > 0 { csi!(/b:fg red;)    } else { csi!(/d;) },
-	)?;
-	
-	use exitcode::{CANTCREAT, UNAVAILABLE, OK};
-	// IOERR should be used instead of CANTCREAT if the mapping involves reading
-	Ok(if missmappings > 0 { CANTCREAT } else if failures > 0 { UNAVAILABLE } else { OK })
-}
-
-#[cfg(feature = "cli")]
-fn print_scheme(scheme: &scheme::Data, bg: u8, i: u8) -> Result<()> {
+fn print_scheme(scheme: &scheme::Data, bg: u8, i: u8) -> Result<(), Error> {
 	let mut stdout = &std::io::stdout();
 	write!(stdout, "{}", if i == 0 { "\n" } else { csi!(/10 U) })?;
 	
-	for (set, roles) in [
-		(aquarelle::Set::Lower, scheme.lower),
-		(aquarelle::Set::Upper, scheme.upper),
-	] {
+	for (set, roles) in [("lower", scheme.lower), ("upper", scheme.upper)] {
 		let like = Srgb::from_u32::<Rgba>(roles.like);
 		let area = Srgb::from_u32::<Rgba>(roles.area);
 		let text = Srgb::from_u32::<Rgba>(roles.text);
@@ -374,7 +260,7 @@ fn print_scheme(scheme: &scheme::Data, bg: u8, i: u8) -> Result<()> {
 		writeln!(stdout, csi! { /"{10}" F
 			/bg rgb("{1};{2};{3}"):fg rgb("{7};{8};{9}"); "{0:^9}"!
 			/bg rgb("{4};{5};{6}"):fg rgb("{7};{8};{9}"); "{0:^9}"!
-		}, set.to_str(),
+		}, set,
 			like.red, like.green, like.blue,
 			area.red, area.green, area.blue,
 			text.red, text.green, text.blue, i * 19 + 1
@@ -389,13 +275,13 @@ fn print_scheme(scheme: &scheme::Data, bg: u8, i: u8) -> Result<()> {
 	});
 	
 	for (set, roles) in [
-		(aquarelle::Set::Red,     scheme.red),
-		(aquarelle::Set::Yellow,  scheme.yellow),
-		(aquarelle::Set::Green,   scheme.green),
-		(aquarelle::Set::Cyan,    scheme.cyan),
-		(aquarelle::Set::Blue,    scheme.blue),
-		(aquarelle::Set::Magenta, scheme.magenta),
-		(aquarelle::Set::Any,     scheme.any),
+		(aquarelle::Accent::Red,     scheme.red),
+		(aquarelle::Accent::Yellow,  scheme.yellow),
+		(aquarelle::Accent::Green,   scheme.green),
+		(aquarelle::Accent::Cyan,    scheme.cyan),
+		(aquarelle::Accent::Blue,    scheme.blue),
+		(aquarelle::Accent::Magenta, scheme.magenta),
+		(aquarelle::Accent::Any,     scheme.any),
 	] {
 		let like = Srgb::from_u32::<Rgba>(roles.like);
 		let area = Srgb::from_u32::<Rgba>(roles.area);
@@ -410,6 +296,23 @@ fn print_scheme(scheme: &scheme::Data, bg: u8, i: u8) -> Result<()> {
 			text.red, text.green, text.blue, i * 19 + 1
 		)?
 	}
-	
-	writeln!(stdout)
+	Ok(writeln!(stdout)?)
+}
+
+thread_local! {
+	static NL: std::cell::Cell<&'static str> = const { std::cell::Cell::new("") }
+}
+
+trait Log<T, const N: usize> {
+	fn log(self, stderr: &mut dyn std::io::Write) -> Result<T, Error>;
+}
+
+impl<'a, T, const N: usize, E: for<'b> Msg<'a, 'b, N>> Log<T, N> for Result<T, E> {
+	fn log(self, stderr: &mut dyn std::io::Write) -> Result<T, Error> {
+		self.or_else(|error| {
+			writeln!(stderr, "{}{}", NL.get(), annotate_snippets::Renderer::styled()
+				.render(error.msg(from_fn(|_| Cow::default()).each_mut())))?;
+			Err(Error::Aquarelle)
+		})
+	}
 }

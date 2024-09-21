@@ -4,18 +4,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-use std::collections::BTreeMap;
-use compact_str::CompactString;
+use std::{borrow::Cow, collections::{BTreeMap, BTreeSet}, rc::Rc};
+use annotate_snippets::{Level, Message, Snippet};
 use itertools::Itertools;
 use serde::{Serialize, Deserialize};
-use crate::{cache, map, mapping, namespace, path};
+use crate::{cache, map, mapping, namespace, path, Src, Key, Spanned};
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Paths {
-	Include (Vec<CompactString>),
-	Exclude (Vec<CompactString>),
-	Request (BTreeMap<CompactString, BTreeMap<CompactString, MapPaths>>)
+	Include (Vec<Spanned>),
+	Exclude (BTreeSet<Key>),
+	In (BTreeMap<Key, MapPaths>),
+	At (BTreeMap<Key, BTreeMap<Key, MapPaths>>),
 }
 
 impl Default for Paths { fn default() -> Self { Paths::Include(Vec::new()) } }
@@ -26,182 +27,191 @@ pub(crate) fn includes_nothing(paths: &Paths) -> bool {
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub enum MapPaths {
-	Include (Vec<CompactString>),
-	Exclude (Vec<CompactString>),
+pub enum MapPaths { Include (Vec<Spanned>), Exclude (BTreeSet<Key>) }
+
+pub(crate) struct Exam<'a, 'b> {
+	pub(crate)             id: &'a Spanned,
+	pub(crate)            map: &'a map::Map,
+	pub(crate)            src: &'a Src,
+	pub(crate)        mapping: &'a mapping::Map,
+	pub(crate)      namespace: &'a namespace::Namespace,
+	pub(crate)            bin: &'a cache::Bin,
+	pub(crate)          cache: &'a cache::Cache,
+	pub(crate)   default_path: &'b std::path::PathBuf,
+	pub(crate)           name: &'b str,
+	pub(crate) previous_paths: &'b mut Vec<path::Parsed<'a>>,
 }
 
-pub fn resolve<'a>(
-	 (id, request): (&'a str, &'a map::Request),
-	           map: &'a mapping::Map,
-	        map_id: &'a str,
-	         cache: &'a cache::Cache,
-	  default_path: &std::path::PathBuf,
-	          name: &str,
-	previous_paths: &mut Vec<path::ParsedFrom<'a>>,
-) -> Result<mapping::Files<'a>, Error<'a>> {
-	let request_paths: Box<dyn Iterator<Item = _>> = match request.paths {
-		Paths::Include(ref include) if include.is_empty() =>
-			Box::new(request.custom_paths.iter().map(|path| Ok((None, path)))),
+impl<'a> Exam<'a, '_> {
+	pub(crate) fn examine(self) -> Result<mapping::Files<'a>, Error<'a>>
+	{ examine(self) }
+}
+
+fn examine<'a>(Exam {
+	id, map, src, mapping, namespace, bin, cache, default_path, name, previous_paths
+}: Exam<'a, '_>) -> Result<mapping::Files<'a>, Error<'a>> {
+	let map_src = mapping.source.get().unwrap();
+	
+	let get_map_paths = |paths: &'a _, map: &'a mapping::Map| {
+		let map_src = map.source.get().unwrap();
+		
+		Ok::<Box<dyn Iterator<Item = Result<_, Error>>>, Error>(match paths {
+			MapPaths::Include(include) => Box::new(
+				include.iter().map(move |suggested| Ok((
+					map_src, map.suggested_paths.get(suggested.get_ref())
+						.ok_or(Error::SuggestedNotFound { src, id, suggested })?
+				)))
+			),
+			
+			MapPaths::Exclude(exclude) if exclude.is_empty() => Box::new(
+				map.suggested_paths.values().map(move |path| Ok((map_src, path)))
+			),
+			
+			MapPaths::Exclude(exclude) => {
+				for suggested in exclude {
+					if !map.suggested_paths.contains_key(suggested.get_ref()) {
+						Err(Error::SuggestedNotFound { src, id, suggested })?
+					}
+				}
+				Box::new(map.suggested_paths.iter().filter_map(move |(id, path)|
+					(!exclude.contains(id as &str)).then_some(Ok((map_src, path)))))
+			}
+		})
+	};
+	
+	let request_paths: Box<dyn Iterator<Item = _>> = match map.paths {
+		Paths::Include(ref include) if include.is_empty() => Box::new(
+			map.custom_paths.iter().map(|path| Ok((src, path)))
+		),
 		
 		Paths::Exclude(ref exclude) if exclude.is_empty() => Box::new(
-			map.suggested_paths.iter()
-				.map(|(id, path)| Ok((Some(id), path)))
-				.chain(request.custom_paths.iter().map(|path| Ok((None, path))))
+			mapping.suggested_paths.values().map(|path| Ok((map_src, path)))
+				.chain(map.custom_paths.iter().map(|path| Ok((src, path))))
 		),
 		
 		Paths::Include(ref include) => Box::new(
-			include.iter().map(
-				|include_id| Ok((
-					Some(include_id), map.suggested_paths.get(include_id)
-						.ok_or(Error::IncludeNotFound { id, map_id, include_id })?
-				))
-			).chain(request.custom_paths.iter().map(|path| Ok((None, path))))
+			include.iter().map(|suggested| Ok((
+				map_src, mapping.suggested_paths.get(suggested.get_ref())
+					.ok_or(Error::SuggestedNotFound { src, id, suggested })?
+			))).chain(map.custom_paths.iter().map(|path| Ok((src, path))))
 		),
 		
-		Paths::Exclude(ref exclude) => Box::new(
-			map.suggested_paths.iter()
-				.filter_map(|(id, path)| (!exclude.contains(id)).then(|| Ok((Some(id), path))))
-				.chain(request.custom_paths.iter().map(|path| Ok((None, path))))
+		Paths::Exclude(ref exclude) => {
+			for suggested in exclude {
+				if !mapping.suggested_paths.contains_key(suggested.get_ref()) {
+					Err(Error::SuggestedNotFound { src, id, suggested })?
+				}
+			}
+			Box::new(mapping.suggested_paths.iter()
+				.filter(|(id, _)| !exclude.contains(id as &str))
+				.map(|(_, path)| Ok((map_src, path)))
+				.chain(map.custom_paths.iter().map(|path| Ok((src, path)))))
+		}
+		
+		Paths::In(ref map_paths) => Box::new(
+			map_paths.iter().map(|(map_id, paths)|
+				get_map_paths(paths, namespace.map(map_id.get_ref(), bin)
+					.map_err(|error| Error::MainNamespace { src, id, map_id, error })?.1)
+			).flatten_ok().flatten_ok()
 		),
 		
-		Paths::Request(ref namespaces) => Box::new(
+		Paths::At(ref namespaces) => Box::new(
 			namespaces.iter().map(|(namespace_id, map_paths)| {
-				let (namespace, bin) = cache.namespace(namespace_id)
-					.map_err(|error| Error::Namespace { id, error })?;
+				let (namespace, bin) = cache.namespace(namespace_id.get_ref())
+					.map_err(|error| Error::Cache { src, id, namespace_id, error })?;
 				
-				Ok(map_paths.iter().map(|(map_id, paths)| {
-					let (_, map) = namespace.map(map_id, bin)
-						.map_err(|error| Error::Map { id, namespace_id, error })?;
-					
-					Ok::<Box<dyn Iterator<Item = Result<_, Error>>>, Error>(match paths {
-						MapPaths::Include(include) => Box::new(
-							include.iter().map(|include_id| Ok((
-								Some(include_id), map.suggested_paths.get(include_id)
-									.ok_or(Error::PathsIncludeNotFound { id, namespace_id, map_id, include_id })?
-							)))
-						),
-						
-						MapPaths::Exclude(exclude) if exclude.is_empty() => Box::new(
-							map.suggested_paths.iter().map(|(id, path)| Ok((Some(id), path)))
-						),
-						
-						MapPaths::Exclude(exclude) => Box::new(
-							map.suggested_paths.iter().filter_map(|(id, path)|
-								if exclude.contains(id) { None } else { Some(Ok((Some(id), path))) })
-						),
-					})
-				}).flatten_ok().flatten_ok())
-			}).flatten_ok().flatten_ok().chain(request.custom_paths.iter().map(|path| Ok((None, path))))
+				Ok(map_paths.iter().map(|(map_id, paths)|
+					get_map_paths(paths, namespace.map(map_id.get_ref(), bin)
+						.map_err(|error| Error::Namespace { src, id, namespace_id, map_id, error })?.1)
+				).flatten_ok().flatten_ok())
+			}).flatten_ok().flatten_ok().chain(map.custom_paths.iter().map(|path| Ok((src, path))))
 		)
 	};
 	
-	match map.variant {
+	match mapping.variant {
 		mapping::Type::EditTextFile => todo!(), // TODO
 		
 		mapping::Type::TextFile | mapping::Type::SvgToPngFile | mapping::Type::ZipFile => {
 			let mut paths = vec![];
 			
 			for request_path in request_paths.into_iter() {
-				let (suggested_id, location) = request_path?;
+				let (source, location) = request_path?;
 				
-				let get_path = || location.to_path_buf(Some(default_path))
-					.ok_or(Error::MissingPath { id, location });
+				let get_path = || location.get_ref().to_path_buf(Some(default_path))
+					.ok_or(Error::MissingPath { src, id, source, location });
 				
 				let buf = if name.is_empty() { get_path()? } else {
-					path::is_bad(name)
-						.map_err(|error| Error::BadNaming { id, map_id, error })?;
-					
 					let mut path = get_path()?; path.push(name); path
 				};
 				
-				let suggested_id = suggested_id.map(|id| id as _);
-				let path = path::Parsed { suggested_id, location, file: None, buf };
+				let path = path::Parsed {
+					id, source, location, map_src, file_name: None, buf: Rc::from(buf)
+				};
 				
-				if is_unique_among_maps(path.clone(), previous_paths, id)? {
-					paths.push(path.clone());
-					previous_paths.push(path::ParsedFrom { id, path });
+				if is_unique_among_maps(previous_paths, &path, src)? {
+					paths.push(Rc::clone(&path.buf));
+					previous_paths.push(path);
 				}
 			}
-			
 			if paths.is_empty() { None } else { Some(mapping::Files::Single(paths)) }
 		}
 		
 		mapping::Type::Directory => {
-			if !name.is_empty() {
-				path::is_bad(&name).map_err(|error| Error::BadNaming { id, map_id, error })?;
-			}
-			
 			let request_paths = request_paths.collect::<Result<Box<_>, _>>()?;
 			let mut paths = Vec::with_capacity(request_paths.len());
 			let mut no_paths = true;
 			
-			for (file_id, file) in &map.files {
+			for (file_id, file) in &mapping.files {
 				let mut file_paths = vec![];
 				
-				for (suggested_id, location) in request_paths.iter() {
-					let mut buf = location.to_path_buf(Some(default_path))
-						.ok_or(Error::MissingPath { id, location })?;
+				for (source, location) in request_paths.iter() {
+					let mut buf = location.get_ref().to_path_buf(Some(default_path))
+						.ok_or(Error::MissingPath { src, id, source, location })?;
 					
 					if !name.is_empty() { buf.push(name); }
 					
-					let subdir = if file.at > 0 {
-						let subdir = map.subdirectories.get(file.at as usize - 1)
+					if *file.at.get_ref() > 0 {
+						buf.push(mapping.subdirectories.get(*file.at.get_ref() as usize - 1)
 							.ok_or(Error::NoSubdirectory {
-								id, map_id, file_id, at: file.at, available: map.subdirectories.len()
-							})?;
-						
-						buf.extend([subdir.as_str(), &file.name]);
-						subdir
-					} else { buf.push(file.name.as_str()); "" };
+								src, id, map_src, file_id, at: &file.at,
+								available: mapping.subdirectories.len()
+							})?.get_ref() as &str);
+					};
 					
-					let suggested_id = suggested_id.map(|id| id as _);
-					let file = Some(path::File { file_id, file, subdir });
-					let path = path::Parsed { suggested_id, location, file, buf };
+					buf.push(path::check_name(file.name.get_ref() as &str,
+						Error::BadName { src, id, map_src, file_id, name: &file.name })?);
 					
-					if is_unique_among_maps(path.clone(), previous_paths, id)? {
-						file_paths.push(path.clone());
-						previous_paths.push(path::ParsedFrom { id, path });
+					let path = path::Parsed {
+						id, source, location, map_src, file_name: Some(&file.name), buf: Rc::from(buf)
+					};
+					
+					if is_unique_among_maps(previous_paths, &path, src)? {
+						file_paths.push(Rc::clone(&path.buf));
+						previous_paths.push(path);
 					}
 				}
 				
 				no_paths &= file_paths.is_empty();
 				
 				paths.push(mapping::ParsedFile {
-					file_id, variant: file.variant.unwrap_or(map.default_file_type), file_paths
+					file_id, variant: file.variant.unwrap_or(mapping.default_file_type), paths: file_paths
 				});
 			}
 			
 			if no_paths { None } else { Some(mapping::Files::Several(paths)) }
 		}
-	}.ok_or(Error::NoPaths { id })
+	}.ok_or_else(|| Error::NoPaths { src, id })
 }
 
 fn is_unique_among_maps<'a>(
-	          path: path::Parsed<'a>,
-	previous_paths: &[path::ParsedFrom<'a>],
-	            id: &'a str,
+	previous_paths: &[path::Parsed<'a>], path: &path::Parsed<'a>, src: &'a Src
 ) -> Result<bool, Error<'a>> {
 	for previous in previous_paths.iter() {
-		macro_rules! conflict { () => {
-			return Err(Error::ConflictingPath {
-				 current: path::ParsedFrom { id, path },
-				previous: previous.clone(),
-			})
-		}; }
+		macro_rules! conflict (() => (return Err(Error::ConflictingPath {
+			src, previous: Box::new(previous.clone()), path: Box::new(path.clone())
+		} )));
 		
-		if previous.buf == path.buf {
-			if previous.id != id { conflict!() }
-			
-			match previous.file.as_ref().zip(path.file.as_ref()) {
-				None => return Ok(false),
-				
-				Some((previous, current))
-					if previous.file_id == current.file_id => return Ok(false),
-				
-				Some(_) => conflict!()
-			}
-		}
+		if previous.buf == path.buf { conflict!() }
 		
 		let (shorter, longer) =
 			if path.buf.as_os_str().len() < previous.buf.as_os_str().len()
@@ -216,115 +226,128 @@ fn is_unique_among_maps<'a>(
 }
 
 pub enum Error<'a> {
-     IncludeNotFound { id: &'a str, map_id: &'a str, include_id: &'a str },
-           Namespace { id: &'a str, error: Box<cache::Error<'a>> },
-                 Map { id: &'a str, namespace_id: &'a str, error: Box<namespace::Error<'a>> },
-PathsIncludeNotFound { id: &'a str, namespace_id: &'a str, map_id: &'a str, include_id: &'a str },
-         MissingPath { id: &'a str, location: &'a path::Location },
-           BadNaming { id: &'a str, map_id: &'a str, error: &'static str },
-      NoSubdirectory { id: &'a str, map_id: &'a str, file_id: &'a str, at: u32, available: usize },
-             NoPaths { id: &'a str },
-     ConflictingPath { previous: path::ParsedFrom<'a>, current: path::ParsedFrom<'a> },
+SuggestedNotFound { src: &'a Src, id: &'a Spanned, suggested: &'a Spanned },
+            Cache { src: &'a Src, id: &'a Spanned, namespace_id: &'a Spanned, error: cache::Error<'a> },
+    MainNamespace { src: &'a Src, id: &'a Spanned, map_id: &'a Spanned, error: Box<namespace::Error<'a>> },
+        Namespace { src: &'a Src, id: &'a Spanned, namespace_id: &'a Spanned, map_id: &'a Spanned, error: Box<namespace::Error<'a>> },
+      MissingPath { src: &'a Src, id: &'a Spanned, source: &'a Src, location: &'a Spanned<path::Location> },
+   NoSubdirectory { src: &'a Src, id: &'a Spanned, map_src: &'a Src, file_id: &'a Spanned, at: &'a Spanned<u32>, available: usize },
+          BadName { src: &'a Src, id: &'a Spanned, map_src: &'a Src, file_id: &'a Spanned, name: &'a Spanned },
+          NoPaths { src: &'a Src, id: &'a Spanned },
+  ConflictingPath { src: &'a Src, previous: Box<path::Parsed<'a>>, path: Box<path::Parsed<'a>> },
 }
 
-impl Error<'_> {
-	#[cfg(feature = "cli")]
-	pub fn show(self, out: &mut impl std::io::Write) -> std::io::Result<i32> {
+impl<'a, 'b> crate::Msg<'a, 'b, 6> for Error<'a> {
+	fn msg(self, [cow_0, cow_1, cow_2, cow_3, cow_4, cow_5]: [&'b mut Cow<'a, str>; 6]) -> Message<'b> {
 		match self {
-			Self::IncludeNotFound { id, map_id, include_id } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ".paths]"! " failed\n"
-					"Suggested path " /fg red; "{:?}"! " not found in map " /fg green; "{:?}"!
-				}, id, include_id, map_id)?;
+			Self::SuggestedNotFound { src, id, suggested } => {
+				*cow_0 = src.1.to_string_lossy();
 				
-				Ok(exitcode::CONFIG)
+				Level::Error.title("suggested path not found")
+					.snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+						.annotation(Level::Error.span(suggested.span()).label("this suggested path"))
+						.annotation(Level::Warning.span(id.span()).label("for this map request")))
 			}
-			Self::Namespace { id, error } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ".paths]"! " failed"
-				}, id)?;
+			Self::Cache { src, id, namespace_id, error } => {
+				let level = if matches!(error, cache::Error::NotFound) { Level::Error } else { Level::Warning };
+				*cow_0 = src.1.to_string_lossy();
 				
-				error.show(out)
+				error.msg([cow_1, cow_2]).snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+					.annotation(level.span(namespace_id.span()).label("this requested namespace"))
+					.annotation(Level::Warning.span(id.span()).label("for this map request")))
 			}
-			Self::Map { id, namespace_id, error } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ".paths]"! " failed"
-				}, id)?;
+			Self::MainNamespace { src, id, map_id, error } => {
+				let level = if matches!(error.1, namespace::Of::NotFound) { Level::Error } else { Level::Warning };
+				*cow_0 = src.1.to_string_lossy();
 				
-				error.show(out, namespace_id)
+				error.msg([cow_1, cow_2]).snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+					.annotation(level.span(map_id.span()).label("this requested map"))
+					.annotation(Level::Warning.span(id.span()).label("for this map request")))
 			}
-			Self::PathsIncludeNotFound { id, namespace_id, map_id, include_id } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ".paths]"! " failed\n"
-					"Suggested path " /fg red; "{:?}"! " not found in map " /fg green; "{:?}"!
-					" at namespace " /fg green; "{:?}"!
-				}, id, include_id, map_id, namespace_id)?;
+			Self::Namespace { src, id, namespace_id, map_id, error } => {
+				let level = if matches!(error.1, namespace::Of::NotFound) { Level::Error } else { Level::Warning };
+				*cow_0 = src.1.to_string_lossy();
 				
-				Ok(exitcode::CONFIG)
+				error.msg([cow_1, cow_2]).snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+					.annotation(level.span(map_id.span()).label("this requested map"))
+					.annotation(Level::Warning.span(namespace_id.span()).label("in this namespace"))
+					.annotation(Level::Warning.span(id.span()).label("for this map request")))
 			}
-			Self::MissingPath { id, location } => {
-				write!(out, crate::csi! {
-					"Unable to parse " /fg blue; "[[maps." /fg yellow; "{:?}" /fg blue; ".custom-paths]]"!
-					" with value "
-				}, id)?;
+			Self::MissingPath { src, id, source, location } => {
+				*cow_0 = source.1.to_string_lossy();
+				*cow_1 = src.1.to_string_lossy();
 				
-				path::show_location(out, &location)?; writeln!(out)?;
-				
-				Ok(exitcode::SOFTWARE)
+				Level::Error.title("unable to parse path")
+					.snippet(Snippet::source(&source.0).origin(cow_0).fold(true)
+						.annotation(Level::Error.span(location.span()).label("this path")))
+					.snippet(Snippet::source(&src.0).origin(cow_1).fold(true)
+						.annotation(Level::Warning.span(id.span()).label("for this map request")))
 			}
-			Self::NoPaths { id } => {
-				writeln!(out, crate::csi! {
-					"No paths were provided for " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ']'!
-				}, id)?;
+			Self::NoSubdirectory { src, id, map_src, file_id, at, available } => {
+				*cow_0 = map_src.1.to_string_lossy();
+				*cow_1 = Cow::Owned(format!("this index is greater than {available}"));
+				*cow_2 = src.1.to_string_lossy();
 				
-				Ok(exitcode::CONFIG)
+				Level::Error.title("directory index out of bounds")
+					.snippet(Snippet::source(&map_src.0).origin(cow_0).fold(true)
+						.annotation(Level::Error.span(at.span()).label(cow_1))
+						.annotation(Level::Warning.span(file_id.span()).label("in this file")))
+					.snippet(Snippet::source(&src.0).origin(cow_2).fold(true)
+						.annotation(Level::Warning.span(id.span()).label("at this map request")))
 			}
-			Self::NoSubdirectory { id, map_id, file_id, at, available } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[maps." /fg green; "{:?}" /fg blue; "]"! " failed\n"
-					/fg blue; "[files." /fg yellow; "{:?}" /fg blue; ']'! " in map " /fg yellow; "{:?}"!
-					" requires subdirectory " /fg red; "{}"! " but there are only " /fg green; "{}"!
-				}, file_id, map_id, id, at, available)?;
+			Self::NoPaths { src, id } => {
+				*cow_0 = src.1.to_string_lossy();
 				
-				Ok(exitcode::DATAERR)
+				Level::Error.title("no paths were provided for a map")
+					.snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+						.annotation(Level::Error.span(id.span()).label("in this map request")))
 			}
-			Self::BadNaming { id, map_id, error } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; ']'! " failed\n"
-					"Bad " /fg blue; "naming"! " found for plural type map " /fg yellow; "{:?}"! "\n{}"
-				}, map_id, id, error)?;
+			Self::BadName { src, id, map_src, file_id, name } => {
+				*cow_0 = map_src.1.to_string_lossy();
+				*cow_1 = src.1.to_string_lossy();
 				
-				Ok(exitcode::DATAERR)
+				Level::Error.title(path::BAD_NAME)
+					.snippet(Snippet::source(&map_src.0).origin(cow_0).fold(true)
+						.annotation(Level::Error.span(name.span()).label("this file name"))
+						.annotation(Level::Warning.span(file_id.span()).label("in this file")))
+					.snippet(Snippet::source(&src.0).origin(cow_1).fold(true)
+						.annotation(Level::Warning.span(id.span()).label("at this map request")))
 			}
-			Self::ConflictingPath { previous, current } => {
-				writeln!(out, "There are conflicting paths\n")?;
+			Self::ConflictingPath { src, previous, path } => {
+				*cow_0 = previous. source.1.to_string_lossy();
+				*cow_1 = previous.map_src.1.to_string_lossy();
+				*cow_2 =     path. source.1.to_string_lossy();
+				*cow_3 =     path.map_src.1.to_string_lossy();
+				*cow_4 =              src.1.to_string_lossy();
+				*cow_5 = Cow::Owned(format!("using the same path {}", if previous.file_name
+					.is_some() { &previous.buf } else { &path.buf }.to_string_lossy()));
 				
-				show_conflict(out, previous, " first")?;
-				show_conflict(out,  current, "second")?;
+				let mut msg = Level::Error.title(cow_5)
+					.snippet(Snippet::source(&previous.source.0).origin(cow_0).fold(true)
+						.annotation(Level::Warning.span(previous.location.span()).label("this path")));
 				
-				Ok(exitcode::DATAERR)
+				if let Some(name) = previous.file_name {
+					msg = msg.snippet(Snippet::source(&previous.map_src.0).origin(cow_1).fold(true)
+						.annotation(Level::Warning.span(name.span()).label("with this file")))
+				};
+				
+				msg = msg.snippet(Snippet::source(&path.source.0).origin(cow_2).fold(true)
+					.annotation(Level::Warning.span(path.location.span()).label("this path")));
+				
+				if let Some(name) = path.file_name {
+					msg = msg.snippet(Snippet::source(&path.map_src.0).origin(cow_3).fold(true)
+						.annotation(Level::Warning.span(name.span()).label("with this file")))
+				};
+				
+				let mut snippet = Snippet::source(&src.0).origin(cow_4).fold(true)
+					.annotation(Level::Error.span(previous.id.span()).label("at this map request"));
+				
+				if previous.id != path.id {
+					snippet = snippet.annotation(Level::Error.span(path.id.span()).label("and this map request"));
+				}
+				
+				msg.snippet(snippet)
 			}
 		}
 	}
-}
-
-#[cfg(feature = "cli")]
-fn show_conflict(out: &mut impl std::io::Write, parsed: path::ParsedFrom, pos: &str) -> std::io::Result<()> {
-	write!(out, crate::csi! {
-		"\t{} cause: " /fg blue; "[maps." /fg yellow; "{:?}" /fg blue; "]"! "\n\t     at path: "
-	}, pos, parsed.id)?;
-	
-	path::show_location(out, parsed.path.location)?;
-	
-	if let Some(id) = parsed.suggested_id {
-		write!(out, crate::csi!(" suggested as " /fg yellow; "{:?}"!), id)?;
-	}
-	
-	if let Some(ref file) = parsed.file {
-		write!(out, crate::csi! {
-			"\n\t     at file: " /fg yellow; "{:?}"! " as " /fg yellow; "{:?}"! " + " /fg yellow; "{:?}"!
-		}, file.file_id, file.subdir, file.file.name)?
-	}
-	
-	writeln!(out, crate::csi!("\n\t      result: " /fg cyan; "{}"! '\n'), parsed.buf.to_string_lossy())
 }

@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-use std::{collections::BTreeMap, fmt::Write, rc::Rc};
+use std::{borrow::Cow, collections::BTreeMap, fmt::Write, rc::Rc};
+use annotate_snippets::{Level, Message, Snippet};
 use compact_str::CompactString;
 use palette::{FromColor, Srgba, rgb::channels::Rgba};
 use rhai::{FLOAT as float, INT as int, plugin::*, packages::Package};
 use crate::{role, scheme, set, Value};
 
 type Fallible<T> = Result<T, Box<EvalAltResult>>;
-pub type SmartString = smartstring::SmartString<smartstring::LazyCompact>;
+pub(crate) type SmartString = smartstring::SmartString<smartstring::LazyCompact>;
 
 struct Modules {
 	  std: rhai::packages::StandardPackage,
@@ -35,7 +36,7 @@ thread_local! {
 	static MODULES: Modules = Modules {
 		  std: rhai::packages::StandardPackage::new(),
 		 base: Rc::new( base::rhai_module_generate()),
-		  rgb: Rc::new(  rgb::rhai_module_generate()),
+		  rgb: Rc::new( srgb::rhai_module_generate()),
 		  hsl: Rc::new(  hsl::rhai_module_generate()),
 		hsluv: Rc::new(hsluv::rhai_module_generate()),
 		  hsv: Rc::new(  hsv::rhai_module_generate()),
@@ -49,18 +50,18 @@ thread_local! {
 		  xyz: Rc::new(  xyz::rhai_module_generate()),
 		  yxy: Rc::new(  yxy::rhai_module_generate()),
 	};
-	pub static MAP_MODULE: Rc<Module> = Rc::new(map::rhai_module_generate());
+	pub(crate) static MAP_MODULE: Rc<Module> = Rc::new(map::rhai_module_generate());
 }
 
-pub fn naming_engine(
-	arrangement_id: ImmutableString,
-	   arrangement: ImmutableString,
+pub(crate) fn naming_engine(
+	arrangement_id: rhai::ImmutableString,
+	   arrangement: &rhai::ImmutableString,
 	       schemes: Rc<BTreeMap<CompactString, Rc<scheme::Data>>>,
 ) -> Engine {
 	let mut module = Module::new();
 	module
 		.set_var("arrangement_id", arrangement_id)
-		.set_var("arrangement", arrangement);
+		.set_var("arrangement", arrangement.clone());
 	
 	let mut engine = Engine::new_raw();
 	engine
@@ -77,7 +78,7 @@ pub fn naming_engine(
 	engine
 }
 
-pub fn engine(path: &std::path::Path) -> Engine {
+pub(crate) fn engine(path: &std::path::Path) -> Engine {
 	let mut engine = Engine::new_raw();
 	
 	MODULES.with(|modules| engine
@@ -114,9 +115,9 @@ pub fn engine(path: &std::path::Path) -> Engine {
 	engine
 }
 
-pub fn cfg_module(id: ImmutableString, options: BTreeMap<CompactString, Value>) -> Module {
+pub(crate) fn cfg_module(id: &str, options: BTreeMap<CompactString, Value>) -> Module {
 	let mut module = Module::new();
-	module.set_var("id", id);
+	module.set_var("id", ImmutableString::from(id));
 	
 	module.set_native_fn("option", move |index: &str| -> Fallible<Dynamic> {
 		let value = options.get(index).ok_or(Box::new(
@@ -127,9 +128,9 @@ pub fn cfg_module(id: ImmutableString, options: BTreeMap<CompactString, Value>) 
 			Value::Bool   (value) => Ok((*value).into()),
 			Value::Int    (value) => Ok((*value).into()),
 			Value::Float  (value) => Ok((*value).into()),
-			Value::String (value) => Ok(value.clone().into()),
-			Value::Set    { set } => Ok((set.to_str()).into()),
-			Value::Role  { role } => Ok((role.to_str()).into()),
+			Value::Str    (value) => Ok(value.clone().into()),
+			Value::Acc { accent } => Ok((accent.to_str()).into()),
+			Value::Bind    { .. } => unreachable!(),
 		}
 	});
 	
@@ -201,34 +202,31 @@ mod map {
 		}
 	}
 	
-	pub fn to_hex_rgb(rgba: int, uppercase: bool) -> ImmutableString {
+	pub fn to_hex_rgb(rgba: int, uppercase: bool) -> Dynamic {
 		let mut string = SmartString::new_const();
-		
-		if uppercase { write!(&mut string, "{:06X}", rgba as u32 >> 8).unwrap() }
-		else         { write!(&mut string, "{:06X}", rgba as u32 >> 8).unwrap() }
-		
-		string.into()
+		match uppercase {
+			true => write!(&mut string, "{:06X}", rgba as u32 >> 8),
+			_    => write!(&mut string, "{:06x}", rgba as u32 >> 8),
+		}.map(|_| string.into()).unwrap_or(Dynamic::UNIT)
 	}
 	
-	pub fn to_hex_rgba(rgba: int, uppercase: bool) -> ImmutableString {
+	pub fn to_hex_rgba(rgba: int, uppercase: bool) -> Dynamic {
 		let mut string = SmartString::new_const();
-		
-		if uppercase { write!(&mut string, "{:08X}", rgba as u32).unwrap() }
-		else         { write!(&mut string, "{:08x}", rgba as u32).unwrap() }
-		
-		string.into()
+		match uppercase {
+			true => write!(&mut string, "{:08X}", rgba as u32),
+			_    => write!(&mut string, "{:08x}", rgba as u32),
+		}.map(|_| string.into()).unwrap_or(Dynamic::UNIT)
 	}
 	
-	pub fn to_hex_argb(rgba: int, uppercase: bool) -> ImmutableString {
+	pub fn to_hex_argb(rgba: int, uppercase: bool) -> Dynamic {
 		let mut string = SmartString::new_const();
-		
-		if uppercase { write!(&mut string, "{:08X}", (rgba as u32) << 24 | rgba as u32 >> 8).unwrap() }
-		else         { write!(&mut string, "{:08x}", (rgba as u32) << 24 | rgba as u32 >> 8).unwrap() }
-		
-		string.into()
+		match uppercase {
+			true => write!(&mut string, "{:08X}", (rgba as u32).rotate_right(8)),
+			_    => write!(&mut string, "{:08x}", (rgba as u32).rotate_right(8)),
+		}.map(|_| string.into()).unwrap_or(Dynamic::UNIT)
 	}
 	
-	pub fn to_css_filter(rgba: int) -> ImmutableString {
+	pub fn to_css_filter(rgba: int) -> Dynamic {
 		let palette::Srgb { red, green, blue, .. } = Srgba::from_u32::<Rgba>(rgba as _).color;
 		let rgb = crate::css_filter::Rgb { red: red as _, green: green as _, blue: blue as _ };
 		crate::css_filter::Solver { rgb }.solve().to_css_filter()
@@ -236,63 +234,56 @@ mod map {
 }
 
 #[export_module]
-mod rgb {
-	#[rhai_fn(name = "rgb", global)]
+mod srgb {
+	#[rhai_fn(name = "srgb", global)]
 	pub fn new(r: int, g: int, b: int) -> int {
-		((r as u8) as int) << 16 | ((g as u8) as int) << 8 |
-		((b as u8) as int)       | 0xFF << 24
+		Srgba::new(r as u8, g as u8, b as u8, 255).into_u32::<Rgba>() as _
 	}
 	
-	#[rhai_fn(name = "rgb", global)]
+	#[rhai_fn(name = "srgb", global)]
 	pub fn new_a(r: int, g: int, b: int, a: int) -> int {
-		((r as u8) as int) << 24 | ((g as u8) as int) << 16 |
-		((b as u8) as int) <<  8 | ((a as u8) as int)
+		Srgba::new(r as u8, g as u8, b as u8, a as u8).into_u32::<Rgba>() as _
 	}
 	
-	#[rhai_fn(name = "rgb", global)]
+	#[rhai_fn(name = "srgb", global)]
 	pub fn new_f(r: float, g: float, b: float) -> int {
-		((255.0 * r) as u8 as int) << 16 |
-		((255.0 * g) as u8 as int) <<  8 |
-		((255.0 * b) as u8 as int)       | 0xFF << 24
+		Srgba::new(r, g, b, 1.0).into_format().into_u32::<Rgba>() as _
 	}
 	
-	#[rhai_fn(name = "rgb", global)]
+	#[rhai_fn(name = "srgb", global)]
 	pub fn new_af(r: float, g: float, b: float, a: float) -> int {
-		((255.0 * r) as u8 as int) << 24 |
-		((255.0 * g) as u8 as int) << 16 |
-		((255.0 * b) as u8 as int) <<  8 |
-		((255.0 * a) as u8 as int)
+		Srgba::new(r, g, b, a).into_format().into_u32::<Rgba>() as _
 	}
 	
 	pub fn mix(a: int, b: int, bias: float) -> int {
-		Srgba::from_linear(palette::Mix::mix(
-			Srgba::from_u32::<Rgba>(a as _).into_linear(),
-			Srgba::from_u32::<Rgba>(b as _).into_linear(), bias
-		)).into_u32::<Rgba>() as _
+		palette::Mix::mix(
+			Srgba::from_u32::<Rgba>(a as _).into_format(),
+			Srgba::from_u32::<Rgba>(b as _).into_format(), bias
+		).into_format().into_u32::<Rgba>() as _
 	}
 	
 	pub fn lighten(rgba: int, factor: float) -> int {
-		Srgba::from_linear(palette::Lighten::lighten(
-			Srgba::from_u32::<Rgba>(rgba as _).into_linear(), factor
-		)).into_u32::<Rgba>() as _
+		palette::Lighten::lighten(
+			Srgba::from_u32::<Rgba>(rgba as _).into_format(), factor
+		).into_format().into_u32::<Rgba>() as _
 	}
 	
 	pub fn lighten_fixed(rgba: int, factor: float) -> int {
-		Srgba::from_linear(palette::Lighten::lighten_fixed(
-			Srgba::from_u32::<Rgba>(rgba as _).into_linear(), factor
-		)).into_u32::<Rgba>() as _
+		palette::Lighten::lighten_fixed(
+			Srgba::from_u32::<Rgba>(rgba as _).into_format(), factor
+		).into_format().into_u32::<Rgba>() as _
 	}
 	
 	pub fn darken(rgba: int, factor: float) -> int {
-		Srgba::from_linear(palette::Darken::darken(
-			Srgba::from_u32::<Rgba>(rgba as _).into_linear(), factor
-		)).into_u32::<Rgba>() as _
+		palette::Darken::darken(
+			Srgba::from_u32::<Rgba>(rgba as _).into_format(), factor
+		).into_format().into_u32::<Rgba>() as _
 	}
 	
 	pub fn darken_fixed(rgba: int, factor: float) -> int {
-		Srgba::from_linear(palette::Darken::darken_fixed(
-			Srgba::from_u32::<Rgba>(rgba as _).into_linear(), factor
-		)).into_u32::<Rgba>() as _
+		palette::Darken::darken_fixed(
+			Srgba::from_u32::<Rgba>(rgba as _).into_format(), factor
+		).into_format().into_u32::<Rgba>() as _
 	}
 	
 	pub fn coords(rgba: int) -> palette::Srgba<u8> {
@@ -310,43 +301,84 @@ mod rgb {
 	
 	#[rhai_fn(get = "blue")]
 	pub fn blue(color: palette::Srgba<u8>) -> int { color.blue as _ }
+}
+
+#[export_module]
+mod linear {
+	use palette::LinSrgba;
+		
+	#[rhai_fn(name = "linear", global)]
+	pub fn new(r: float, g: float, b: float) -> int {
+		(LinSrgba::new(r, g, b, 1.0).into_encoding() as Srgba<u8>).into_u32::<Rgba>() as _
+	}
 	
-	pub fn coords_f(rgba: int) -> palette::Srgba {
-		palette::Srgba::from_u32::<Rgba>(rgba as _).into_format()
+	#[rhai_fn(name = "linear", global)]
+	pub fn new_a(r: float, g: float, b: float, a: float) -> int {
+		(LinSrgba::new(r, g, b, a).into_encoding() as Srgba<u8>).into_u32::<Rgba>() as _
+	}
+	
+	pub fn mix(a: int, b: int, bias: float) -> int {
+		(palette::Mix::mix(
+			Srgba::from_u32::<Rgba>(a as _).into_linear(),
+			Srgba::from_u32::<Rgba>(b as _).into_linear(), bias
+		).into_encoding()  as Srgba<u8>).into_u32::<Rgba>() as _
+	}
+	
+	pub fn lighten(rgba: int, factor: float) -> int {
+		(palette::Lighten::lighten(
+			Srgba::from_u32::<Rgba>(rgba as _).into_linear(), factor
+		).into_encoding() as Srgba<u8>).into_u32::<Rgba>() as _
+	}
+	
+	pub fn lighten_fixed(rgba: int, factor: float) -> int {
+		(palette::Lighten::lighten_fixed(
+			Srgba::from_u32::<Rgba>(rgba as _).into_linear(), factor
+		).into_encoding() as Srgba<u8>).into_u32::<Rgba>() as _
+	}
+	
+	pub fn darken(rgba: int, factor: float) -> int {
+		(palette::Darken::darken(
+			Srgba::from_u32::<Rgba>(rgba as _).into_linear(), factor
+		).into_encoding() as Srgba<u8>).into_u32::<Rgba>() as _
+	}
+	
+	pub fn darken_fixed(rgba: int, factor: float) -> int {
+		(palette::Darken::darken_fixed(
+			Srgba::from_u32::<Rgba>(rgba as _).into_linear(), factor
+		).into_encoding() as Srgba<u8>).into_u32::<Rgba>() as _
+	}
+	
+	pub fn coords(rgba: int) -> LinSrgba {
+		palette::Srgba::from_u32::<Rgba>(rgba as _).into_linear()
 	}
 	
 	#[rhai_fn(get = "alpha")]
-	pub fn alpha_f(color: palette::Srgba) -> float { color.alpha }
+	pub fn alpha(color: LinSrgba) -> int { color.alpha as _ }
 	
 	#[rhai_fn(get = "red")]
-	pub fn red_f(color: palette::Srgba) -> float { color.red }
+	pub fn red(color: LinSrgba) -> int { color.red as _ }
 	
 	#[rhai_fn(get = "green")]
-	pub fn green_f(color: palette::Srgba) -> float { color.green }
+	pub fn green(color: LinSrgba) -> int { color.green as _ }
 	
 	#[rhai_fn(get = "blue")]
-	pub fn blue_f(color: palette::Srgba) -> float { color.blue }
-	
-	#[rhai_fn(get = "hue")]
-	pub fn hue(color: palette::Srgba) -> float {
-		palette::GetHue::get_hue(&color).into_positive_degrees()
-	}
+	pub fn blue(color: LinSrgba) -> int { color.blue as _ }
 }
 
 macro_rules! feature { ($any:tt) => () }
 
 macro_rules! module {
-	($name:ident, $new:tt, $type:ty $(:s $saturate:tt)? $(, $([$hue:ident])? $point:ident: $get:tt)+) => {
+	($name:ident, $new:tt, $type:ty $(:s $saturate:tt)? $(, $point:ident: $get:tt)+) => {
 		#[export_module]
 		mod $name {
 			#[rhai_fn(name = $new, global)]
-			pub fn newf(x: float, y: float, z: float) -> int {
+			pub fn new(x: float, y: float, z: float) -> int {
 				Srgba::from_color(<$type>::new(x, y, z, 1.0 as float))
 					.into_format().into_u32::<Rgba>() as _
 			}
 			
 			#[rhai_fn(name = $new, global)]
-			pub fn newaf(x: float, y: float, z: float, a:float) -> int {
+			pub fn new_a(x: float, y: float, z: float, a:float) -> int {
 				Srgba::from_color(<$type>::new(x, y, z, a)).into_format().into_u32::<Rgba>() as _
 			}
 			
@@ -408,54 +440,71 @@ macro_rules! module {
 			)?
 			
 			pub fn coords(rgba: int) -> $type {
-				<$type>::from_color(
-					palette::Srgba::from_u32::<Rgba>(rgba as _).into_format()
-				)
+				<$type>::from_color(palette::Srgba::from_u32::<Rgba>(rgba as _).into_format())
 			}
 			
-			$(
-				#[rhai_fn(get = $get)]
-				pub fn $point(color: $type) -> float { if_hue![color.$point] }
-			)+
+			$(#[rhai_fn(get = $get)]
+			  pub fn $point(color: $type) -> float { if_hue![color.$point] })+
 		}
 	}
 }
 
 macro_rules! if_hue {
-	($color:ident.hue) => {
-		palette::GetHue::get_hue(&$color).into_positive_degrees()
-	};
+	($color:ident.hue) => { palette::GetHue::get_hue(&$color).into_positive_degrees() };
 	($color:ident.$ident:ident) => { $color.$ident };
 }
 
-module!(hsl  , "hsl"  , palette::Hsla:s!  , alpha: "alpha", hue: "hue", saturation: "saturation", lightness: "lightness");
-module!(hsluv, "hsluv", palette::Hsluva:s!, alpha: "alpha", hue: "hue", saturation: "saturation", l: "l");
-module!(hsv  , "hsv"  , palette::Hsva:s!  , alpha: "alpha", hue: "hue", saturation: "saturation", value: "value");
-module!(hwb  , "hwb"  , palette::Hwba     , alpha: "alpha", hue: "hue", whiteness: "whiteness", blackness: "blackness");
-module!(lab  , "lab"  , palette::Laba     , alpha: "alpha", hue: "hue", l: "l", a: "a", b: "b");
-module!(lch  , "lch"  , palette::Lcha:s!  , alpha: "alpha", hue: "hue", l: "l", chroma: "chroma");
-module!(lchuv, "lchuv", palette::Lchuva:s!, alpha: "alpha", hue: "hue", l: "l", chroma: "chroma");
-module!(luv  , "luv"  , palette::Luva     , alpha: "alpha", hue: "hue", l: "l", u: "u", v: "v");
-module!(okhsl, "okhsl", palette::Okhsla:s!, alpha: "alpha", hue: "hue", saturation: "saturation", lightness: "lightness");
-module!(okhsv, "okhsv", palette::Okhsva:s!, alpha: "alpha", hue: "hue", saturation: "saturation", value: "value");
-module!(okhwb, "okhwb", palette::Okhwba   , alpha: "alpha", hue: "hue", whiteness: "whiteness", blackness: "blackness");
-module!(oklab, "oklab", palette::Oklaba   , alpha: "alpha", hue: "hue", l: "l", a: "a", b: "b");
-module!(oklch, "oklch", palette::Oklcha   , alpha: "alpha", hue: "hue", l: "l", chroma: "chroma");
-module!(xyz  , "xyz"  , palette::Xyza     , alpha: "alpha", x: "x", y: "y", z: "z");
-module!(yxy  , "yxy"  , palette::Yxya     , alpha: "alpha", x: "x", y: "y", luma: "luma");
+module!(hsl   , "hsl"   , palette::Hsla:s!  , alpha: "alpha", hue: "hue", saturation: "saturation", lightness: "lightness");
+module!(hsluv , "hsluv" , palette::Hsluva:s!, alpha: "alpha", hue: "hue", saturation: "saturation", l: "l");
+module!(hsv   , "hsv"   , palette::Hsva:s!  , alpha: "alpha", hue: "hue", saturation: "saturation", value: "value");
+module!(hwb   , "hwb"   , palette::Hwba     , alpha: "alpha", hue: "hue", whiteness: "whiteness", blackness: "blackness");
+module!(lab   , "lab"   , palette::Laba     , alpha: "alpha", hue: "hue", l: "l", a: "a", b: "b");
+module!(lch   , "lch"   , palette::Lcha:s!  , alpha: "alpha", hue: "hue", l: "l", chroma: "chroma");
+module!(lchuv , "lchuv" , palette::Lchuva:s!, alpha: "alpha", hue: "hue", l: "l", chroma: "chroma");
+module!(luv   , "luv"   , palette::Luva     , alpha: "alpha", hue: "hue", l: "l", u: "u", v: "v");
+module!(okhsl , "okhsl" , palette::Okhsla:s!, alpha: "alpha", hue: "hue", saturation: "saturation", lightness: "lightness");
+module!(okhsv , "okhsv" , palette::Okhsva:s!, alpha: "alpha", hue: "hue", saturation: "saturation", value: "value");
+module!(okhwb , "okhwb" , palette::Okhwba   , alpha: "alpha", hue: "hue", whiteness: "whiteness", blackness: "blackness");
+module!(oklab , "oklab" , palette::Oklaba   , alpha: "alpha", hue: "hue", l: "l", a: "a", b: "b");
+module!(oklch , "oklch" , palette::Oklcha   , alpha: "alpha", hue: "hue", l: "l", chroma: "chroma");
+module!(xyz   , "xyz"   , palette::Xyza     , alpha: "alpha", x: "x", y: "y", z: "z");
+module!(yxy   , "yxy"   , palette::Yxya     , alpha: "alpha", x: "x", y: "y", luma: "luma");
 
-#[cfg(feature = "cli")]
-pub fn show_error(out: &mut impl std::io::Write, mut error: Box<EvalAltResult>, script: &str) -> std::io::Result<i32> {
+pub fn error_msg<'b>(
+	mut error: Box<rhai::EvalAltResult>,
+	      cow: &'b mut Cow<str>,
+	     code: &'b str,
+	    paths: (&'b str, &'b str),
+	      src: &'b str,
+	   script: &'b crate::Spanned
+) -> Message<'b> {
 	let pos = error.take_position();
+	*cow = Cow::Owned(error.to_string());
+	let mut msg = Level::Error.title(cow);
 	
-	if pos.is_none() { writeln!(out, "{error}")? } else {
-		let line = pos.line().unwrap();
+	let (path, start) = if paths.0.is_empty() {
+		let (mut chars, mut lines) = (0, 0);
+		for line in src.lines() {
+			chars += line.len() + 1; lines += 1;
+			if chars >= script.span().start {
+				if line.ends_with("\"\"\"")
+				|| line.ends_with("'''") { lines += 1 }
+				break
+			}
+		} (paths.1, lines)
+	} else { (paths.0, 1) };
+	
+	if !pos.is_none() {
+		let error_line = pos.line().unwrap_or(0);
+		let (mut line, mut sum) = (0, 0);
 		
-		writeln!(out,
-			crate::csi!("\n{}: " /fg magenta; "{}"! '\n' /"{}" F /b:fg red; '^'! " {}"!),
-			line, script.split('\n').nth(line - 1).unwrap().replace('\t', " "),
-			2 + (line as f64).log10() as usize + pos.position().unwrap(), error)?
-	}
-	
-	Ok(exitcode::DATAERR)
+		for code in code.split('\n') {
+			if line + 1 >= error_line { break }
+			sum += code.len() + 1;
+			line += 1;
+		}
+		sum += pos.position().unwrap_or(0) - 1;
+		msg = msg.snippet(Snippet::source(code).origin(path).line_start(start)
+			.fold(true).annotation(Level::Error.span(sum..sum).label("here")))
+	} msg
 }

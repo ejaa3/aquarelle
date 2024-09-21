@@ -18,11 +18,10 @@ Can be the following:
 
 [rice]: https://www.quora.com/What-is-the-meaning-of-Linux-ricing
 
-The current state is basically:
-- Undocumented.
+The current state is:
+- Incomplete documentation.
 - The CLI is functional, the GUI is not.
 - The API seems stable.
-- Review is needed (memory layout, error handling, etc.).
 
 ## Development and testing
 
@@ -43,3 +42,20 @@ The following commands are assumed to be executed with bash in the project direc
    Now you can run the GUI version: `cargo run --features gui --bin gui`
 
 4. Installation: `meson install -C build`
+
+## Book
+
+Install [mdbook-i18n-helpers]:
+
+	cargo install mdbook-i18n-helpers
+
+View live translation for an `xx` language:
+
+	MDBOOK_BOOK__LANGUAGE=xx mdbook serve -d book/xx
+
+Update translations:
+
+	meson compile -C build update-doc-l10n
+
+[mdbook-alerts]: https://github.com/lambdalisue/rs-mdbook-alerts
+[mdbook-i18n-helpers]: https://github.com/google/mdbook-i18n-helpers

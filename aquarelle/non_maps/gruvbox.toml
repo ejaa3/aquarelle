@@ -3,10 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-# Based on https://github.com/morhetz/gruvbox
-
-name  = 'Gruvbox'
-about = 'Retro groove color scheme for Vim'
+name  = 'Gruvbox' # xml
+about = """
+Retro groove color scheme for Vim. \
+<a href='https://github.com/morhetz/gruvbox'>Source</a>.
+"""
 
 [schemes.dark]
 name    = 'Gruvbox Dark'

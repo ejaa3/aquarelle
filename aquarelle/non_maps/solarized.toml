@@ -1,18 +1,19 @@
+# SPDX-FileCopyrightText: 2018 Ethan Schoonover <https://github.com/altercation>
 # SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
-# SPDX-License-Identifier: Unlicense
+# SPDX-License-Identifier: MIT
 
-name = 'Solarized' # md
-about = '''
-Precision colors for machines and people.
-[Source](https://ethanschoonover.com/solarized).
-'''
+name = 'Solarized' # xml
+about = """
+Precision colors for machines and people. \
+<a href='https://ethanschoonover.com/solarized'>Source</a>.
+"""
 
 [schemes.dark]
 name    = 'Solarized Dark'
 lower   = { like = 0x002B36FF, area = 0x002B36FF, text = 0x839496FF }
 upper   = { like = 0x073642FF, area = 0x073642FF, text = 0x93A1A1FF }
-red     = { like = 0xCB4B16FF, area = 0xCB4B16FF, text = 0x002B36FF }
+red     = { like = 0xCB4B16FF, area = 0xDC322FFF, text = 0x002B36FF }
 yellow  = { like = 0xB58900FF, area = 0xB58900FF, text = 0x002B36FF }
 green   = { like = 0x859900FF, area = 0x859900FF, text = 0x002B36FF }
 cyan    = { like = 0x2AA198FF, area = 0x2AA198FF, text = 0x002B36FF }
@@ -24,12 +25,10 @@ any     = { like = 0x6C71C4FF, area = 0x6C71C4FF, text = 0x002B36FF }
 name    = 'Solarized Light'
 lower   = { like = 0xEEE8D5FF, area = 0xFDF6E3FF, text = 0x586E75FF }
 upper   = { like = 0xEEE8D5FF, area = 0xFDF6E3FF, text = 0x657B83FF }
-red     = { like = 0xCB4B16FF, area = 0xCB4B16FF, text = 0xFDF6E3FF }
+red     = { like = 0xDC322FFF, area = 0xCB4B16FF, text = 0xFDF6E3FF }
 yellow  = { like = 0xB58900FF, area = 0xB58900FF, text = 0xFDF6E3FF }
 green   = { like = 0x859900FF, area = 0x859900FF, text = 0xFDF6E3FF }
 cyan    = { like = 0x2AA198FF, area = 0x2AA198FF, text = 0xFDF6E3FF }
 blue    = { like = 0x268BD2FF, area = 0x268BD2FF, text = 0xFDF6E3FF }
 magenta = { like = 0xD33682FF, area = 0xD33682FF, text = 0xFDF6E3FF }
 any     = { like = 0x6C71C4FF, area = 0x6C71C4FF, text = 0xFDF6E3FF }
-
-# NOTE red (0xDC322FFF) not used

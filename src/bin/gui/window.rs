@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-use std::rc::Rc;
+use std::{borrow::Cow, cell::RefCell, fmt::Write, rc::Rc};
 use adw::{gio, glib, prelude::*};
-use aquarelle::{cache, config};
+use vte::prelude::*;
+use aquarelle::{cache, config, Msg};
 use declarative::{clone, construct, view};
-use crate::{icons, log, schemes, utils, i18n, critical};
+use crate::{icons, schemes, i18n, critical};
 
-const WINDOW_WIDTH : &str = "window-width";
-const WINDOW_HEIGHT: &str = "window-height";
-const LOG_HEIGHT   : &str = "log-height";
-const LAST_VIEW    : &str = "last-view";
+const WIDTH : &str = "width";
+const HEIGHT: &str = "height";
+const VIEW  : &str = "view";
 
-const SHOW_LOG : &str = "win.show-log";
-const CLEAR_LOG: &str = "win.clear-log";
+const BOLD     : &str = "win.bold";
+const CLEAR    : &str = "win.clear";
 const SHORTCUTS: &str = "win.show-help-overlay";
 const ABOUT    : &str = "win.about";
 
@@ -27,8 +27,8 @@ const ABOUT    : &str = "win.about";
 	
 	adw::ApplicationWindow window {
 		application: app
-		default_height: settings.int(WINDOW_HEIGHT)
-		default_width: settings.int(WINDOW_WIDTH)
+		default_height: settings.int(HEIGHT)
+		default_width: settings.int(WIDTH)
 		height_request: 360
 		width_request: 360
 		title: i18n("Aquarelle") ~>
@@ -40,73 +40,72 @@ const ABOUT    : &str = "win.about";
 			add_setter: &bar, "reveal", Some(&true.to_value())
 			add_setter: &themes.root, "collapsed", Some(&true.to_value())
 			add_setter: &header_bar, "title-widget", Some(&gtk::Widget::NONE.to_value())
+			
+			connect_apply:   clone![themes.sidebar; move |_| sidebar.remove_css_class("sidebar")]
+			connect_unapply: clone![themes.sidebar; move |_| sidebar.add_css_class("sidebar")]
 		}
 		
-		set_content: Some(&_) @ gtk::Box {
-			orientation: gtk::Orientation::Vertical
-			~
-			append: &_ @ adw::HeaderBar header_bar {
-				title_widget: &_ @ adw::ViewSwitcher {
-					stack: &stack
-					policy: adw::ViewSwitcherPolicy::Wide
-				} ~
+		set_content: Some(&_) @ adw::BottomSheet sheet {
+			content: &_ @ adw::ToolbarView {
+				set_top_bar_style: adw::ToolbarStyle::Raised
 				
-				pack_start: &_ @ gtk::ToggleButton {
-					icon_name: icons::DOCK_BOTTOM
-					action_name: SHOW_LOG
-					// Translators: Button tooltip (keyboard shortcut).
-					tooltip_text: i18n("Show log (F12)") ~
-					bind_property: "active", &log, "visible" 'back { bidirectional; sync_create; }
-				}
-				
-				pack_start: &_ @ ref themes.buttons {
-					'bind set_visible: view == "themes"
-				}
-				
-				pack_end: &_ @ gtk::MenuButton {
-					icon_name: icons::OPEN_MENU
-					// Translators: Main menu button tooltip (keyboard shortcut).
-					tooltip_text: i18n("Menu (F10)")
+				add_top_bar: &_ @ adw::HeaderBar header_bar {
+					title_widget: &_ @ adw::ViewSwitcher {
+						stack: &stack
+						policy: adw::ViewSwitcherPolicy::Wide
+					} ~
 					
-					menu_model: &_ @ gio::Menu common_menu {
-						append: Some(&i18n("_Clear Log")), Some(CLEAR_LOG)
-						append: Some(&i18n("_Keyboard Shortcuts")), Some(SHORTCUTS)
-						// Translators: Translate as "About [application name]"
-						append: Some(&i18n("About A_quarelle")), Some(ABOUT)
-						freeze;
-					}! ~
+					pack_start: &_ @ gtk::ToggleButton {
+						icon_name: icons::DOCK_BOTTOM
+						// Translators: Button tooltip (keyboard shortcut).
+						tooltip_text: i18n("Show log (F12)") ~
+						add_controller: crate::shortcut("F12", "activate")
+						bind_property: "active", &sheet, "open" 'back { bidirectional; sync_create; }
+					}
 					
-					add_controller: utils::shortcut("F10", "activate")
-					'bind set_visible: view != "themes"
+					pack_start: &_ @ ref themes.buttons {
+						'bind set_visible: view == "themes"
+					}
+					
+					pack_end: &_ @ gtk::MenuButton {
+						icon_name: icons::OPEN_MENU
+						// Translators: Menu button tooltip (keyboard shortcut).
+						tooltip_text: i18n("Menu (F10)")
+						
+						menu_model: &_ @ gio::Menu common_menu {
+							append: Some(&i18n("_Keyboard Shortcuts")), Some(SHORTCUTS)
+							append: Some(&i18n("About A_quarelle")), Some(ABOUT)
+							freeze;
+						}! ~
+						
+						add_controller: crate::shortcut("F10", "activate")
+						'bind set_visible: view != "themes"
+					}
+					
+					pack_end: &_ @ gtk::MenuButton {
+						icon_name: icons::OPEN_MENU
+						tooltip_text: i18n("Menu (F10)")
+						
+						menu_model: &_ @ gio::Menu {
+							append_section: Some(&i18n("Show")), &_ @ gio::Menu {
+								append: Some(&i18n(  "_All schemes")), Some(schemes::show::ALL)
+								append: Some(&i18n("_Light schemes")), Some(schemes::show::LIGHT)
+								append: Some(&i18n( "_Dark schemes")), Some(schemes::show::DARK)
+							}!
+							append_section: Some(&i18n("Appearance")), &_ @ gio::Menu {
+								append: Some(&i18n( "De_fault scheme")), Some(schemes::appearance::DEFAULT)
+								append: Some(&i18n("_Selected scheme")), Some(schemes::appearance::SELECTED)
+								append: Some(&i18n(  "Do not chan_ge")), Some(schemes::appearance::NO_CHANGE)
+							}!
+							append_section: None, &common_menu
+							freeze;
+						}! ~
+						
+						add_controller: crate::shortcut("F10", "activate")
+						'bind set_visible: view == "themes"
+					}
 				}
-				
-				pack_end: &_ @ gtk::MenuButton {
-					icon_name: icons::OPEN_MENU
-					// Translators: Main menu button tooltip (keyboard shortcut).
-					tooltip_text: i18n("Menu (F10)")
-					
-					menu_model: &_ @ gio::Menu {
-						append_section: Some(&i18n("Show")), &_ @ gio::Menu {
-							append: Some(&i18n(  "_All schemes")), Some(schemes::show::ALL)
-							append: Some(&i18n("_Light schemes")), Some(schemes::show::LIGHT)
-							append: Some(&i18n( "_Dark schemes")), Some(schemes::show::DARK)
-						}!
-						append_section: Some(&i18n("Appearance")), &_ @ gio::Menu {
-							append: Some(&i18n( "De_fault scheme")), Some(schemes::appearance::DEFAULT)
-							append: Some(&i18n("_Selected scheme")), Some(schemes::appearance::SELECTED)
-							append: Some(&i18n(  "Do not chan_ge")), Some(schemes::appearance::NO_CHANGE)
-						}!
-						append_section: None, &common_menu
-						freeze;
-					}! ~
-					
-					add_controller: utils::shortcut("F10", "activate")
-					'bind set_visible: view == "themes"
-				}
-			}
-			
-			append: &_ @ adw::ToastOverlay content {
-				set_child: Some(&_) @ adw::ViewStack stack {
+				set_content: Some(&_) @ adw::ViewStack stack {
 					add: &adw::Bin::new() 'back { // TODO component
 						set_name: Some("arrangements")
 						set_title: Some(&i18n("Arrangements"))
@@ -116,81 +115,48 @@ const ABOUT    : &str = "win.about";
 						cache: Rc::clone(&cache)
 						selection: selection.clone()
 						settings: &settings
-						tags: tags.clone()
 						window: &window
 					}? 'back {
 						set_name: Some("themes")
 						set_title: Some(&i18n("Themes"))
 						set_icon_name: Some(icons::APPLICATIONS_GRAPHICS)
 					}!
-					add: &crate::settings::start(tags) 'back {
+					add: &crate::settings::start() 'back {
 						set_name: Some("settings")
 						set_title: Some(&i18n("Settings"))
 						set_icon_name: Some(icons::SETTINGS)
 					}!
 				}!
+				add_bottom_bar: &_ @ adw::ViewSwitcherBar bar { stack: &stack }
 			}!
 			
-			append: &_ @ adw::Bin handle {
-				name: "handle"
-				height_request: 5 ~
-				set_cursor_from_name: Some("ns-resize")
-				
-				add_controller: _ @ gtk::GestureDrag {
-					propagation_phase: gtk::PropagationPhase::Capture
-					~
-					connect_drag_update: clone! {
-						content, log, min_height = content.preferred_size().0.height();
-						move |_this, _x, y| {
-							let new = log.allocated_height() - y.round() as i32;
-							let max = content.allocated_height() + log.allocated_height() - min_height;
-							if new >= 0 && new < max { log.set_height_request(new) }
-						}
-					}
-				}
-			}
-			
-			append: &_ @ gtk::ScrolledWindow log {
-				height_request: settings.int(LOG_HEIGHT)
-				name: "log"
-				
-				child: &_ @ gtk::TextView {
-					editable: false
-					monospace: true
-					wrap_mode: gtk::WrapMode::Word
-					
-					top_margin: 6
-					bottom_margin: 6
-					left_margin: 12
-					right_margin: 12
-					
-					buffer: &_ @ ref buffer {
-						connect_changed: clone![log, content, toast; move |this|
-							if this.char_count() > 0 && !log.is_visible() {
-								content.add_toast(toast.clone())
-							}]
-						
-						emit_by_name::<()>: "changed", &[]
+			sheet: &_ @ adw::ToolbarView {
+				css_classes: ["view"]
+				content: &_ @ gtk::ScrolledWindow {
+					propagate_natural_height: true
+					child: &_ @ ref term {
+						connect_cursor_moved: clone![sheet; move |_| sheet.set_open(true)]
+						set_xalign: vte::Align::Center
 					}
 				} ~
-				
-				bind_property: "visible", &handle, "visible" 'back { sync_create; }
-				
-				connect_show: move |_| _.dismiss() @ adw::Toast toast {
-					title: i18n("Something went wrong")
-					action_name: SHOW_LOG
-					button_label: i18n("_Log")
-				}
+				add_top_bar: &_ @ adw::HeaderBar {
+					pack_end: &_ @ gtk::MenuButton {
+						icon_name: icons::OPEN_MENU
+						tooltip_text: i18n("Menu (F10)")
+						
+						menu_model: &_ @ gio::Menu {
+							append: Some(&i18n("_Bold"))     , Some(BOLD)
+							append: Some(&i18n("_Clear Log")), Some(CLEAR)
+							freeze;
+						}!
+					}
+				}!
 			}
-			
-			append: &_ @ adw::ViewSwitcherBar bar { stack: &stack }
 		}
 		
-		add_action: &settings.create_action(&SHOW_LOG[4..])
-		
-		add_action: &_ @ gio::SimpleAction::new(&CLEAR_LOG[4..], None) {
-			connect_activate: move |_, _|
-				buffer.delete(&mut buffer.start_iter(), &mut buffer.end_iter())
+		add_action: &settings.create_action(&BOLD[4..])
+		add_action: &_ @ gio::SimpleAction::new(&CLEAR[4..], None) {
+			connect_activate: clone![term; move |_, _| term.reset(true, true)]
 		}
 		
 		help_overlay; 'back {
@@ -198,7 +164,7 @@ const ABOUT    : &str = "win.about";
 			unwrap; ~~
 		}
 		
-		add_action: &_ @ settings.create_action(LAST_VIEW) {
+		add_action: &_ @ settings.create_action(VIEW) {
 			connect_state_notify: move |this| {
 				let view = this.state().unwrap();
 				let view = view.str().unwrap();
@@ -208,13 +174,11 @@ const ABOUT    : &str = "win.about";
 		}
 		
 		add_action: &_ @ gio::SimpleAction::new(&ABOUT[4..], None) {
-			connect_activate: move |_, _| _.present() @ adw::AboutWindow {
-				modal: true; transient_for: &window
-				
+			// FIXME Some(&window) instead of gtk::Widget::NONE
+			connect_activate: move |_, _| _.present(gtk::Widget::NONE) @ adw::AboutDialog {
 				application_icon: config::APP_ID
-				// Translators: "Aquarelle" is the application name, but translate it as the English word it is.
 				application_name: i18n("Aquarelle")
-				comments: i18n("Theming software")
+				comments: i18n("Color scheme processor")
 				copyright: "© 2024 Eduardo Javier Alvarado Aarón"
 				developer_name: "Eduardo Javier Alvarado Aarón"
 				issue_url: "https://github.com/ejaa3/aquarelle/issues"
@@ -225,29 +189,26 @@ const ABOUT    : &str = "win.about";
 			}
 		}
 		
-		/* connect_maximized_notify: |this| {
+		connect_maximized_notify: |this| {
 			glib::idle_add_local_once(clone![this; move || this.notify("default-width")]);
 		}
 		
-		connect_show: |this| this.notify("maximized") */
+		connect_show: |this| this.notify("maximized")
 		
-		connect_close_request: clone![settings, log; move |this| {
-			settings.set(WINDOW_WIDTH, this.default_width()).unwrap_or_else(
-				|error| critical!("Failed to save {WINDOW_WIDTH:?} setting: {error}")
+		connect_close_request: clone![settings; move |this| {
+			settings.set(WIDTH, this.default_width()).unwrap_or_else(
+				|error| critical!("Failed to save {WIDTH:?} setting: {error}")
 			);
-			settings.set(WINDOW_HEIGHT, this.default_height()).unwrap_or_else(
-				|error| critical!("Failed to save {WINDOW_HEIGHT:?} setting: {error}")
-			);
-			settings.set(LOG_HEIGHT, log.height_request()).unwrap_or_else(
-				|error| critical!("Failed to save {LOG_HEIGHT:?} setting: {error}")
+			settings.set(HEIGHT, this.default_height()).unwrap_or_else(
+				|error| critical!("Failed to save {HEIGHT:?} setting: {error}")
 			);
 			glib::Propagation::Proceed
 		}]
 	}
 	
 	ref app {
-		set_accels_for_action: SHOW_LOG , &["F12"]
-		set_accels_for_action: CLEAR_LOG, &["<Ctrl>K"]
+		set_accels_for_action: BOLD     , &["<Ctrl>B"]
+		set_accels_for_action: CLEAR, &["<Ctrl>K"]
 		
 		set_accels_for_action: schemes::show::ALL  , &["<Ctrl>1"]
 		set_accels_for_action: schemes::show::LIGHT, &["<Ctrl>2"]
@@ -263,21 +224,28 @@ const ABOUT    : &str = "win.about";
 
 pub fn start(app: &adw::Application) {
 	let settings = gio::Settings::new(config::APP_ID);
-	let tags = utils::Tags::new();
-	let buffer = tags.buffer.clone(); // WARNING clone workaround
 	
-	let cache = Rc::new(cache::Cache::new(|error| {
-		(if let cache::ScanError::Path { user: true, .. } = error
-			{ log::warning } else { log::error }) (&tags, true);
-		
-		log::scan_error(&tags, error, ())
+	let cache = Rc::new(RefCell::new(cache::Cache::default()));
+	
+	cache.borrow_mut().update(|error| crate::MSG.with_borrow_mut(|msg| {
+		writeln!(msg, "{}", annotate_snippets::Renderer::styled()
+			.render(error.msg(<[Cow<_>; 2]>::default().each_mut())))
+			.unwrap_or_else(|error| critical!("{error}"));
+		true
 	}));
 	
 	let selection = crate::namespaces::SharedSelection::default();
-	
+	let term = crate::TERM.with(vte::Terminal::clone);
 	expand_view_here! { }
 	
-	settings.bind("window-maximized", &window, "maximized").build();
-	settings.bind(LAST_VIEW, &stack, "visible-child-name").build();
+	crate::MSG.with_borrow(|msg| if !msg.is_empty() {
+		for line in msg.split('\n') {
+			term.feed(line.as_bytes());
+			term.feed(b"\r\n")
+		}
+	});
+	
+	settings.bind("maximized", &window, "maximized").build();
+	settings.bind(VIEW, &stack, "visible-child-name").build();
 	window.present()
 }

@@ -3,37 +3,90 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'Aquarelle'
-about = 'The original namespace of the application'
+about = 'The original namespace of the application.'
+schemes.neon-cake = 'non_maps/neon_cake.toml'
 
 [maps]
-adwaita = { manifest = 'adwaita.toml', script = 'adwaita.rhai' }
-blackbox = { manifest = 'blackbox.toml', script = 'blackbox.rhai' }
-chromium = { manifest = 'chromium.toml', script = 'chromium.rhai' }
-code-settings = { manifest = 'code/settings.toml', script = 'code/settings.rhai' }
-code = { manifest = 'code/map.toml', script = 'code/map.rhai' }
-css-colors = { manifest = 'css_colors.toml', script = 'css_colors.rhai' }
-dark-reader = { manifest = 'dark_reader.toml', script = 'dark_reader.rhai' }
-firefox-gnome-theme = { manifest = 'firefox/gnome_theme.toml', script = 'firefox/gnome_theme.rhai' }
-firefox = { manifest = 'firefox/map.toml', script = 'firefox/map.rhai' }
-ghostwriter = { manifest = 'ghostwriter.toml', script = 'ghostwriter.rhai' }
-gimp-palette = { manifest = 'gimp_palette.toml', script = 'gimp_palette.rhai' }
-jdownloader = { manifest = 'jdownloader.toml', script = 'jdownloader.rhai' }
-konsole = { manifest = 'konsole.toml', script = 'konsole.rhai' }
-obsidian-border = { manifest = 'obsidian-border.toml', script = 'obsidian-border.rhai' }
-plasma-scheme = { manifest = 'plasma_scheme.toml', script = 'plasma_scheme.rhai' }
-qjackctl = { manifest = 'qjackctl.toml', script = 'qjackctl.rhai' }
-reaper = { manifest = 'reaper/map.toml', script = 'reaper/map.rhai' }
-sidebery = { manifest = 'sidebery.toml', script = 'sidebery.rhai' }
-syntax-highlighting = { manifest = 'syntax_highlighting.toml', script = 'syntax_highlighting.rhai' }
-telegram-desktop = { manifest = 'telegram_desktop.toml', script = 'telegram_desktop.rhai' }
-wine = { manifest = 'wine.toml', script = 'wine.rhai' }
-zotero = { manifest = 'zotero.toml', script = 'zotero.rhai' }
-
-[schemes]
-neon-cake = { manifest = 'schemes/neon_cake.toml', script = 'schemes/neon_cake.rhai' }
+adwaita = 'adwaita.toml'
+blackbox = 'blackbox.toml'
+chromium = 'chromium.toml'
+code-settings = 'code/settings.toml'
+code = 'code/map.toml'
+css-colors = 'css_colors.toml'
+dark-reader = 'dark_reader.toml'
+firefox-gnome-theme = 'firefox/gnome_theme.toml'
+firefox = 'firefox/map.toml'
+ghostwriter = 'ghostwriter.toml'
+gimp-palette = 'gimp_palette.toml'
+jdownloader = 'jdownloader.toml'
+konsole = 'konsole.toml'
+obsidian-border = 'obsidian-border.toml'
+plasma-scheme = 'plasma_scheme.toml'
+qjackctl = 'qjackctl.toml'
+reaper = 'reaper/map.toml'
+sidebery = 'sidebery.toml'
+syntax-highlighting = 'syntax_highlighting.toml'
+telegram-desktop = 'telegram_desktop.toml'
+wine = 'wine.toml'
+zotero = 'zotero.toml'
 
 [themes]
-everforest = 'themes/everforest.toml'
-gruvbox    = 'themes/gruvbox.toml'
-neon-cake  = 'themes/neon_cake.toml'
-solarized  = 'themes/solarized.toml'
+everforest = 'non_maps/everforest.toml'
+gruvbox = 'non_maps/gruvbox.toml'
+solarized = 'non_maps/solarized.toml'
+
+[themes.neon-cake]
+name = 'Neon Cake Examples'
+about = 'Using a parametric scheme'
+presets = { light-text = 35.0, light-surface = 82.5 }
+
+[themes.neon-cake.schemes]
+     dark.request.scheme = 'neon-cake'
+    light.request.scheme = 'neon-cake'
+old-light.request.scheme = 'neon-cake'
+
+[themes.neon-cake.schemes.light.options]
+name = 'Neon Cake Light'
+overall-chroma    = 64.0
+overall-luminance = 42.5
+surface-luminance.bind = 'light-surface'
+   text-luminance.bind = 'light-text'
+
+[themes.neon-cake.schemes.old-light.options]
+name = 'Neon Cake Light (Old)'
+overall-luminance.bind = 'light-text'
+surface-luminance.bind = 'light-surface'
+   text-luminance.bind = 'light-text'
+
+[themes.adwaita]
+name = 'Adwaita-like' # xml
+about = """
+Adwaita theme based on its accent colors. \
+<a href='https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1-latest/css-variables.html'>Source</a>.
+"""
+
+[themes.adwaita.schemes.dark]
+name    = 'Adwaita-like Dark'
+lower   = { like = 0x242424FF, area = 0x1E1E1EFF, text = 0xCCCCCCFF }
+upper   = { like = 0x303030FF, area = 0x383838FF, text = 0xFFFFFFFF }
+red     = { like = 0xFF888CFF, area = 0xE62D42FF, text = 0xFFFFFFFF }
+yellow  = { like = 0xFFC057FF, area = 0xC88800FF, text = 0xFFFFFFFF }
+green   = { like = 0x8DE698FF, area = 0x3A944AFF, text = 0xFFFFFFFF }
+cyan    = { like = 0x7BDFF4FF, area = 0x2190A4FF, text = 0xFFFFFFFF }
+blue    = { like = 0x81D0FFFF, area = 0x3584E4FF, text = 0xFFFFFFFF }
+magenta = { like = 0xFBA7FFFF, area = 0x9141ACFF, text = 0xFFFFFFFF }
+# pink  = { like = 0xFFA0D8FF, area = 0xD56199FF, text = 0xFFFFFFFF }
+any     = { like = 0xBBD1E5FF, area = 0x6F8396FF, text = 0xFFFFFFFF }
+
+[themes.adwaita.schemes.light]
+name    = 'Adwaita-like Light'
+lower   = { like = 0xFAFAFAFF, area = 0xFFFFFFFF, text = 0x333333FF }
+upper   = { like = 0xEBEBEBFF, area = 0xFFFFFFFF, text = 0x333333FF }
+red     = { like = 0xC00023FF, area = 0xE62D42FF, text = 0xFFFFFFFF }
+yellow  = { like = 0x905300FF, area = 0xC88800FF, text = 0xFFFFFFFF }
+green   = { like = 0x15772EFF, area = 0x3A944AFF, text = 0xFFFFFFFF }
+cyan    = { like = 0x007184FF, area = 0x2190A4FF, text = 0xFFFFFFFF }
+blue    = { like = 0x0461BEFF, area = 0x3584E4FF, text = 0xFFFFFFFF }
+magenta = { like = 0x8939A4FF, area = 0x9141ACFF, text = 0xFFFFFFFF }
+# pink  = { like = 0xA2326CFF, area = 0xD56199FF, text = 0xFFFFFFFF }
+any     = { like = 0x526678FF, area = 0x6F8396FF, text = 0xFFFFFFFF }

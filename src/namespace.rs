@@ -4,10 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-use std::{cell::OnceCell, collections::BTreeMap, path::PathBuf};
+use std::{borrow::Cow, cell::OnceCell, collections::BTreeMap, rc::Rc, path::PathBuf};
 use compact_str::CompactString;
-use serde::{Serialize, Deserialize};
-use crate::{arrangement::Arrangement, mapping::Map, cache::Bin, scheme, theme::Theme};
+use serde::{de, Serialize, Deserialize, Serializer, Deserializer};
+use annotate_snippets::{Level, Message, Snippet};
+use crate::Spanned;
+use crate::{arrangement::Arrangement, cache::Bin, mapping::Map};
+use crate::{scheme::Parametric, theme::Theme, Key};
 
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -18,192 +21,212 @@ pub struct Namespace {
 	pub about: CompactString,
 	
 	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-	pub arrangements: BTreeMap<CompactString, Item<CompactString, Arrangement>>,
+	pub arrangements: BTreeMap<Key, Item<Arrangement>>,
 	
 	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-	pub maps: BTreeMap<rhai::ImmutableString, Item<Paths, Map>>,
+	pub maps: BTreeMap<Key, Item<Map>>,
 	
 	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-	pub schemes: BTreeMap<rhai::ImmutableString, Item<Paths, scheme::Parametric>>,
+	pub schemes: BTreeMap<Key, Item<Parametric>>,
 	
 	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-	pub themes: BTreeMap<CompactString, Item<CompactString, Theme>>,
+	pub themes: BTreeMap<Key, Item<Theme>>,
+	
+	#[serde(skip)]
+	pub source: Option<Rc<Cow<'static, str>>>,
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Paths { manifest: CompactString, script: CompactString }
+pub enum Item<V> { Data(V), Path { path: CompactString, cell: OnceCell<V> } }
 
-pub struct Item<P, V> { path: P, value: OnceCell<V>, }
-
-impl<P: Serialize, V> Serialize for Item<P, V> {
-	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-	where S: serde::Serializer { self.path.serialize(serializer) }
+impl<V: Serialize> Serialize for Item<V> {
+	fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+		match self {
+			Item::Data(value) => value.serialize(serializer),
+			Item::Path { path, .. } => path.serialize(serializer),
+		}
+	}
 }
 
-impl<'de, P: Deserialize<'de>, V> Deserialize<'de> for Item<P, V> {
-	fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-		Ok(Item { path: P::deserialize(deserializer)?, value: OnceCell::new() })
+impl<'de, T: Deserialize<'de>> Deserialize<'de> for Item<T> {
+	fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+		struct Visitor<T>(std::marker::PhantomData<T>);
+		
+		impl<'de, T: Deserialize<'de>> de::Visitor<'de> for Visitor<T> {
+			type Value = Item<T>;
+		
+			fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+				write!(formatter, "algo")
+			}
+			
+			fn visit_str<E: de::Error>(self, path: &str) -> Result<Item<T>, E> {
+				Ok(Item::Path { path: CompactString::from(path), cell: OnceCell::new() })
+			}
+			
+			fn visit_string<E: de::Error>(self, path: String) -> Result<Item<T>, E> {
+				Ok(Item::Path { path: CompactString::from(path), cell: OnceCell::new() })
+			}
+			
+			fn visit_map<A: de::MapAccess<'de>>(self, map: A) -> Result<Item<T>, A::Error> {
+				T::deserialize(de::value::MapAccessDeserializer::new(map)).map(Item::Data)
+			}
+			
+		}
+		deserializer.deserialize_map(Visitor(std::marker::PhantomData))
 	}
 }
 
 impl Namespace {
-	pub fn arrangement<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&Arrangement, Box<Error>> {
-		self.arrangements.get(id).ok_or(Error(Object::Arrangement, id, bin.user, Of::NotFound))?.get(id, bin)
+	pub fn arrangement<'a>(&'a self, id: &str, bin: &'a Bin) -> Result<&Arrangement, Box<Error>> {
+		let source = self.source.as_ref().unwrap();
+		let (id, item) = self.arrangements.get_key_value(id).ok_or(Error(Object::Arrangement, Of::NotFound, bin, source))?;
+		item.get(&id.0, bin, source)
 	}
 	
-	pub fn map<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<(&rhai::ImmutableString, &Map), Box<Error>> {
-		let (id, item) = self.maps.get_key_value(id).ok_or(Error(Object::Map, id, bin.user, Of::NotFound))?;
-		
-		item.get(id, bin).map(|map| (id, map))
+	pub fn map<'a>(&'a self, id: &str, bin: &'a Bin) -> Result<(&Key, &Map), Box<Error>> {
+		let source = self.source.as_ref().unwrap();
+		let (id, item) = self.maps.get_key_value(id).ok_or(Error(Object::Map, Of::NotFound, bin, source))?;
+		item.get(&id.0, bin, source).map(|map| (id, map))
 	}
 	
-	pub fn scheme<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<(&rhai::ImmutableString, &scheme::Parametric), Box<Error>> {
-		let (id, item) = self.schemes.get_key_value(id).ok_or(Error(Object::Scheme, id, bin.user, Of::NotFound))?;
-		item.get(id, bin).map(|scheme| (id, scheme))
+	pub fn scheme<'a>(&'a self, id: &str, bin: &'a Bin) -> Result<&Parametric, Box<Error>> {
+		let source = self.source.as_ref().unwrap();
+		let (id, item) = self.schemes.get_key_value(id).ok_or(Error(Object::Scheme, Of::NotFound, bin, source))?;
+		item.get(&id.0, bin, source)
 	}
 	
-	pub fn theme<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&Theme, Box<Error>> {
-		self.themes.get(id).ok_or(Error(Object::Theme, id, bin.user, Of::NotFound))?.get(id, bin)
+	pub fn theme<'a>(&'a self, id: &str, bin: &'a Bin) -> Result<&Theme, Box<Error>> {
+		let source = self.source.as_ref().unwrap();
+		let (id, item) = self.themes.get_key_value(id).ok_or(Error(Object::Theme, Of::NotFound, bin, source))?;
+		item.get(&id.0, bin, source)
 	}
 }
 
-impl Item<CompactString, Arrangement> {
-	pub fn get<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&Arrangement, Box<Error>> {
-		if let Some(arrangement) = self.value.get() { return Ok(arrangement) }
-		
-		let path = bin.path.parent().unwrap().join(self.path.as_str());
-		
-		let toml = match std::fs::read_to_string(&path) {
-			Ok(text) => text, Err(error) => return Err(Box::new(
-				Error(Object::Arrangement, id, bin.user, Of::Io(path, error))
-			))
-		};
-		
-		let value = toml::de::from_str(&toml).map_err(|error| Box::new(
-			Error(Object::Arrangement, id, bin.user, Of::De(path, Box::from(error)))
-		))?;
-		
-		Ok(self.value.get_or_init(|| value))
+trait Gettable {
+	const OBJECT: Object;
+	fn init(&self, source: &Rc<Cow<'static, str>>, path: &Rc<PathBuf>);
+	fn  set(&mut self, source: Rc<Cow<'static, str>>, path: Rc<PathBuf>);
+}
+
+impl Gettable for Arrangement {
+	const OBJECT: Object = Object::Arrangement;
+	
+	fn init(&self, source: &Rc<Cow<'static, str>>, path: &Rc<PathBuf>)
+		{ self.source.get_or_init(|| (Rc::clone(source), Rc::clone(path))); }
+	
+	fn set(&mut self, source: Rc<Cow<'static, str>>, path: Rc<PathBuf>)
+		{ self.source = OnceCell::from((source, path)); }
+}
+
+impl Gettable for Map {
+	const OBJECT: Object = Object::Map;
+	
+	fn init(&self, source: &Rc<Cow<'static, str>>, path: &Rc<PathBuf>)
+		{ self.source.get_or_init(|| (Rc::clone(source), Rc::clone(path))); }
+	
+	fn set(&mut self, source: Rc<Cow<'static, str>>, path: Rc<PathBuf>) {
+		self.source = OnceCell::from((source, path));
 	}
 }
 
-impl Item<Paths, Map> {
-	pub fn get<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&Map, Box<Error>> {
-		if let Some(map) = self.value.get() { return Ok(map) }
+impl Gettable for Parametric {
+	const OBJECT: Object = Object::Scheme;
+	
+	fn init(&self, source: &Rc<Cow<'static, str>>, path: &Rc<PathBuf>)
+		{ self.source.get_or_init(|| (Rc::clone(source), Rc::clone(path))); }
+	
+	fn set(&mut self, source: Rc<Cow<'static, str>>, path: Rc<PathBuf>) {
+		self.source = OnceCell::from((source, path));
+	}
+}
+
+impl Gettable for Theme {
+	const OBJECT: Object = Object::Theme;
+	
+	fn init(&self, source: &Rc<Cow<'static, str>>, path: &Rc<PathBuf>)
+		{ self.source.get_or_init(|| (Rc::clone(source), Rc::clone(path))); }
+	
+	fn set(&mut self, source: Rc<Cow<'static, str>>, path: Rc<PathBuf>)
+		{ self.source = OnceCell::from((source, path)); }
+}
+
+#[allow(private_bounds)]
+impl<V: for<'de> Deserialize<'de> + Gettable> Item<V> {
+	pub fn get<'a>(
+		&'a self, id: &'a Spanned, bin: &'a Bin, source: &'a Rc<Cow<'static, str>>
+	) -> Result<&V, Box<Error>> {
+		let (path, cell) = match self {
+			Item::Data(value) => {
+				value.init(source, &bin.path);
+				return Ok(value)
+			}
+			Item::Path { path, cell: value } => (path, value),
+		};
 		
-		let mut path = bin.path.parent().unwrap().join(self.path.manifest.as_str());
+		if let Some(value) = cell.get() { return Ok(value) }
 		
-		let toml = match std::fs::read_to_string(&path) {
+		let pat = bin.path.parent().unwrap().join(path as &str);
+		
+		let item_source = match std::fs::read_to_string(&pat) {
 			Ok(text) => text, Err(error) => return Err(Box::new(
-				Error(Object::Map, id, bin.user, Of::Io(path, error))
+				Error(V::OBJECT, Of::Io(id, error), bin, source)
 			))
 		};
 		
-		let mut map: Map = match toml::de::from_str(&toml) {
+		let mut value: V = match toml::de::from_str(&item_source) {
 			Ok(map) => map, Err(error) => return Err(Box::new(
-				Error(Object::Map, id, bin.user, Of::De(path, Box::from(error)))
+				Error(V::OBJECT, Of::De(id, error), bin, source)
 			))
 		};
 		
-		path.clear();
-		path.push(bin.path.parent().unwrap());
-		path.push(self.path.script.as_str());
-		
-		map.script_path = Some(path.into());
-		Ok(self.value.get_or_init(|| map))
+		value.set(Rc::from(Cow::Owned(item_source)), Rc::from(pat));
+		Ok(cell.get_or_init(|| value))
 	}
 }
 
-impl Item<Paths, scheme::Parametric> {
-	pub fn get<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&scheme::Parametric, Box<Error>> {
-		if let Some(scheme) = self.value.get() { return Ok(scheme) }
-		
-		let mut path = bin.path.parent().unwrap().join(self.path.manifest.as_str());
-		
-		let toml = match std::fs::read_to_string(&path) {
-			Ok(text) => text, Err(error) => return Err(Box::new(
-				Error(Object::Scheme, id, bin.user, Of::Io(path, error))
-			))
-		};
-		
-		let mut scheme: scheme::Parametric = match toml::de::from_str(&toml) {
-			Ok(scheme) => scheme, Err(error) => return Err(Box::new(
-				Error(Object::Scheme, id, bin.user, Of::De(path, Box::from(error)))
-			))
-		};
-		
-		path.clear();
-		path.push(bin.path.parent().unwrap());
-		path.push(self.path.script.as_str());
-		
-		scheme.script_path = Some(path.into());
-		Ok(self.value.get_or_init(|| scheme))
-	}
-}
+pub struct Error<'a>(pub Object, pub Of<'a>, pub &'a Bin, pub &'a str);
 
-impl Item<CompactString, Theme> {
-	pub fn get<'a>(&'a self, id: &'a str, bin: &'a Bin) -> Result<&Theme, Box<Error>> {
-		if let Some(theme) = self.value.get() { return Ok(theme) }
-		
-		let path = bin.path.parent().unwrap().join(self.path.as_str());
-		
-		let toml = match std::fs::read_to_string(&path) {
-			Ok(text) => text, Err(error) => return Err(Box::new(
-				Error(Object::Theme, id, bin.user, Of::Io(path, error))
-			))
-		};
-		
-		let theme = toml::de::from_str(&toml).map_err(|error| Box::new(
-			Error(Object::Theme, id, bin.user, Of::De(path, Box::from(error)), )
-		))?;
-		
-		Ok(self.value.get_or_init(|| theme))
-	}
-}
-
-pub struct Error<'a>(pub Object, pub &'a str, pub bool, pub Of);
-
-pub enum Of { Io(PathBuf, std::io::Error), De(PathBuf, Box<toml::de::Error>), NotFound }
+pub enum Of<'a> { Io(&'a Spanned, std::io::Error), De(&'a Spanned, toml::de::Error), NotFound }
 
 #[derive(Clone, Copy)]
 pub enum Object { Arrangement, Map, Scheme, Theme }
 
-impl Error<'_> {
-	#[cfg(feature = "cli")]
-	pub fn show(self, out: &mut impl std::io::Write, at: &str) -> std::io::Result<i32> {
-		let Self(object, id, user, of) = self;
+impl<'a, 'b> crate::Msg<'a, 'b, 2> for Error<'a> {
+	fn msg(self, [cow_0, cow_1]: [&'b mut Cow<'a, str>; 2]) -> Message<'b> {
+		let Self(object, of, bin, source) = self;
 		
-		let object = match object {
-			Object::Arrangement => ("arrangement", "Arrangement"),
-			Object::Map => ("map", "Map"),
-			Object::Scheme => ("scheme", "Scheme"),
-			Object::Theme => ("theme", "Theme"),
-		};
+		macro_rules! title {
+			($left:literal, $right:literal) => (match object {
+				Object::Arrangement => concat!($left, "arrangement", $right),
+				Object::Map => concat!($left, "map", $right),
+				Object::Scheme => concat!($left, "parametric scheme", $right),
+				Object::Theme => concat!($left, "theme", $right),
+			})
+		}
+		
+		let this = title!("this ", "");
 		
 		match of {
 			Of::Io(path, error) => {
-				write!(out, crate::csi! {
-					"In the {} namespace " /fg yellow; "{:?}"! "\n"
-					"Unable to read {} " /fg red; "{:?}"! " from\n" /fg cyan; "{}"! "\n{}\n"
-				}, crate::location(user), at, object.0, id, path.to_string_lossy(), error)?;
+				(*cow_0, *cow_1) = (bin.path.to_string_lossy(), Cow::Owned(error.to_string()));
 				
-				Ok(exitcode::NOINPUT)
+				Level::Error.title(title!("unable to read ", ""))
+					.snippet(Snippet::source(source).origin(cow_0).fold(true)
+						.annotation(Level::Error.span(path.span()).label(this)))
+					.footer(Level::Info.title(cow_1))
 			}
 			Of::De(path, error) => {
-				write!(out, crate::csi! {
-					"In the {} namespace " /fg yellow; "{:?}"! "\n"
-					"Failed to deserialize {} " /fg red; "{:?}"! " from\n" /fg cyan; "{}"! "\n\n{}"
-				}, crate::location(user), at, object.0, id, path.to_string_lossy(), error)?;
+				(*cow_0, *cow_1) = (bin.path.to_string_lossy(), Cow::Owned(error.to_string()));
 				
-				Ok(exitcode::DATAERR)
+				Level::Error.title(title!("failed to deserialize ", ""))
+					.snippet(Snippet::source(source).origin(cow_0).fold(true)
+						.annotation(Level::Error.span(path.span()).label(this)))
+					.footer(Level::Info.title(cow_1))
 			}
 			Of::NotFound => {
-				writeln!(out, crate::csi! {
-					"In the {} namespace " /fg green; "{:?}"! "\n{} " /fg red; "{:?}"! " not found"
-				}, crate::location(user), at, object.1, id)?;
+				*cow_0 = bin.path.to_string_lossy();
 				
-				Ok(exitcode::UNAVAILABLE)
+				Level::Error.title(title!("", " not found"))
+					.footer(Level::Info.title(cow_0))
 			}
 		}
 	}

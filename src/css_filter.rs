@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+ * SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -129,12 +129,13 @@ impl Solver {
 				let ak = a[i] / (A + k as f32 + 1.0).powf(ALPHA);
 				let (mut value, mut max) = (values[i] - ak * g, 100.0);
 				
-				if i == 2 /* saturate */ { max = 7500.0 } else
-				if i == 4 /* brightness */ || i == 5 /* contrast */ { max = 200.0 }
+				     if i == 2 /* saturate */ { max = 7500.0 }
+				else if i == 4 /* brightness */
+				     || i == 5 /* contrast */ { max = 200.0 }
 				
 				if i == 3 /* hue-rotate */ {
-					if value > max { value = value % max } else
-					if value < 0.0 { value = max + value % max }
+					     if value > max { value %= max }
+					else if value < 0.0 { value = max + value % max }
 				} else if value < 0.0 { value = 0.0 }
 				  else if value > max { value = max }
 				
@@ -178,15 +179,14 @@ impl Solver {
 pub struct Result { values: Option<[f32; 6]>, loss: f32 }
 
 impl Result {
-	pub fn to_css_filter(&self) -> rhai::ImmutableString {
+	pub fn to_css_filter(&self) -> rhai::Dynamic {
 		let mut string = crate::script::SmartString::new_const();
 		let filters = self.values.as_ref().unwrap();
 		let fmt = |index, multiplier| f32::round(filters[index] * multiplier); // (_, 1.0)
 		
 		write!(&mut string,
 			"invert({}%) sepia({}%) saturate({}%) hue-rotate({}deg) brightness({}%) contrast({}%)",
-			fmt(0, 1.0), fmt(1, 1.0), fmt(2, 1.0), fmt(3, 3.6), fmt(4, 1.0), fmt(5, 1.0)).unwrap();
-		
-		string.into()
+			fmt(0, 1.0), fmt(1, 1.0), fmt(2, 1.0), fmt(3, 3.6), fmt(4, 1.0), fmt(5, 1.0),
+		).map(|_| string.into()).unwrap_or(rhai::Dynamic::UNIT)
 	}
 }

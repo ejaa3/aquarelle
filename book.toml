@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+#
+# SPDX-License-Identifier: Unlicense
+
+[book]
+title = 'Aquarelle'
+authors = ['Eduardo Javier Alvarado Aarón']
+description = 'Aquarelle reference and usage book'
+language = 'en'
+src = 'doc'
+
+[build]
+build-dir = 'book/en'
+create-missing = false
+
+[preprocessor]
+gettext.after = ['links']
+gettext.po-dir = 'doc/po'

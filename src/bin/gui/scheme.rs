@@ -52,7 +52,7 @@ impl Object {
 		let css_id = format!("{namespace_id}-{theme_id}-{scheme_id}");
 		
 		let style = gtk::CssProvider::new();
-		style.load_from_data(&css_thumbnail(&css_id, &data));
+		style.load_from_string(&css_thumbnail(&css_id, &data));
 		
 		gtk::style_context_add_provider_for_display(
 			display, &style, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
@@ -109,7 +109,6 @@ mod imp {
 			}
 		}
 		append: &_ @ gtk::Label name {
-			css_classes: ["caption-heading"]
 			ellipsize: gtk::pango::EllipsizeMode::End
 			justify: gtk::Justification::Center
 			lines: 2
@@ -188,18 +187,22 @@ fn css_thumbnail(id: &str, scheme: &aquarelle::scheme::Data) -> String {
 
 #[cfg(test)]
 mod tests {
-	use aquarelle::{cache::Cache, theme::Theme};
+	use aquarelle::{cache::Cache, theme::Theme, Msg};
 	
 	#[test]
-	fn thumbnail() {
-		let toml = include_str!("../../../aquarelle/themes/neon_cake.toml");
-		let theme: Theme = toml::de::from_str(toml).unwrap();
-		let namespace_id = compact_str::CompactString::const_new("aquarelle");
+	fn thumbnail() -> anyhow::Result<()> {
+		let toml = include_str!("../../../aquarelle/non_maps/solarized.toml");
+		let theme: Theme = toml::de::from_str(toml)?;
+		let mut cache = Cache::default(); cache.update(|_| false);
+		let mut cows = <[std::borrow::Cow<str>; 2]>::default();
+		let namespace = cache.namespace("aquarelle")
+			.map_err(|error| error.msg(cows.each_mut())).unwrap();
 		
 		let css = super::css_thumbnail("test", &theme.scheme(
-			"light", &namespace_id, &Cache::new(|_| ()), Default::default(),
+			"light", namespace, &cache, &Default::default()
 		).unwrap_or_else(|_| panic!()));
 		
 		println!("'Theme' {:?} thumbnail:\n\n{css}\n", theme.name);
+		Ok(())
 	}
 }

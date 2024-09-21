@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import "../lib" as lib;
-
-// schemes:
-
 const common = cfg::scheme("common");
 const main   = cfg::scheme("main");
 
@@ -39,16 +35,18 @@ const emphasis = cfg::option("emphasis");
 
 // roles:
 
-const hard = if editor.dark() { "area" } else { "like" };
-const soft = if editor.dark() { "like" } else { "area" };
-
-const bright = if cfg::option("terminal-bold") { "area" } else { "like" };
-const normal = if cfg::option("terminal-bold") { "like" } else { "area" };
+const basic  = if cfg::option("basic-area")  { "area" } else { "like" };
+const bright = if cfg::option("bright-area") { "area" } else { "like" };
 
 // colors:
 
+fn shadow(color) {
+	const luma = color.luma();
+	2 ** -luma + 0.2 * luma - 0.6
+}
+
 const status_shadow = if status.dark() {
-	lab::mix(editor.lower.area, 0xFF, lib::shadow(editor.lower.area)).out()
+	lab::mix(editor.lower.area, 0xFF, shadow(editor.lower.area)).out()
 } else {`"#0000"`};
 
 const status_text = lab::lighten(if status.dark()
@@ -60,7 +58,7 @@ fn out() { `"#${this.to_hex_rgba(true)}"` }
 
 fn dark() { this.lower.text.luma() > this.lower.like.luma() }
 
-fn shadow() { 0xFF.fade(lib::shadow(this)).out() }
+fn shadow() { 0xFF.fade(shadow(this)).out() }
 
 fn status(set) {
 	const base = if global::status.dark()
@@ -263,7 +261,7 @@ export const colors = `{
 	"editorBracketHighlight.foreground2": ${editor.magenta.area.out()},
 	"editorBracketHighlight.foreground3": ${editor.green.area.out()},
 	"editorBracketHighlight.foreground4": ${editor.blue.area.out()},
-	"editorBracketHighlight.foreground5": ${editor.yellow[hard].out()},
+	"editorBracketHighlight.foreground5": ${editor.yellow.area.out()},
 	"editorBracketHighlight.foreground6": ${editor.any.area.out()},
 	"editorBracketHighlight.unexpectedBracket.foreground": ${editor.red.area.out()},
 	
@@ -274,14 +272,14 @@ export const colors = `{
 	"editorBracketPairGuide.activeBackground2": ${editor.magenta.area.fade(ACTIVE).out()},
 	"editorBracketPairGuide.activeBackground3": ${editor.green.area.fade(ACTIVE).out()},
 	"editorBracketPairGuide.activeBackground4": ${editor.blue.area.fade(ACTIVE).out()},
-	"editorBracketPairGuide.activeBackground5": ${editor.yellow[hard].fade(ACTIVE).out()},
+	"editorBracketPairGuide.activeBackground5": ${editor.yellow.area.fade(ACTIVE).out()},
 	"editorBracketPairGuide.activeBackground6": ${editor.any.area.fade(ACTIVE).out()},
 	
 	"editorBracketPairGuide.background1": ${editor.cyan.area.fade(INACTIVE).out()},
 	"editorBracketPairGuide.background2": ${editor.magenta.area.fade(INACTIVE).out()},
 	"editorBracketPairGuide.background3": ${editor.green.area.fade(INACTIVE).out()},
 	"editorBracketPairGuide.background4": ${editor.blue.area.fade(INACTIVE).out()},
-	"editorBracketPairGuide.background5": ${editor.yellow[hard].fade(INACTIVE).out()},
+	"editorBracketPairGuide.background5": ${editor.yellow.area.fade(INACTIVE).out()},
 	"editorBracketPairGuide.background6": ${editor.any.area.fade(INACTIVE).out()},
 	
 	"editorCodeLens.foreground": ${editor.lower.text.fade(0.75).out()}, ${dev(`
@@ -832,13 +830,13 @@ export const colors = `{
 	"tab.unfocusedInactiveModifiedBorder": "#FF0000",`)}
 	
 	"terminal.ansiBlack": ${term.alternate().out()},
-	"terminal.ansiBlue": ${term.blue[normal].out()},
-	"terminal.ansiCyan": ${term.cyan[normal].out()},
-	"terminal.ansiGreen": ${term.green[normal].out()},
-	"terminal.ansiMagenta": ${term.magenta[normal].out()},
-	"terminal.ansiRed": ${term.red[normal].out()},
-	"terminal.ansiWhite": ${term.any[normal].out()},
-	"terminal.ansiYellow": ${term.yellow[normal].out()},
+	"terminal.ansiBlue": ${term.blue[basic].out()},
+	"terminal.ansiCyan": ${term.cyan[basic].out()},
+	"terminal.ansiGreen": ${term.green[basic].out()},
+	"terminal.ansiMagenta": ${term.magenta[basic].out()},
+	"terminal.ansiRed": ${term.red[basic].out()},
+	"terminal.ansiWhite": ${term.any[basic].out()},
+	"terminal.ansiYellow": ${term.yellow[basic].out()},
 	
 	"terminal.ansiBrightBlack": ${lab::mix(term.lower.text, term.lower.area, 0.625).out()},
 	"terminal.ansiBrightBlue": ${term.blue[bright].out()},

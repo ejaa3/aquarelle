@@ -3,15 +3,108 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'obsidian-border'
-type = 'text-file' # md
+type = 'text-file' # xml
 about = '''
-A preset for [obsidian-border](https://github.com/Akifyss/obsidian-border).
+A preset for <a href='https://github.com/Akifyss/obsidian-border'>obsidian-border</a>.
 '''
 
 schemes.main.name = 'Main'
 
 [options]
-accent = { name = 'Accent', default.set = 'any' }
+accent = { name = 'Accent', default.accent = 'any' }
 
 [suggested-paths]
 default = { default = 'obsidian-border.json' }
+
+[script] # rhai
+embedded = '''
+const main   = cfg::scheme("main");
+const accent = cfg::option("accent");
+
+fn out() { "\"#" + this.to_hex_rgba(true) + '"' } // json
+fn shadow() { const L = this.luma(); '#' + 0xFF.fade(2 ** -L + 0.2 * L - 0.6).to_hex_rgba(true) }
+
+`{
+	"Appearance-dark@@accent-dark": ${main[accent].area.out()},
+	"Appearance-dark@@background-modifier-active-hover@@dark": ${lab::mix(main.lower.area, main.lower.text, 0.1).out()},
+	"Appearance-dark@@background-modifier-border@@dark": ${main.lower.text.fade(0.25).out()},
+	"Appearance-dark@@background-modifier-hover@@dark": ${main.lower.text.fade(0.1).out()},
+	"Appearance-dark@@background-primary@@dark": ${main.lower.like.out()},
+	"Appearance-dark@@background-secondary@@dark": ${main.lower.area.out()},
+	"Appearance-dark@@background-underlying-select-dark": "background-underlying-secondary-dark",
+	"Appearance-dark@@card-layout-open-dark": true,
+	"Appearance-dark@@card-shadow-dark": "${main.lower.area.shadow()} 0px 0px 9px",
+	"Appearance-dark@@color-blue-rgb@@dark": ${main.blue.area.out()},
+	"Appearance-dark@@color-cyan-rgb@@dark": ${main.cyan.area.out()},
+	"Appearance-dark@@color-green-rgb@@dark": ${main.green.area.out()},
+	"Appearance-dark@@color-orange-rgb@@dark": ${main.any.area.out()},
+	"Appearance-dark@@color-pink-rgb@@dark": ${main.magenta.area.out()},
+	"Appearance-dark@@color-purple-rgb@@dark": ${lch::desaturate(main.lower.text, 1.0).out()},
+	"Appearance-dark@@color-red-rgb@@dark": ${main.red.area.out()},
+	"Appearance-dark@@color-yellow-rgb@@dark": ${main.yellow.area.out()},
+	"Appearance-dark@@text-accent-hover@@dark": ${main.lower.text.out()},
+	"Appearance-dark@@text-accent@@dark": ${main[accent].like.out()},
+	"Appearance-dark@@text-faint@@dark": ${main.lower.text.fade(0.5).out()},
+	"Appearance-dark@@text-muted@@dark": ${main.lower.text.fade(0.75).out()},
+	"Appearance-dark@@text-normal@@dark": ${main.lower.text.out()},
+	
+	"Appearance-light@@accent-light": ${main[accent].area.out()},
+	"Appearance-light@@background-modifier-active-hover@@light": ${lab::mix(main.lower.like, main.lower.text, 0.1).out()},
+	"Appearance-light@@background-modifier-border@@light": ${main.lower.text.fade(0.25).out()},
+	"Appearance-light@@background-modifier-hover@@light": ${main.lower.text.fade(0.1).out()},
+	"Appearance-light@@background-primary@@light": ${main.lower.area.out()},
+	"Appearance-light@@background-secondary@@light": ${main.lower.like.out()},
+	"Appearance-light@@background-underlying-select-light": "background-underlying-secondary-light",
+	"Appearance-light@@card-layout-open-light": true,
+	"Appearance-light@@card-shadow-light": "${main.lower.like.shadow()} 0px 0px 9px",
+	"Appearance-light@@color-blue-rgb@@light": ${main.blue.area.out()},
+	"Appearance-light@@color-cyan-rgb@@light": ${main.cyan.area.out()},
+	"Appearance-light@@color-green-rgb@@light": ${main.green.area.out()},
+	"Appearance-light@@color-orange-rgb@@light": ${main.any.area.out()},
+	"Appearance-light@@color-pink-rgb@@light": ${main.magenta.area.out()},
+	"Appearance-light@@color-purple-rgb@@light": ${lch::desaturate(main.lower.text, 1.0).out()},
+	"Appearance-light@@color-red-rgb@@light": ${main.red.area.out()},
+	"Appearance-light@@color-yellow-rgb@@light": ${main.yellow.area.out()},
+	"Appearance-light@@text-accent-hover@@light": ${main.lower.text.out()},
+	"Appearance-light@@text-accent@@light": ${main[accent].like.out()},
+	"Appearance-light@@text-faint@@light": ${main.lower.text.fade(0.5).out()},
+	"Appearance-light@@text-muted@@light": ${main.lower.text.fade(0.75).out()},
+	"Appearance-light@@text-normal@@light": ${main.lower.text.out()},
+	
+	"Editor@@bold-color@@dark": ${main.lower.text.out()},
+	"Editor@@bold-color@@light": ${main.lower.text.out()},
+	"Editor@@callout-style-select": "callout-style-2",
+	"Editor@@hover-indicator-color@@dark": ${main.lower.text.fade(0.25).out()},
+	"Editor@@hover-indicator-color@@light": ${main.lower.text.fade(0.25).out()},
+	"Editor@@img-center-align": true,
+	"Editor@@img-darken": true,
+	"Editor@@inline-code-background-dark": ${lab::lighten_fixed(main.lower.like, 0.05).out()},
+	"Editor@@inline-code-background-light": ${lab::darken_fixed(main.lower.area, 0.05).out()},
+	"Editor@@inline-code-normal@@dark": ${main.lower.text.out()},
+	"Editor@@inline-code-normal@@light": ${main.lower.text.out()},
+	"Editor@@italic-color@@dark": ${main.any.like.out()},
+	"Editor@@italic-color@@light": ${main.any.like.out()},
+	"Editor@@line-hover-indicator": true,
+	"Editor@@link-color-hover@@dark": ${main.blue.like.out()},
+	"Editor@@link-color-hover@@light": ${main.blue.like.out()},
+	"Editor@@link-color@@dark": ${main.blue.like.out()},
+	"Editor@@link-color@@light": ${main.blue.like.out()},
+	"Editor@@link-decoration": "none",
+	"Editor@@link-external-color-hover@@dark": ${main.blue.like.out()},
+	"Editor@@link-external-color-hover@@light": ${main.blue.like.out()},
+	"Editor@@link-external-color@@dark": ${main.blue.like.out()},
+	"Editor@@link-external-color@@light": ${main.blue.like.out()},
+	"Editor@@link-external-decoration": "none",
+	"Editor@@list-marker-color@@dark": ${main.red.area.out()},
+	"Editor@@list-marker-color@@light": ${main.red.area.out()},
+	"Editor@@tag-background-hover@@dark": ${main.red.area.fade(0.4).out()},
+	"Editor@@tag-background-hover@@light": ${main.red.area.fade(0.4).out()},
+	"Editor@@tag-background@@dark": ${main.red.area.fade(0.2).out()},
+	"Editor@@tag-background@@light": ${main.red.area.fade(0.2).out()},
+	"Editor@@tag-color@@dark": ${main.red.like.out()},
+	"Editor@@tag-color@@light": ${main.red.like.out()},
+	"Editor@@text-align-justify": true,
+	"Editor@@text-highlight-bg@@dark": ${main.yellow.area.fade(0.25).out()},
+	"Editor@@text-highlight-bg@@light": ${main.yellow.area.fade(0.25).out()}
+}`
+'''

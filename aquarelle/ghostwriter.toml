@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'ghostwriter'
-type = 'text-file' # md
-about = '''
-A JSON file that defines a color theme for the [ghostwriter] text editor.
-[ghostwriter]: https://github.com/KDE/ghostwriter
-''' # rhai
+type = 'text-file' # xml
+about = """
+A JSON file that defines a color theme for the Markdown editor \
+<a href='https://github.com/KDE/ghostwriter'>ghostwriter</a>.
+""" # rhai
 
 nomenclature = 'arrangement + " – " + scheme("main") + ".json"'
 
@@ -20,3 +20,40 @@ default = { default = 'ghostwriter' }
 flatpak = { home = '.var/app/io.github.wereturtle.ghostwriter/data/ghostwriter/themes' }
 user-1  = { config = 'ghostwriter/themes' }
 user-2  = { home = '.config/ghostwriter/themes' }
+
+[script] # rhai
+embedded = '''
+const dark  = cfg::scheme("dark");
+const light = cfg::scheme("light");
+
+fn out() { `"#${this.to_hex_rgb(true)}"` } // json
+
+`{
+	"dark": {
+		"accent": ${dark.any.area.out()},
+		"background": ${dark.lower.area.out()},
+		"block": ${dark.yellow.like.out()},
+		"cursor": ${dark.lower.text.out()},
+		"emphasis": ${dark.magenta.like.out()},
+		"error": ${dark.red.like.out()},
+		"foreground": ${dark.lower.text.out()},
+		"heading": ${dark.cyan.like.out()},
+		"link": ${dark.blue.like.out()},
+		"markup": ${dark.lower.text.fade(0.5).out()},
+		"selection": ${dark.lower.text.fade(0.15).out()}
+	},
+	"light": {
+		"accent": ${light.any.area.out()},
+		"background": ${light.lower.area.out()},
+		"block": ${light.yellow.like.out()},
+		"cursor": ${light.lower.text.out()},
+		"emphasis": ${light.magenta.like.out()},
+		"error": ${light.red.like.out()},
+		"foreground": ${light.lower.text.out()},
+		"heading": ${light.cyan.like.out()},
+		"link": ${light.blue.like.out()},
+		"markup": ${light.lower.text.fade(0.5).out()},
+		"selection": ${light.lower.text.fade(0.15).out()}
+	}
+}`
+'''

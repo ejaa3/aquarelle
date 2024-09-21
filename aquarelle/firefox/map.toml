@@ -3,17 +3,41 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'Firefox'
-type = 'text-file' # md
+type = 'text-file' # xml
 about = '''
-Style sheet for [Firefox Web Browser](https://mozilla.org/en-US/firefox).
+Style sheet for <a href='https://mozilla.org/en-US/firefox'>Firefox Web Browser</a>.
 '''
 
 schemes.main.name = 'Main'
 
 [options]
-accent = { name = 'Accent', default.set = 'any' }
+accent = { name = 'Accent', default.accent = 'any' }
 
 [suggested-paths]
 default = { default = 'firefox/userContent.css' }
 flatpak = { home = '.var/app/org.mozilla.firefox/.mozilla/aquarelle/userContent.css' }
 user    = { home = '.mozilla/aquarelle/userContent.css' }
+
+[script] # rhai
+embedded = '''
+const main   = cfg::scheme("main");
+const accent = cfg::option("accent");
+
+fn out() { '#' + this.to_hex_rgba(true) } // css
+
+`@-moz-document url("about:newtab"), url("about:home") {
+	body {
+		--newtab-background-color: ${main.lower.like.out()} !important;
+		--newtab-background-color-secondary: ${main.upper.area.out()} !important;
+		--newtab-text-primary-color: ${main.lower.text.out()} !important;
+		--newtab-primary-action-background: ${main[accent].area.out()} !important;
+		--newtab-primary-element-text-color: ${main[accent].text.out()} !important;
+		--newtab-primary-action-background-pocket: ${main.cyan.area.out()} !important;
+		--newtab-status-error: ${main.red.area.out()} !important;
+		--newtab-status-success: ${main.green.area.out()} !important;
+		--newtab-text-emphasis-background: ${main.yellow.area.out()} !important;
+		--newtab-text-emphasis-text-color: ${main.yellow.text.out()} !important;
+		--newtab-wordmark-color: ${main.lower.text.out()} !important;
+	}
+}`
+'''

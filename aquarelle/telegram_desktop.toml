@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'Telegram Desktop'
-type = 'zip-file' # md
+type = 'zip-file' # xml
 about = '''
-Experimental theme for [Telegram Desktop](https://desktop.telegram.org).
+Experimental theme for <a href='https://desktop.telegram.org'>Telegram Desktop</a>.
 ''' # rhai
 
 display = 'arrangement + " – " + scheme("main")' # rhai
@@ -15,8 +15,10 @@ nomenclature = '''
   arrangement_id + if scheme.pop() == () { () } else { '.' + scheme } + ".tdesktop-theme"
 '''
 
+script.path = 'telegram_desktop.rhai'
+
 [options]
-accent = { name = 'Accent', default.set = 'any' }
+accent = { name = 'Accent', default.accent = 'any' }
 
 [options.title-shadow]
 name = 'Draw a shadow line below the title bar'
@@ -31,12 +33,12 @@ default = false
 [options.incoming-selected]
 name = 'Color set for the selected incoming message'
 about = 'Use an emphasis color set for best results'
-default.set = 'magenta'
+default.accent = 'magenta'
 
 [options.outgoing-selected]
 name = 'Color set for the selected outgoing message'
 about = 'Use an emphasis color set for best results'
-default.set = 'blue'
+default.accent = 'blue'
 
 [schemes]
 incoming = { name = 'Incoming messages', fallback = 'history' }

@@ -3,14 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'Black Box & Tilix'
-type = 'text-file' # md
-about = '''
-A JSON file that provides a color scheme for the terminal emulators
-[Black Box](https://gitlab.gnome.org/raggesilver/blackbox)
-and [Tilix](https://gnunn1.github.io/tilix-web).
+type = 'text-file' # xml
+about = """
+A JSON file that provides a color scheme for the terminal emulators \
+<a href='https://gitlab.gnome.org/raggesilver/blackbox'>Black Box</a> \
+and <a href='https://gnunn1.github.io/tilix-web'>Tilix</a>.
 
 I recommend trying the bold option if your terminal uses intense colors for bold text.
-''' # rhai
+""" # rhai
 
 display = 'arrangement + " – " + scheme("main") + ".json"' # rhai
 nomenclature = '''
@@ -20,22 +20,79 @@ arrangement_id + if scheme.pop() == () { () } else { '.' + scheme }
 '''
 
 [options]
-accent = { name = 'Accent', default.set = 'any' }
+accent = { name = 'Accent', default.accent = 'any' }
 
-[options.bold]
-name = 'Swaps the roles “like” and “area” for emphasis colors'
-about = 'It is better if the bold text uses intense colors'
+[options.basic-area]
+name = 'Role `area` for basic colors'
+about = 'Use role `area` instead of `like` for basic colors'
+default = false
+
+[options.bright-area]
+name = 'Role `area` for bright colors'
+about = 'Use role `area` instead of `like` for bright colors'
 default = false
 
 [schemes]
 main = { name = 'Main' }
 
 [suggested-paths]
-default = { default = 'blackbox' }
-
-black-box-1       = { data = 'blackbox/schemes' }
-black-box-2       = { home = '.local/share/blackbox/schemes' }
+default           = { default = 'blackbox' }
+black-box         = { data = 'blackbox/schemes' }
 black-box-flatpak = { home = '.var/app/com.raggesilver.BlackBox/data/blackbox/schemes' }
+tilix             = { config = 'tilix/schemes' }
 
-tilix-1 = { config = 'tilix/schemes' }
-tilix-2 = { home = '.config/tilix/schemes' }
+[script] # rhai
+embedded = '''
+const main   = cfg::scheme("main");
+const accent = cfg::option("accent");
+
+const basic  = if cfg::option("basic-area")  { "area" } else { "like" };
+const bright = if cfg::option("bright-area") { "area" } else { "like" };
+
+fn out() { "\"#" + this.to_hex_rgb(true) + '"' } // json
+
+`{
+	"name": ${cfg::display},
+	"comment": "Scheme provided by Aquarelle",
+	
+	"use-badge-color": true,
+	"badge-color": ${main[accent].like.out()},
+	
+	"use-bold-color": true,
+	"bold-color": ${main.any[bright].out()},
+	
+	"use-cursor-color": true,
+	"cursor-background-color": ${main.lower.text.out()},
+	"cursor-foreground-color": ${main.lower.area.out()},
+	
+	"use-highlight-color": true,
+	"highlight-background-color": ${main[accent].area.out()},
+	"highlight-foreground-color": ${main[accent].text.out()},
+	
+	"use-theme-colors": false,
+	"background-color": ${main.lower.area.out()},
+	"foreground-color": ${main.lower.text.out()},
+	
+	"palette": [
+		${ // HACK better solarized
+			if main.lower.like.luma() != main.lower.area.luma()
+				{ main.lower.like.out() } else { main.upper.like.out() }
+		},
+		${main.red[basic].out()},
+		${main.green[basic].out()},
+		${main.yellow[basic].out()},
+		${main.blue[basic].out()},
+		${main.magenta[basic].out()},
+		${main.cyan[basic].out()},
+		${main.any[basic].out()},
+		${lab::mix(main.lower.text, main.lower.area, 0.625).out()},
+		${main.red[bright].out()},
+		${main.green[bright].out()},
+		${main.yellow[bright].out()},
+		${main.blue[bright].out()},
+		${main.magenta[bright].out()},
+		${main.cyan[bright].out()},
+		${main.upper.text.out()}
+	]
+}`
+'''

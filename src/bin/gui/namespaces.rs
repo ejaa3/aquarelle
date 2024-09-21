@@ -6,10 +6,9 @@
 
 use std::{cell::RefCell, rc::Rc};
 use adw::{glib, prelude::*};
-use aquarelle::cache;
 use compact_str::CompactString;
 use declarative::{clone, construct, view};
-use crate::{log, log::Log, utils, send};
+use crate::{Log, send};
 
 pub type SharedSelection = Rc<RefCell<Selection>>;
 
@@ -19,7 +18,7 @@ pub enum Msg { Select, SelectItem }
 pub struct Selection {
 	pub namespace: CompactString,
 	pub     group: CompactString,
-	pub     local: bool,
+	pub      user: bool,
 }
 
 #[view {
@@ -46,10 +45,10 @@ pub fn pane() -> Pane {
 	Pane { root, vbox }
 }
 
-#[view[ adw::ExpanderRow root {
-	title: format!("{name}<span face='monospace' size='90%' alpha='55%'>: {id}</span>")
+#[view[ adw::ExpanderRow root { // xml
+	title: format!("{}<span face='monospace' size='90%' alpha='55%'>: {id}</span>", &namespace.name)
 	title_lines: 1
-	subtitle: about
+	subtitle: &namespace.about as &str
 	subtitle_lines: 1
 	~
 	add_prefix: &_ @ gtk::CheckButton {
@@ -62,14 +61,13 @@ pub fn pane() -> Pane {
 } ]]
 
 fn namespace(
-	    about: & str,
-	container: & adw::PreferencesGroup,
-	       id:   CompactString,
-	    local:   bool,
-	     name: & str,
-	   parent:   async_channel::Sender<Msg>,
+	namespace: & aquarelle::namespace::Namespace,
 	    radio: & gtk::CheckButton,
+	container: & adw::PreferencesGroup,
 	selection:   SharedSelection,
+	       id:   CompactString,
+	     user:   bool,
+	   parent:   async_channel::Sender<Msg>,
 ) -> (adw::ExpanderRow, async_channel::Sender<bool>) {
 	let (tx, rx) = async_channel::bounded(1);
 	expand_view_here! { }
@@ -79,7 +77,7 @@ fn namespace(
 		while let Ok(no_group) = rx.recv().await {
 			let mut selected = selection.borrow_mut();
 			selected.namespace.clone_from(&id);
-			selected.local = local;
+			selected.user = user;
 			
 			if no_group { selected.group.clear(); }
 			
@@ -90,11 +88,12 @@ fn namespace(
 	(root, tx)
 }
 
-#[view[ adw::ActionRow root {
-	title: format!("{name}<span face='monospace' size='90%' alpha='55%'>: {id}</span>")
+#[view[ adw::ActionRow root { // xml
+	title: format!("{name}<span face='monospace' size='90%' alpha='63%'>: {id}</span>")
 	title_lines: 1
-	subtitle: about
+	subtitle: about.lines().next().unwrap_or("")
 	subtitle_lines: 1
+	tooltip_markup: about
 	activatable_widget: &prefix
 	~
 	add_prefix: &_ @ gtk::CheckButton prefix {
@@ -123,32 +122,28 @@ fn group(about: & str,
 
 pub fn populate(
 	    radio: & gtk::CheckButton,
-	     tags: & utils::Tags,
-	    cache: & cache::Cache,
+	    cache: & aquarelle::cache::Cache,
 	container: & adw::PreferencesGroup,
-	selection: & SharedSelection,
 	       tx: & async_channel::Sender<Msg>,
+	selection: & SharedSelection,
 ) {
 	for (id, bin) in &cache.namespaces {
-		let Some(namespace) = bin.get(id).log(|error| match **error {
-			cache::Error::Io(..) => log::warning, _ => log::error
-		}, log::cache_error, (), tags, true) else { continue };
+		let Some(namespace) = bin.get().log() else { continue };
 		
 		let (expander, tx) = self::namespace(
-			&namespace.about, container, id.clone(), bin.user,
-			&namespace.name, tx.clone(), &radio, selection.clone()
+			namespace, radio, container, selection.clone(),
+			id.clone(), bin.user, tx.clone()
 		);
 		
 		let mut expand = false;
 		
-		for (id, theme) in &namespace.themes {
-			let Some(theme) = theme.get(id, bin).log(
-				|_| log::error, log::namespace_error, &id, tags, true
-			) else { continue };
+		for (id, item) in &namespace.themes {
+			let Some(theme) = item.get(id, bin, namespace.source.as_ref().unwrap()).log()
+			else { continue };
 			
 			self::group(
-				&theme.about, &expander, id.clone(), &theme.name,
-				&radio, Rc::clone(selection), tx.clone()
+				&theme.about, &expander, id.get_ref().clone(), &theme.name,
+				radio, Rc::clone(selection), tx.clone()
 			);
 			
 			expand = true;

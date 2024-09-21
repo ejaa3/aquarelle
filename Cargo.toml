@@ -5,7 +5,7 @@
 [package]
 name = 'aquarelle'
 version = '0.1.0'
-description = 'Color scheme processor focused on theme maintainability'
+description = 'Color scheme processor'
 authors = ['Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>']
 license = 'AGPL-3.0-only'
 keywords = ['cli', 'color', 'palette', 'scheme', 'theme']
@@ -13,65 +13,37 @@ edition = '2021'
 default-run = 'aquarelle'
 
 [dependencies]
-async-channel = { version = '2'   , optional = true }
-compact_str   = { version = '0.8' , default-features = false, features = ['serde'] }
-dirs          = { version = '5'   , default-features = false }
-fastrand      = '2'
-itertools     = { version = '0.13', default-features = false }
-palette       = { version = '0.7' , default-features = false, features = ['std'] }
-regex         = '1'
-rhai          = { version = '1'   , features = ['only_i32', 'f32_float', 'no_custom_syntax', 'serde'] }
-smallvec      = { version = '1'   , default-features = false }
-smartstring   = { version = '1'   , default-features = false }
-zip           = { version = '2'   , default-features = false }
-
-serde = { version = '1'  , features = ['derive', 'rc'] }
-toml  = '0.8'
-
-png   = '0.17'
-resvg = '0.43'
-
-# CLI:
-clap     = { version = '4'  , optional = true, features = ['derive'] }
-exitcode = { version = '1'  , optional = true }
-time     = { version = '0.3', optional = true, default-features = false, features = ['formatting', 'macros'] }
-
-[dependencies.gtk]
-default-features = false
-features = ['gnome_44']
-optional = true
-package = 'gtk4'
-version = '0.9'
-
-# [dependencies.sourceview]
-# default-features = false
-# optional = true
-# package = 'sourceview5'
-# version = '0.7'
-
-[dependencies.adw]
-package = 'libadwaita'
-version = '0.7'
-default-features = false
-features = ['v1_4']
-optional = true
-
-[dependencies.gettext-rs]
-version = '0.7'
-default-features = false
-features = ['gettext-system']
-optional = true
-
-[dependencies.declarative]
-version = '0.7'
-optional = true
+adw = { package = 'libadwaita', version = '0.7.0', features = ['v1_6'], optional = true }
+annotate-snippets = '0.11.4'
+async-channel = { version = '2.3.1', optional = true }
+clap = { version = '4.5.17', optional = true, features = ['derive'] }
+compact_str = { version = '0.8.0', features = ['serde'] }
+declarative = { version = '0.7', optional = true }
+dirs = '5.0.1'
+fastrand = '2.1.1'
+gettext-rs = { version = '0.7.1', features = ['gettext-system'], optional = true }
+gtk = { package = 'gtk4', version = '0.9.1', features = ['gnome_47'], optional = true }
+itertools = '0.13.0'
+palette = { version = '0.7.6', default-features = false, features = ['std'] }
+png = '0.17.13'
+resvg = { version = '0.43.0', default-features = false, features = ['memmap-fonts', 'system-fonts', 'text'] }
+rhai = { version = '1.19.0', features = ['only_i32', 'f32_float', 'no_custom_syntax', 'no_time', 'serde'] }
+serde = { version = '1.0.210', features = ['derive', 'rc'] }
+serde_spanned = '0.6.7'
+smartstring = '1.0.1'
+toml = { package = 'toml_edit', version = '0.22.21', features = ['serde'] }
+vte = { package = 'vte4', version = '0.8.0', features = ['v0_78'], optional = true }
+zip = { version = '2.2.0', default-features = false }
 
 [build-dependencies]
-glib-build-tools = { version = '0', optional = true }
+glib-build-tools = { version = '0.20.0', optional = true }
+
+[dev-dependencies]
+anyhow = '1.0.89'
 
 [features]
-cli = ['clap', 'exitcode', 'time']
-gui = ['async-channel', 'adw', 'declarative', 'gettext-rs', 'glib-build-tools', 'gtk']
+cli = ['clap']
+gui = ['adw', 'async-channel', 'declarative', 'gettext-rs', 'glib-build-tools', 'gtk', 'vte']
 
 [[bin]]
 name = 'aquarelle'

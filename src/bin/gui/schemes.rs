@@ -4,14 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-use std::{cell::Ref, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 use adw::{gdk, gio, glib, prelude::*};
 use aquarelle::{cache, config, Value};
 use compact_str::CompactString;
 use declarative::{clone, construct, view};
-use crate::{log, log::Log, namespaces, scheme, themes, utils, i18n, send};
+use palette::{rgb::channels::Rgba, Desaturate, FromColor};
+use vte::TerminalExtManual;
+use crate::{namespaces, scheme, themes, Log, i18n, rgba, send};
 
-const SCHEME: &str = "scheme";
+const SKIN: &str = "skin";
 
 pub mod appearance {
 	pub const SETTING  : &str =     "appearance";
@@ -27,7 +29,7 @@ pub mod show {
 	pub const DARK   : &str = "win.show-schemes::Dark";
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub enum Msg {
 	SelectItem,
 	UseDefaultAppearance,
@@ -38,11 +40,10 @@ pub enum Msg {
 }
 
 pub struct Schemes<'a> {
-	pub     cache: Rc<cache::Cache>,
+	pub     cache: Rc<RefCell<cache::Cache>>,
 	pub    scheme: themes::SelectedScheme,
 	pub selection: namespaces::SharedSelection,
 	pub  settings: gio::Settings,
-	pub      tags: utils::Tags,
 	pub    themes: async_channel::Sender<namespaces::Msg>,
 	pub    window: &'a adw::ApplicationWindow,
 }
@@ -54,23 +55,8 @@ impl Schemes<'_> {
 #[view {
 	pub struct Template { pub tx: async_channel::Sender<Msg> }
 	
-	gtk::Box pub root {
-		orientation: gtk::Orientation::Vertical
-		hexpand: true ~>
-		
-		append: &_ @ gtk::SearchBar {
-			key_capture_widget: window
-			
-			child: &_ @ gtk::SearchEntry {
-				placeholder_text: i18n("Search")
-				~
-				connect_search_changed: clone![name_filter; move |this| {
-					let text = this.text();
-					name_filter.set_search(if text.is_empty() { None } else { Some(&text) });
-				}]
-			}
-		}
-		append: &_ @ gtk::ScrolledWindow {
+	adw::ToolbarView pub root {
+		set_content: Some(&_) @ gtk::ScrolledWindow {
 			vexpand: true
 			
 			child: &_ @ adw::ClampScrollable {
@@ -105,7 +91,7 @@ impl Schemes<'_> {
 								}
 								model: &_ @ gtk::FilterListModel show_model {
 									model: &_ @ gtk::FilterListModel {
-										model: &get_schemes(&cache, &tags, &root.display())
+										model: &get_schemes(&cache.borrow(), &root.display())
 										
 										filter: &_ @ gtk::StringFilter name_filter {
 											ignore_case: true
@@ -120,7 +106,7 @@ impl Schemes<'_> {
 									}
 								}
 							}
-							'consume update_filters = move |selected: Ref<namespaces::Selection>| bindings!()
+							'consume update_filters = move |selected: &namespaces::Selection| bindings!()
 						} ~
 						connect_selected_item_notify: clone![tx; move |_| send!(Msg::SelectScheme => tx)]
 					}
@@ -130,7 +116,19 @@ impl Schemes<'_> {
 				}
 			}
 		}
-	}
+		add_bottom_bar: &_ @ gtk::SearchBar {
+			key_capture_widget: window
+			
+			child: &_ @ gtk::SearchEntry {
+				placeholder_text: i18n("Search")
+				~
+				connect_search_changed: clone![name_filter; move |this| {
+					let text = this.text();
+					name_filter.set_search(if text.is_empty() { None } else { Some(&text) });
+				}]
+			}
+		}
+	}!
 	ref window {
 		add_action: &_ @ settings.create_action(show::SETTING) {
 			connect_state_notify: move |this| {
@@ -155,10 +153,12 @@ impl Schemes<'_> {
 			}
 			notify: "state"
 		}
+		
 		connect_close_request: clone![tx; move |_| {
 			send!(Msg::Shutdown => tx);
 			glib::Propagation::Proceed
 		}]
+		
 		add_action: &_ @ settings.create_action(appearance::SETTING) {
 			connect_state_notify: clone![tx; move |this|
 				match this.state().unwrap().str().unwrap() {
@@ -171,13 +171,13 @@ impl Schemes<'_> {
 	}
 }]
 
-pub fn start(Schemes { cache, scheme, selection, settings, tags, themes, window }: Schemes) -> Template {
+pub fn start(Schemes { cache, scheme, selection, settings, themes, window }: Schemes) -> Template {
 	let (tx, rx) = async_channel::bounded(1);
 	
 	expand_view_here! { }
 	
-	let (namespace, theme, scheme_id): (String, String, String) = settings.get(SCHEME);
-	let mut appearance = get_scheme(&cache, &tags, log::warning, &namespace, &theme, &scheme_id);
+	let (namespace, theme, scheme_id): (String, String, String) = settings.get(SKIN);
+	let mut appearance = get_scheme(&cache, &namespace, &theme, &scheme_id);
 	let mut is_selected = settings.string(appearance::SETTING) == "Selected";
 	let css = gtk::CssProvider::new();
 	
@@ -185,23 +185,21 @@ pub fn start(Schemes { cache, scheme, selection, settings, tags, themes, window 
 		&root.display(), &css, gtk::STYLE_PROVIDER_PRIORITY_USER
 	);
 	
-	set_appearance(&appearance, &cache, &tags, &css);
+	set_appearance(&appearance, &cache, &css);
 	
+	#[allow(clippy::unit_arg)]
 	let mut update_state = move |msg| Some(match msg {
-		Msg::SelectItem => update_filters(selection.borrow()),
+		Msg::SelectItem => update_filters(&selection.borrow()),
 		Msg::UseDefaultAppearance => {
 			is_selected = false;
-			appearance = get_scheme(
-				&cache, &tags, log::critical,
-				config::APP, "everforest", "hard-dark"
-			);
-			set_appearance(&appearance, &cache, &tags, &css);
+			appearance = get_scheme(&cache, config::APP, "neon-cake", "dark");
+			set_appearance(&appearance, &cache, &css);
 		}
 		Msg::UseSelectedSchemeForAppearance => {
 			is_selected = true;
 			let scheme = single.selected_item()?;
 			appearance = Some(scheme.downcast().unwrap());
-			set_appearance(&appearance, &cache, &tags, &css);
+			set_appearance(&appearance, &cache, &css);
 		}
 		Msg::DoNotChangeAppearance => is_selected = false,
 		Msg::SelectScheme => {
@@ -213,12 +211,12 @@ pub fn start(Schemes { cache, scheme, selection, settings, tags, themes, window 
 			
 			if is_selected {
 				appearance = Some(selected);
-				set_appearance(&appearance, &cache, &tags, &css);
+				set_appearance(&appearance, &cache, &css);
 			}
 		}
 		Msg::Shutdown => if let Some(ref scheme) = appearance {
-			settings.set(SCHEME, scheme.borrow().location()).unwrap_or_else(
-				move |error| crate::critical!("Failed to save {SCHEME} setting: {error}")
+			settings.set(SKIN, scheme.borrow().location()).unwrap_or_else(
+				|error| crate::critical!("Failed to save {SKIN} setting: {error}")
 			);
 		}
 	});
@@ -232,74 +230,74 @@ pub fn start(Schemes { cache, scheme, selection, settings, tags, themes, window 
 
 fn set_appearance(
 	appearance: & Option<scheme::Object>,
-	     cache: & cache::Cache,
-	      tags: & utils::Tags,
+	     cache: & RefCell<cache::Cache>,
 	       css: & gtk::CssProvider,
 ) -> Option<()> {
 	let scheme = appearance.as_ref()?.borrow();
 	let (namespace_id, theme_id, scheme_id) = scheme.location();
 	
-	let (namespace, bin) = cache.namespace(&namespace_id)
-		.log(|_| log::critical, log::cache_error, (), &tags, true)?;
+	let cache = cache.borrow();
+	let (mut namespace, mut bin) = cache.namespace(namespace_id).log()?;
 	
-	let theme = namespace.theme(theme_id, bin)
-		.log(|_| log::critical, log::namespace_error, namespace_id, &tags, true)?;
+	let theme = namespace.theme(theme_id, bin).log()?;
 	
-	let data = theme.scheme(scheme_id, "", &cache, Default::default()) // TODO Safety
-		.log(|_| log::critical, log::theme_error, (), &tags, true)?;
+	let safety = Default::default(); // FIXME Safety
 	
-	let (namespace, bin) = if namespace_id != config::APP {
-		cache.namespace(config::APP)
-			.log(|_| log::critical, log::cache_error, (), &tags, true)?
-	} else { (namespace, bin) };
+	let scheme = theme.scheme(scheme_id, (namespace, bin), &cache, &safety).log()?;
 	
-	let (map_id, map) = namespace.map("adwaita", bin)
-		.log(|_| log::critical, log::namespace_error, namespace_id, &tags, true)?;
+	if namespace_id != config::APP {
+		(namespace, bin) = cache.namespace(config::APP).log()?;
+	}
 	
-	const     ACCENT: CompactString = CompactString::const_new("accent");
-	const DIM_HEADER: CompactString = CompactString::const_new("dim-header");
-	const CUSTOM_CSS: CompactString = CompactString::const_new("custom-css");
-	const       MAIN: CompactString = CompactString::const_new("main");
+	let (id, map) = namespace.map("adwaita", bin).log()?;
+	let src = &(namespace.source.as_ref().map(Rc::clone)?, Rc::clone(&bin.path));
 	
-	let success = aquarelle::mapping::Ready {
-		map, id: config::APP_ID, map_id,
-		options: [
-			(    ACCENT, Value::Set { set: aquarelle::Set::Any }),
-			(DIM_HEADER, Value::Bool(true)),
-			(CUSTOM_CSS, Value::String(Default::default())),
+	css.load_from_string(&aquarelle::mapping::Ready {
+		map, src, id, map_id: id, options: [
+			(CompactString::from("accent")    , Value::Acc { accent: aquarelle::Accent::Any }),
+			(CompactString::from("dim-header"), Value::Bool(true)),
+			(CompactString::from("custom-css"), Value::Str(Default::default())),
 		].into(),
 		   name: Default::default(),
 		display: Default::default(),
-		schemes: Rc::new([(MAIN, data.clone())].into()),
-		 safety: Default::default(), // TODO Safety
+		schemes: Rc::new([(CompactString::from("main"), scheme.clone())].into()),
+		 safety: &Default::default(), // TODO Safety
 		  paths: None,
-		replica: (Default::default(), aquarelle::arrangement::Replica::Copy),
-	}.perform().log(|_| log::critical, log::mapping_error, (), &tags, true)?;
+		replica: Default::default(),
+	}.perform().log()??);
 	
-	tags.refresh(&data);
-	css.load_from_data(&success.text.unwrap());
+	let mut rgb = palette::Srgba::from_u32::<Rgba>(scheme.red.like).into_format();
+	let white = palette::Lch::from_color(rgb).desaturate(0.0);
+	rgb = palette::Srgba::from_color(white);
+	
+	let white = gdk::RGBA::new(rgb.red, rgb.green, rgb.blue, rgb.alpha);
+	
+	crate::TERM.with(|term| term.set_colors(Some(&rgba(scheme.lower.text)), Some(&rgba(scheme.lower.area)), &[
+		&rgba(scheme.upper.like), &rgba(scheme.red    .like), &rgba(scheme.green.like), &rgba(scheme.yellow.like),
+		&rgba(scheme.blue .like), &rgba(scheme.magenta.like), &rgba(scheme.cyan .like), &rgba(scheme.any   .like),
+		
+		&rgba(scheme.upper.area), &rgba(scheme.red    .like), &rgba(scheme.green.like), &rgba(scheme.yellow.like),
+		&rgba(scheme.blue .like), &rgba(scheme.magenta.like), &rgba(scheme.cyan .like), &white,
+	]));
+	
 	None
 }
 
-fn get_schemes(cache: &cache::Cache, tags: &utils::Tags, display: &gdk::Display) -> gio::ListStore {
+fn get_schemes(cache: &cache::Cache, display: &gdk::Display) -> gio::ListStore {
 	let mut list = gio::ListStore::new::<scheme::Object>();
+	let safety = Default::default(); // FIXME Safety
 	
-	list.extend(cache.namespaces.iter().filter_map(move |(at, bin)| {
-		let namespace = bin.get(at).log(|error| match **error {
-			cache::Error::Io(..) => log::warning, _ => log::error
-		}, log::cache_error, (), &tags, true)?;
+	list.extend(cache.namespaces.iter().filter_map(|(at, bin)| {
+		let namespace = bin.get().log()?;
 		
-		Some(namespace.themes.iter().filter_map(move |(theme_id, item)| {
-			let theme = item.get(theme_id, bin)
-				.log(|_| log::error, log::namespace_error, at, &tags, true)?;
+		Some(namespace.themes.iter().filter_map(|(theme_id, item)| {
+			let theme = item.get(theme_id, bin, namespace.source.as_ref().unwrap()).log()?;
 			
-			Some(theme.schemes.iter().filter_map(move |(id, scheme)| {
-				let data = scheme.data(at, &cache, &Default::default()) // TODO Safety
-					.map_err(move |error| aquarelle::theme::Error::Scheme { id, error })
-					.log(|_| log::error, log::theme_error, (), &tags, true)?;
+			Some(theme.schemes.iter().filter_map(|(scheme_id, scheme)| {
+				let data = theme.scheme(scheme_id.get_ref(), (namespace, bin), cache, &safety).log()?;
 				
 				let metadata = scheme::Object::new(
-					Rc::clone(data), at.clone(), theme_id.clone(), id.clone(), &display
+					Rc::clone(data), at.clone(), theme_id.get_ref().clone(), scheme_id.get_ref().clone(), display
 				);
 				scheme.metadata.set(Box::new(metadata.clone())).unwrap();
 				Some(metadata)
@@ -311,27 +309,12 @@ fn get_schemes(cache: &cache::Cache, tags: &utils::Tags, display: &gdk::Display)
 }
 
 fn get_scheme(
-	       cache: & cache::Cache,
-	        tags: & utils::Tags,
-	 log_variant:   fn(&utils::Tags, bool),
-	namespace_id: & str,
-	    theme_id: & str,
-	   scheme_id: & str,
+	cache: &RefCell<cache::Cache>, namespace: &str, theme: &str, scheme: &str
 ) -> Option<scheme::Object> {
-	let Some((namespace, bin)) = cache.namespace(&namespace_id)
-		.log(|_| log_variant, log::cache_error, (), &tags, true)
-		else { return None };
+	let cache = cache.borrow();
+	let (namespace, bin) = cache.namespace(namespace).log()?;
+	let theme = namespace.theme(theme, bin).log()?;
+	let scheme = theme.schemes.get(scheme as &str)?;
 	
-	let Some(theme) = namespace.theme(&theme_id, bin)
-		.log(|_| log_variant, log::namespace_error, &namespace_id, &tags, true)
-		else { return None };
-	
-	let Some(scheme) = theme.schemes.get(&scheme_id as &str) else {
-		log_variant(&tags, true);
-		log::theme_error(&tags, aquarelle::theme::Error::NotFound { id: &scheme_id }, ());
-		return None;
-	};
-	
-	Some(scheme.metadata.get().unwrap()
-		.downcast_ref::<scheme::Object>().unwrap().clone())
+	Some(scheme.metadata.get()?.downcast_ref::<scheme::Object>().unwrap().clone())
 }

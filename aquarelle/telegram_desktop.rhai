@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+fn dev(text) { }
+// fn dev(text) { text }
+
 // schemes:
 
 const main     = cfg::scheme("main");
@@ -44,12 +47,12 @@ fn solar_bg() {
 
 const image = /* XML */ `
 <svg xmlns='http://www.w3.org/2000/svg' width='1' height='1' viewBox='0 0 1 1'>
-	<rect width='1' height='1' fill='${
-		if history.dark() { history.lower.area.out() } else { history.upper.like.out() }
+	<rect width='1' height='1' fill='#${
+		if history.dark() { history.lower.area.to_hex_rgb(true) } else { history.upper.like.to_hex_rgb(true) }
 	}'/>
 </svg>`;
 
-const palette = /* tdesktop-palette */ `
+const palette = /* yaml */ `
 activeButtonBg: ${main[accent].area.out()}; // default active button background
 activeButtonBgOver: ${main[accent].text.fade(ACT).out()}; // default active button background with mouse over
 activeButtonBgRipple: ${main[accent].text.fade(ACT).out()}; // default active button ripple effect
@@ -64,15 +67,15 @@ activeLineFgError: ${main[bad].area.out()}; // default active line for error sta
 attentionButtonBgOver: ${main.red.like.fade(ACT).out()}; // default attention button background with mouse over
 attentionButtonBgRipple: ${main.red.like.fade(ACT).out()}; // default attention button ripple effect
 attentionButtonFg: ${main.red.like.out()}; // default attention button text (like confirm button on log out)
-attentionButtonFgOver: attentionButtonFg; // default attention button text with mouse over
+attentionButtonFgOver: attentionButtonFg; // default attention button text with mouse over ${dev(`
 
-botKbBg: #FF0000; // FIXME bot keyboard button background
-botKbColor: #00FF00; // FIXME bot keyboard button text
-botKbDownBg: #0000FF; // FIXME bot keyboard button ripple effect
+botKbBg: #FF0000; // bot keyboard button background
+botKbColor: #00FF00; // bot keyboard button text
+botKbDownBg: #0000FF; // bot keyboard button ripple effect`)}
 
 boxBg: ${main.solar_bg().out()}; // box background
-boxDividerBg: ${0xFF.fade(main.solar_bg().shadow() / 1.5).out()}; // FIXME gray divider in boxes and layers
-boxDividerFg: windowShadowFg; // FIXME gray divider shadow in boxes and layers
+boxDividerBg: ${0xFF.fade(main.solar_bg().shadow() / 1.5).out()}; // FIXME gray divider in boxes and layers ${dev(`
+boxDividerFg: windowShadowFg; // gray divider shadow in boxes and layers`)}
 boxSearchBg: ${main.solar_bg().out()}; // box search field background (like in contacts box)
 boxTextFg: ${main.lower.text.out()}; // box text
 boxTextFgError: ${main.red.like.out()}; // rejecting box text (like when choosing username that is occupied)
@@ -91,33 +94,33 @@ callArrowMissedFg: ${main[bad].like.out()}; // missed phone call arrow (in calls
 
 callBarBg: ${main[out_sel].like.out()}; // active phone call bar background
 callBarBgMuted: ${main[in_sel].like.out()}; // phone call bar with muted mic background
-callBarFg: ${main.lower.area.out()}; // phone call bar text and icons
-callBarMuteRipple: #FF0000; // FIXME active phone call bar mute and hangup button ripple effect
-callBarUnmuteRipple: #0000FF; // FIXME phone call bar with muted mic mute and hangup button ripple effect
+callBarFg: ${main.lower.area.out()}; // phone call bar text and icons ${dev(`
+callBarMuteRipple: #FF0000; // active phone call bar mute and hangup button ripple effect
+callBarUnmuteRipple: #0000FF; // phone call bar with muted mic mute and hangup button ripple effect
 
-callBg: #FFFF00; // FIXME old phone call popup background
-callBgButton: #1b1f237f; // FIXME phone call window control buttons bg
-callBgOpaque: #1b1f23; // FIXME phone call popup background
+callBg: #FFFF00; // old phone call popup background
+callBgButton: #1b1f237f; // phone call window control buttons bg
+callBgOpaque: #1b1f23; // phone call popup background`)}
 callCancelBg: ${calling.lower.text.fade(0.625).out()}; // phone call popup line busy cancel button background
-callCancelFg: ${calling.lower.area.out()}; // phone call popup line busy cancel button icon
-callCancelRipple: #FF00FF; // FIXME phone call popup line busy cancel button ripple effect
-callFingerprintBg: #00FF00; // FIXME phone call popup emoji fingerprint background
+callCancelFg: ${calling.lower.area.out()}; // phone call popup line busy cancel button icon ${dev(`
+callCancelRipple: #FF00FF; // phone call popup line busy cancel button ripple effect
+callFingerprintBg: #00FF00; // phone call popup emoji fingerprint background`)}
 callHangupBg: ${calling.red.area.out()}; // phone call popup hangup button background
-callHangupRipple: ${calling.red.text.fade(1.5 * ACT).out()}; // phone call popup hangup button ripple effect
-callIconActiveRipple: #f1f1f1; // FIXME phone call line busy cancel, muted mic and camera ripple effect
-callIconBg: #ffffff1f; // FIXME phone call mute mic and camera button background
-callIconBgActive: #ffffffe5; // FIXME phone call line busy cancel, muted mic and camera button background
-callIconFg: #00ff00; // FIXME phone call popup answer, hangup, mute mic and camera icon
-callIconFgActive: #222222; // FIXME phone call line busy cancel, muted mic and camera icon
+callHangupRipple: ${calling.red.text.fade(1.5 * ACT).out()}; // phone call popup hangup button ripple effect ${dev(`
+callIconActiveRipple: #f1f1f1; // phone call line busy cancel, muted mic and camera ripple effect
+callIconBg: #ffffff1f; // phone call mute mic and camera button background
+callIconBgActive: #ffffffe5; // phone call line busy cancel, muted mic and camera button background
+callIconFg: #00ff00; // phone call popup answer, hangup, mute mic and camera icon
+callIconFgActive: #222222; // phone call line busy cancel, muted mic and camera icon`)}
 callMuteRipple: ${calling.lower.text.fade(0.625).out()}; // phone call popup mute mic ripple effect
 callNameFg: ${calling.lower.text.out()}; // phone call popup name text
-callStatusFg: ${calling.lower.text.fade(0.625).out()}; // phone call popup status text
+callStatusFg: ${calling.lower.text.fade(0.625).out()}; // phone call popup status text ${dev(`
 
 cancelIconFg: #FF0000; // BUG default for settings close icon and box search cancel icon
 cancelIconFgOver: #FFFF00; // BUG default for settings close icon and box search cancel icon with mouse over
 
-changePhoneSimcardFrom: notificationSampleTextFg; // FIXME change phone number box left simcard icon
-changePhoneSimcardTo: notificationSampleNameFg; // FIXME change phone number box right simcard and plane icons
+changePhoneSimcardFrom: notificationSampleTextFg; // change phone number box left simcard icon
+changePhoneSimcardTo: notificationSampleNameFg; // change phone number box right simcard and plane icons`)}
 
 checkboxFg: ${main.lower.text.fade(0.625).out()}; // default unchecked checkbox rounded rectangle (and also emoji category icons)
 
@@ -145,10 +148,10 @@ dialogsDateFgOver: ${dialogs.lower.text.out()}; // chat list date text with mous
 
 dialogsDraftFg: ${dialogs[note].like.out()}; // chat list draft label
 dialogsDraftFgActive: ${dialogs[accent].text.out()}; // chat list draft label for current (active) chat
-dialogsDraftFgOver: ${dialogs.lower.text.out()}; // chat list draft label with mouse over
+dialogsDraftFgOver: ${dialogs.lower.text.out()}; // chat list draft label with mouse over ${dev(`
 
-dialogsForwardBg: #FF0000; // FIXME forwarding panel background (when forwarding messages in the smallest window size)
-dialogsForwardFg: #FFFF00; // FIXME forwarding panel text (when forwarding messages in the smallest window size)
+dialogsForwardBg: #FF0000; // forwarding panel background (when forwarding messages in the smallest window size)
+dialogsForwardFg: #FFFF00; // forwarding panel text (when forwarding messages in the smallest window size)`)}
 
 dialogsMenuIconFg: ${dialogs.lower.text.out()}; // main menu and lock telegram icon
 dialogsMenuIconFgOver: ${dialogs[accent].like.out()}; // main menu and lock telegram icon with mouse over
@@ -209,38 +212,38 @@ emojiSubIconFgActive: ${main[accent].like.out()}; // active emoji subcategory ic
 
 filterInputActiveBg: ${dialogs.lower.area.out()}; // default rounded input field active background (like in chats list search field when field is focused)
 filterInputBorderFg: ${dialogs.lower.text.fade(0.625).out()}; // default rounded input field border (like in chats list search field when field is focused)
-filterInputInactiveBg: dialogsBgOver; // default rounded input field background (like in chats list search field when field is inactive)
+filterInputInactiveBg: dialogsBgOver; // default rounded input field background (like in chats list search field when field is inactive) ${dev(`
 
-groupCallActiveFg: #4db8ff; // FIXME group call active controls text
-groupCallBg: #1a2026; // FIXME group call popup background
-groupCallForceMuted1: #4f9cff; // FIXME group call force muted button color1
-groupCallForceMuted2: #9b52e9; // FIXME group call force muted button color2
-groupCallForceMuted3: #eb5353; // FIXME group call force muted button color3
-groupCallForceMutedBar1: #c65493; // FIXME group call force muted top bar color1
-groupCallForceMutedBar2: #7a6af1; // FIXME group call force muted top bar color2
-groupCallForceMutedBar3: #5f95e8; // FIXME group call force muted top bar color3
-groupCallIconFg: #ffffff; // FIXME group call mute / settings / leave icon
-groupCallLeaveBg: #f75c5c7f; // FIXME group call leave button background
-groupCallLeaveBgRipple: #f75c5c9e; // FIXME group call leave button ripple effect
-groupCallLive1: #0dcc39; // FIXME group call live button color1
-groupCallLive2: #0bb6bd; // FIXME group call live button color2
-groupCallMemberActiveIcon: #8deb90; // FIXME group call active member icon
-groupCallMemberActiveStatus: #8deb90; // FIXME group call active member status text
-groupCallMemberInactiveIcon: #84888f; // FIXME group call inactive member icon
-groupCallMemberInactiveStatus: #61c0ff; // FIXME group call inactive member status text
-groupCallMemberMutedIcon: #ed7372; // FIXME group call muted by admin member icon
-groupCallMemberNotJoinedStatus: #91979e; // FIXME group call non joined member status text
-groupCallMembersBg: #2c333d; // FIXME group call members list background
-groupCallMembersBgOver: #323a45; // FIXME group call members list row with mouse over
-groupCallMembersBgRipple: #39424f; // FIXME group call member row ripple effect
-groupCallMembersFg: #ffffff; // FIXME group call member name text
-groupCallMenuBg: #292d33; // FIXME group call popup menu background
-groupCallMenuBgOver: #343940; // FIXME group call popup menu with mouse over
-groupCallMenuBgRipple: #3a4047; // FIXME group call popup menu ripple effect
-groupCallMuted1: #0992ef; // FIXME group call muted button color1
-groupCallMuted2: #16ccfb; // FIXME group call muted button color2
-groupCallVideoSubTextFg: #ffffffc0; // FIXME group call additional text over video
-groupCallVideoTextFg: #ffffffe0; // FIXME group call text over video
+groupCallActiveFg: #4db8ff; // group call active controls text
+groupCallBg: #1a2026; // group call popup background
+groupCallForceMuted1: #4f9cff; // group call force muted button color1
+groupCallForceMuted2: #9b52e9; // group call force muted button color2
+groupCallForceMuted3: #eb5353; // group call force muted button color3
+groupCallForceMutedBar1: #c65493; // group call force muted top bar color1
+groupCallForceMutedBar2: #7a6af1; // group call force muted top bar color2
+groupCallForceMutedBar3: #5f95e8; // group call force muted top bar color3
+groupCallIconFg: #ffffff; // group call mute / settings / leave icon
+groupCallLeaveBg: #f75c5c7f; // group call leave button background
+groupCallLeaveBgRipple: #f75c5c9e; // group call leave button ripple effect
+groupCallLive1: #0dcc39; // group call live button color1
+groupCallLive2: #0bb6bd; // group call live button color2
+groupCallMemberActiveIcon: #8deb90; // group call active member icon
+groupCallMemberActiveStatus: #8deb90; // group call active member status text
+groupCallMemberInactiveIcon: #84888f; // group call inactive member icon
+groupCallMemberInactiveStatus: #61c0ff; // group call inactive member status text
+groupCallMemberMutedIcon: #ed7372; // group call muted by admin member icon
+groupCallMemberNotJoinedStatus: #91979e; // group call non joined member status text
+groupCallMembersBg: #2c333d; // group call members list background
+groupCallMembersBgOver: #323a45; // group call members list row with mouse over
+groupCallMembersBgRipple: #39424f; // group call member row ripple effect
+groupCallMembersFg: #ffffff; // group call member name text
+groupCallMenuBg: #292d33; // group call popup menu background
+groupCallMenuBgOver: #343940; // group call popup menu with mouse over
+groupCallMenuBgRipple: #3a4047; // group call popup menu ripple effect
+groupCallMuted1: #0992ef; // group call muted button color1
+groupCallMuted2: #16ccfb; // group call muted button color2
+groupCallVideoSubTextFg: #ffffffc0; // group call additional text over video
+groupCallVideoTextFg: #ffffffe0; // group call text over video`)}
 
 historyCallArrowInFg: ${incoming[good].like.out()}; // received phone call arrow
 historyCallArrowInFgSelected: ${incoming[in_sel].text.out()}; // received phone call arrow in a selected message
@@ -271,18 +274,18 @@ historyFileNameOutFgSelected: ${outgoing[out_sel].text.out()}; // outbox media f
 historyFileOutIconFg: ${outgoing[accent].text.out()}; // outbox file without thumbnail (like audio file) download arrow icon
 historyFileOutIconFgSelected: ${outgoing[out_sel].area.out()}; // outbox selected file without thumbnail (like audio file) download arrow icon
 historyFileOutRadialFg: historyFileOutIconFg; // outbox file without thumbnail (like audio file) radial download animation line
-historyFileOutRadialFgSelected: historyFileOutIconFgSelected; // outbox selected file without thumbnail (like audio file) radial download animation line
+historyFileOutRadialFgSelected: historyFileOutIconFgSelected; // outbox selected file without thumbnail (like audio file) radial download animation line ${dev(`
 
 // NOTE above image
-historyFileThumbIconFg: #FF0000; // FIXME file with thumbnail (or photo / video) download arrow icon
-historyFileThumbIconFgSelected: #00FFFF; // FIXME selected file with thumbnail (or photo / video) download arrow icon
-historyFileThumbRadialFg: #FFFF00; // FIXME file with thumbnail (or photo / video) radial download animation line
-historyFileThumbRadialFgSelected: #0000FF; // FIXME selected file with thumbnail (or photo / video) radial download animation line
+historyFileThumbIconFg: #FF0000; // file with thumbnail (or photo / video) download arrow icon
+historyFileThumbIconFgSelected: #00FFFF; // selected file with thumbnail (or photo / video) download arrow icon
+historyFileThumbRadialFg: #FFFF00; // file with thumbnail (or photo / video) radial download animation line
+historyFileThumbRadialFgSelected: #0000FF; // selected file with thumbnail (or photo / video) radial download animation line
 
-historyForwardChooseBg: #0000ff; // FIXME forwarding messages in a large window size "choose recipient" background [#0000004c]
-historyForwardChooseFg: #ffff00; // FIXME forwarding messages in a large window size "choose recipient" text [windowFgActive]
+historyForwardChooseBg: #0000ff; // forwarding messages in a large window size "choose recipient" background [#0000004c]
+historyForwardChooseFg: #ffff00; // forwarding messages in a large window size "choose recipient" text [windowFgActive]
 
-historyIconFgInverted: #00ffff; // FIXME media message tick / double tick icon (like in sent photo)
+historyIconFgInverted: #00ffff; // media message tick / double tick icon (like in sent photo)`)}
 
 historyLinkInFg: ${incoming.blue.like.out()}; // inbox message link
 historyLinkInFgSelected: ${incoming[in_sel].text.out()}; // inbox message link in a selected text or message
@@ -297,36 +300,36 @@ historyPeer1NameFgSelected: ${incoming[in_sel].text.out()}; // red group member 
 historyPeer1UserpicBg: ${incoming.red.area.out()}; // red userpic background
 historyPeer2NameFg: ${incoming.green.like.out()}; // green group member name
 historyPeer2NameFgSelected: ${incoming[in_sel].text.out()}; // green group member name in a selected message
-historyPeer2UserpicBg: ${incoming.green.area.out()}; // green userpic background
-historyPeer2UserpicBg2: #46ba43; // FIXME the second green userpic background
+historyPeer2UserpicBg: ${incoming.green.area.out()}; // green userpic background ${dev(`
+historyPeer2UserpicBg2: #46ba43; // the second green userpic background
 historyPeer3NameFg: #FF0000; // TODO yellow group member name (actually unused)
 historyPeer3NameFgSelected: #7F7F7F; // TODO yellow group member name in a selected message (actually unused)
 historyPeer3UserpicBg: #00FF00; // TODO yellow userpic background (actually unused)
-historyPeer3UserpicBg2: #e5ca77; // TODO the second yellow userpic background (actually unused)
+historyPeer3UserpicBg2: #e5ca77; // TODO the second yellow userpic background (actually unused)`)}
 historyPeer4NameFg: ${incoming.blue.like.out()}; // blue group member name
 historyPeer4NameFgSelected: ${incoming[in_sel].text.out()}; // blue group member name in a selected message
-historyPeer4UserpicBg: ${incoming.blue.area.out()}; // blue userpic background
-historyPeer4UserpicBg2: #408acf; // FIXME the second blue userpic background
+historyPeer4UserpicBg: ${incoming.blue.area.out()}; // blue userpic background ${dev(`
+historyPeer4UserpicBg2: #408acf; // the second blue userpic background`)}
 historyPeer5NameFg: ${incoming.any.like.out()}; // purple group member name
 historyPeer5NameFgSelected: ${incoming[in_sel].text.out()}; // purple group member name in a selected message
-historyPeer5UserpicBg: ${incoming.any.area.out()}; // purple userpic background
-historyPeer5UserpicBg2: #6c61df; // FIXME the second purple userpic background
+historyPeer5UserpicBg: ${incoming.any.area.out()}; // purple userpic background ${dev(`
+historyPeer5UserpicBg2: #6c61df; // the second purple userpic background`)}
 historyPeer6NameFg: ${incoming.magenta.like.out()}; // pink group member name
 historyPeer6NameFgSelected: ${incoming[in_sel].text.out()}; // pink group member name in a selected message
-historyPeer6UserpicBg: ${incoming.magenta.area.out()}; // pink userpic background
-historyPeer6UserpicBg2: #d95574; // FIXME the second pink userpic background
+historyPeer6UserpicBg: ${incoming.magenta.area.out()}; // pink userpic background ${dev(`
+historyPeer6UserpicBg2: #d95574; // the second pink userpic background`)}
 historyPeer7NameFg: ${incoming.cyan.like.out()}; // sea group member name
 historyPeer7NameFgSelected: ${incoming[in_sel].text.out()}; // sea group member name in a selected message
-historyPeer7UserpicBg: ${incoming.cyan.area.out()}; // sea userpic background
-historyPeer7UserpicBg2: #359ad4; // FIXME the second sea userpic background
+historyPeer7UserpicBg: ${incoming.cyan.area.out()}; // sea userpic background ${dev(`
+historyPeer7UserpicBg2: #359ad4; // the second sea userpic background`)}
 historyPeer8NameFg: ${incoming.yellow.like.out()}; // orange group member name
 historyPeer8NameFgSelected: ${incoming[in_sel].text.out()}; // orange group member name in a selected message
-historyPeer8UserpicBg: ${incoming.yellow.area.out()}; // orange userpic background
-historyPeer8UserpicBg2: #f68136; // FIXME the second orange userpic background
-historyPeerArchiveUserpicBg: dialogsUnreadBgMuted; // FIXME archive folder userpic background
-historyPeerSavedMessagesBg: historyPeer4UserpicBg; // FIXME saved messages userpic background
-historyPeerUserpicFg: ${incoming.upper.area.out()}; // default userpic initialshistoryPeer1UserpicBg2: #d45246; // FIXME the second red userpic background
-historyPeerSavedMessagesBg2: historyPeer4UserpicBg2; // FIXME the second saved messages userpic background
+historyPeer8UserpicBg: ${incoming.yellow.area.out()}; // orange userpic background ${dev(`
+historyPeer8UserpicBg2: #f68136; // the second orange userpic background
+historyPeerArchiveUserpicBg: dialogsUnreadBgMuted; // archive folder userpic background
+historyPeerSavedMessagesBg: historyPeer4UserpicBg; // saved messages userpic background
+historyPeerUserpicFg: ${incoming.upper.area.out()}; // default userpic initialshistoryPeer1UserpicBg2: #d45246; // the second red userpic background
+historyPeerSavedMessagesBg2: historyPeer4UserpicBg2; // the second saved messages userpic background`)}
 
 historyPinnedBg: ${history.solar_bg().out()}; // pinned message area background
 historyReplyBg: ${history.solar_bg().out()}; // reply / forward / edit message area background
@@ -336,16 +339,16 @@ historyReplyCancelFgOver: ${history.lower.text.out()}; // reply / forward / edit
 
 historyReplyIconFg: ${history[accent].like.out()}; // reply / forward / edit message left icon
 
-historyScrollBarBg: ${main.lower.text.fade(3.0 / 6).out()}; // FIXME scroll bar current rectangle, the bar itself in the chat view (adjusted)
-historyScrollBarBgOver: ${main.lower.text.out()}; // FIXME scroll bar current rectangle with mouse over it in the chat view (adjusted)
-historyScrollBg: ${main.lower.text.fade(1.0 / 6).out()}; // FIXME scroll bar background (adjusted)
-historyScrollBgOver: ${main.lower.text.fade(1.5 / 6).out()}; // FIXME scroll bar background with mouse over the scroll bar (adjusted)
+historyScrollBarBg: ${main.lower.text.fade(3.0 / 6).out()}; // scroll bar current rectangle, the bar itself in the chat view (adjusted)
+historyScrollBarBgOver: ${main.lower.text.out()}; // scroll bar current rectangle with mouse over it in the chat view (adjusted)
+historyScrollBg: ${main.lower.text.fade(1.0 / 6).out()}; // scroll bar background (adjusted)
+historyScrollBgOver: ${main.lower.text.fade(1.5 / 6).out()}; // scroll bar background with mouse over the scroll bar (adjusted)
 
 historySendIconFg: ${history[accent].like.out()}; // send message icon
 historySendIconFgOver: ${history.lower.text.out()}; // send message icon with mouse over
 
-historySendingInIconFg: ${incoming[note].like.out()}; // inbox sending message icon (clock) (like in sent messages to yourself or in sent messages to a channel)
-historySendingInvertedIconFg: #ffffffc8; // FIXME media sending message icon (clock) (like in sent photo)
+historySendingInIconFg: ${incoming[note].like.out()}; // inbox sending message icon (clock) (like in sent messages to yourself or in sent messages to a channel) ${dev(`
+historySendingInvertedIconFg: #ffffffc8; // media sending message icon (clock) (like in sent photo)`)}
 historySendingOutIconFg: ${outgoing[note].like.out()}; // outbox sending message icon (clock)
 
 historyTextInFg: ${incoming.upper.text.out()}; // inbox message text
@@ -363,20 +366,19 @@ historyToDownShadow: ${0xFF.fade(history.upper.area.shadow()).out()}; // arrow b
 
 historyUnreadBarBg: ${history.solar_bg().out()}; // new unread messages bar background
 historyUnreadBarBorder: ${0xFF.fade(history.solar_bg().shadow()).out()}; // new unread messages bar shadow
-historyUnreadBarFg: ${history[accent].like.out()}; // new unread messages bar text
+historyUnreadBarFg: ${history[accent].like.out()}; // new unread messages bar text ${dev(`
 
-historyVideoMessageProgressFg: historyFileThumbIconFg; // FIXME radial playback progress in round video messages
+historyVideoMessageProgressFg: historyFileThumbIconFg; // radial playback progress in round video messages
 
-imageBg: #000000; // FIXME image background fallback (when photo size is less than minimum allowed)
-imageBgTransparent: #ffffff; // FIXME image background when displaying an image with opacity where no opacity is needed
+imageBg: #000000; // image background fallback (when photo size is less than minimum allowed)
+imageBgTransparent: #ffffff; // image background when displaying an image with opacity where no opacity is needed
 
-importantTooltipBg: toastBg; // FIXME group call important tooltip background color
-importantTooltipFg: toastFg; // FIXME group call important tooltip text color
-importantTooltipFgLink: #65fce8; // FIXME group call important tooltip text link color
+importantTooltipBg: toastBg; // group call important tooltip background color
+importantTooltipFg: toastFg; // group call important tooltip text color
+importantTooltipFgLink: #65fce8; // group call important tooltip text link color`)}
 
-inputBorderFg: ${main.lower.text.fade(0.25).out()}; // default input field bottom border (like in code input field when you log in and field is not focused)
+inputBorderFg: ${main.lower.text.fade(0.25).out()}; // default input field bottom border (like in code input field when you log in and field is not focused) ${dev(`
 
-// TODO intro
 introBg: windowBg; // login background
 introCoverBottomBg: #188173; // intro gradient bottom (to)
 introCoverIconsFg: #34a495; // intro cloud graphics
@@ -389,7 +391,7 @@ introDescriptionFg: #999999; // login description text
 introErrorFg: #999999; // login error text (like when providing a wrong log in code)
 introTitleFg: #eeeeee; // login title text
 
-layerBg: #0000007f; // FIXME box and main menu background layer fade
+layerBg: #0000007f; // box and main menu background layer fade`)}
 
 lightButtonBg: #00000000; // default light button background (like buttons in boxes)
 lightButtonBgOver: ${main[accent].like.fade(ACT).out()}; // default light button background with mouse over
@@ -397,13 +399,12 @@ lightButtonBgRipple: ${main[accent].like.fade(ACT).out()}; // default light butt
 lightButtonFg: ${main[accent].like.out()}; // default light button text
 lightButtonFgOver: ${main[accent].like.out()}; // default light button text with mouse over
 
-mainMenuBg: ${main.solar_bg().out()}; // main menu background
+mainMenuBg: ${main.solar_bg().out()}; // main menu background ${dev(`
 
-// FIXME mainMenu
 mainMenuCloudBg: #0e837f; // 
 mainMenuCloudFg: #FFFF00; // 
 mainMenuCoverBg: #009687; // main menu top cover background
-mainMenuCoverFg: #FF0000; // main menu top cover text
+mainMenuCoverFg: #FF0000; // main menu top cover text`)}
 
 mediaInFg: ${incoming.upper.text.fade(0.625).out()}; // inbox media message status text (like in file that is being downloaded)
 mediaInFgSelected: ${incoming[in_sel].text.out()}; // inbox selected media message status text (like in file that is being downloaded)
@@ -411,12 +412,11 @@ mediaOutFg: ${outgoing.upper.text.fade(0.625).out()}; // outbox media message st
 mediaOutFgSelected: ${outgoing[out_sel].text.out()}; // outbox selected media message status text (like in file that is being downloaded)
 
 // NOTE also used for the interface scaling slider
-mediaPlayerActiveFg: ${main[accent].area.out()}; // audio file player playback progress already played part
-mediaPlayerBg: #0000FF; // FIXME audio file player background
-mediaPlayerDisabledFg: #9dd1ef; // FIXME audio file player loading progress (when you're playing an audio file and switch to the previous one which is not loaded yet)
-mediaPlayerInactiveFg: ${main.lower.text.fade(0.25).out()}; // audio file player playback progress upcoming (not played yet) part with mouse over
+mediaPlayerActiveFg: ${main[accent].area.out()}; // audio file player playback progress already played part ${dev(`
+mediaPlayerBg: #0000FF; // audio file player background
+mediaPlayerDisabledFg: #9dd1ef; // audio file player loading progress (when you're playing an audio file and switch to the previous one which is not loaded yet)`)}
+mediaPlayerInactiveFg: ${main.lower.text.fade(0.25).out()}; // audio file player playback progress upcoming (not played yet) part with mouse over ${dev(`
 
-// FIXME mediaview
 mediaviewBg: #222222eb; // Media Viewer background
 mediaviewCaptionBg: #11111180; // caption text background (when viewing photo with caption)
 mediaviewCaptionFg: mediaviewControlFg; // caption text
@@ -453,7 +453,7 @@ mediaviewTransparentBg: #ffffff; // transparent filling part (when viewing a tra
 mediaviewTransparentFg: #cccccc; // another transparent filling part
 mediaviewVideoBg: imageBg; // Media Viewer background when viewing a video in full screen
 
-membersAboutLimitFg: #5e6065; // FIXME text in channel members box about the limit (max 200 last members are shown)
+membersAboutLimitFg: #5e6065; // text in channel members box about the limit (max 200 last members are shown)`)}
 
 menuBg: ${main.solar_bg().out()}; // default popup menu background
 menuBgOver: ${main.lower.text.fade(ACT).out()}; // default popup menu item background with mouse over
@@ -462,15 +462,14 @@ menuFgDisabled: ${main.lower.text.fade(0.625).out()}; // default popup menu item
 menuIconFg: ${main.lower.text.fade(0.625).out()}; // default popup menu item icon (like main menu)
 menuIconFgOver: ${main.lower.text.out()}; // default popup menu item icon with mouse over
 menuSeparatorFg: ${main.lower.text.fade(0.25).out()}; // default popup menu separator (like in message field context menu)
-menuSubmenuArrowFg: ${main.lower.text.fade(0.625).out()}; // default popup menu submenu arrow icon (like in message field context menu in case of RTL system language)
+menuSubmenuArrowFg: ${main.lower.text.fade(0.625).out()}; // default popup menu submenu arrow icon (like in message field context menu in case of RTL system language) ${dev(`
 
-// FIXME
 msgBotKbIconFg: msgServiceFg; // bot inline keyboard button icon in the top-right corner (like in @vote bot when a poll is ready to be shared)
 msgBotKbOverBgAdd: #ffffff14; // this is painted over a bot inline keyboard button (which has msgServiceBg background) when mouse is over that button
 msgBotKbRippleBg: #9e9d9d10; // bot inline keyboard button ripple effect
 msgDateImgBg: #00000054; // media message time bubble background (like time bubble in a sent photo) or file with thumbnail download icon circle background
 msgDateImgBgOver: #00000074; // media message download icon circle background with mouse over (like file with thumbnail download icon)
-msgDateImgBgSelected: #1c706587; // selected media message time bubble background
+msgDateImgBgSelected: #1c706587; // selected media message time bubble background`)}
 msgDateImgFg: msgServiceFg; // media message time text (like time text in a sent photo)
 msgFile1Bg: ${main.blue.area.out()}; // blue shared links / files without image square thumbnail
 msgFile1BgDark: ${main.blue.text.fade(ACT).out()}; // blue shared files without image download circle background
@@ -489,21 +488,21 @@ msgFile4BgDark: ${main.yellow.text.fade(ACT).out()}; // yellow shared files with
 msgFile4BgOver: ${main.yellow.text.fade(ACT).out()}; // yellow shared files without image download circle background with mouse over
 msgFile4BgSelected: ${main.yellow.like.out()}; // yellow shared files without image download circle background if file is selected
 
-msgFileInBg: ${incoming[accent].area.out()}; // inbox audio file download circle background
-msgFileInBgOver: #FF00FF; // FIXME inbox audio file download circle background with mouse over
+msgFileInBg: ${incoming[accent].area.out()}; // inbox audio file download circle background ${dev(`
+msgFileInBgOver: #FF00FF; // inbox audio file download circle background with mouse over`)}
 msgFileInBgSelected: ${incoming[in_sel].text.out()}; // inbox selected audio file download circle background
 
-msgFileOutBg: ${outgoing[accent].area.out()}; // outbox audio file download circle background
-msgFileOutBgOver: #0000FF; // FIXME outbox audio file download circle background with mouse over
+msgFileOutBg: ${outgoing[accent].area.out()}; // outbox audio file download circle background ${dev(`
+msgFileOutBgOver: #0000FF; // outbox audio file download circle background with mouse over`)}
 msgFileOutBgSelected: ${outgoing[out_sel].text.out()}; // outbox selected audio file download circle background
 
 msgFileThumbLinkInFg: ${incoming.blue.like.out()}; // inbox media file message with thumbnail download / open with button text
 msgFileThumbLinkInFgSelected: ${incoming[in_sel].text.out()}; // inbox selected media file message with thumbnail download / open with button text
 
 msgFileThumbLinkOutFg: ${outgoing.blue.like.out()}; // outbox media file message with thumbnail download / open with button text
-msgFileThumbLinkOutFgSelected: ${outgoing[out_sel].text.out()}; // outbox selected media file message with thumbnail download / open with button text
+msgFileThumbLinkOutFgSelected: ${outgoing[out_sel].text.out()}; // outbox selected media file message with thumbnail download / open with button text ${dev(`
 
-msgImgReplyBarColor: msgServiceFg; // FIXME sticker message reply outline
+msgImgReplyBarColor: msgServiceFg; // sticker message reply outline`)}
 
 msgInBg: ${incoming.upper.area.out()}; // inbox message background
 msgInBgSelected: ${incoming[in_sel].area.out()}; // inbox selected message background (and background of selected text in those messages)
@@ -535,11 +534,10 @@ msgOutShadowSelected: ${lab::mix(outgoing[out_sel].area, 0xFF, outgoing[out_sel]
 
 msgSelectOverlay: ${history[accent].area.fade(SELECT).out()}; // overlay which is filling the media parts of selected messages (like in selected photo message)
 
-// FIXME msgService msgSticker
-msgServiceBg: ${history.upper.like.out()}; // service message background (like in a service message about group title being changed) (adjusted)
-msgServiceBgSelected: #009687; // service message selected text background (like in a service message about group title being changed) (adjusted)
-msgServiceFg: ${history.upper.text.out()}; // service message text (like date dividers or service message about the group title being changed)
-msgStickerOverlay: #35d4bf7f; // overlay which is filling the selected sticker message
+msgServiceBg: ${history.upper.like.out()}; // service message background (like in a service message about group title being changed) (adjusted) ${dev(`
+msgServiceBgSelected: #009687; // service message selected text background (like in a service message about group title being changed) (adjusted)`)}
+msgServiceFg: ${history.upper.text.out()}; // service message text (like date dividers or service message about the group title being changed) ${dev(`
+msgStickerOverlay: #35d4bf7f; // overlay which is filling the selected sticker message`)}
 
 msgWaveformInActive: ${incoming[accent].like.out()}; // inbox voice message active waveform lines (like played part of currently playing voice message)
 msgWaveformInActiveSelected: ${incoming[in_sel].text.out()}; // inbox selected voice message active waveform lines (like played part of currently playing voice message)
@@ -548,9 +546,8 @@ msgWaveformInInactiveSelected: ${incoming[in_sel].text.fade(SELECT).out()}; // i
 msgWaveformOutActive: ${outgoing[accent].like.out()}; // outbox voice message active waveform lines (like played part of currently playing voice message)
 msgWaveformOutActiveSelected: ${outgoing[out_sel].text.out()}; // outbox selected voice message active waveform lines (like played part of currently playing voice message)
 msgWaveformOutInactive: ${outgoing.upper.text.fade(SELECT).out()}; // outbox voice message inactive waveform lines (like upcoming part of currently playing voice message)
-msgWaveformOutInactiveSelected: ${outgoing[out_sel].text.fade(SELECT).out()}; // outbox selected voice message inactive waveform lines (like upcoming part of currently playing voice message)
+msgWaveformOutInactiveSelected: ${outgoing[out_sel].text.fade(SELECT).out()}; // outbox selected voice message inactive waveform lines (like upcoming part of currently playing voice message) ${dev(`
 
-// FIXME
 notificationBg: #0000FF; // custom notification window background
 notificationSampleCloseFg: #d7d7d7; // custom notifications settings box small sample close button placeholder
 notificationSampleNameFg: #939393; // custom notifications settings box small sample name placeholder
@@ -568,12 +565,11 @@ overviewCheckFg: #ffffff; // shared files / links checkbox icon for not selected
 overviewCheckFgActive: #ffffff; // shared files / links checkbox icon for selected rows
 overviewPhotoSelectOverlay: #40ace333; // shared photos / videos / links fill for selected rows
 photoCropFadeBg: #FFFF00; // avatar crop box fade background (when choosing a new photo in Settings or for a group)
-photoCropPointFg: #ffffff7f; // avatar crop box corner rectangles (when choosing a new photo in Settings or for a group)
+photoCropPointFg: #ffffff7f; // avatar crop box corner rectangles (when choosing a new photo in Settings or for a group)`)}
 
 placeholderFg: ${main.lower.text.fade(2.0 / 3).out()}; // default input field placeholder when field is not focused (like in phone input field when you log in)
-placeholderFgActive: ${main.lower.text.fade(1.5 / 3).out()}; // default input field placeholder when field is focused
+placeholderFgActive: ${main.lower.text.fade(1.5 / 3).out()}; // default input field placeholder when field is focused ${dev(`
 
-// FIXME
 profileAdminStartFg: #00FF00; // group members list admin star icon
 profileStatusFgOver: #9c9c9c; // group members list in group profile user last seen text with mouse over
 profileVerifiedCheckBg: #00FFFF; // profile verified check icon background
@@ -581,11 +577,11 @@ profileVerifiedCheckFg: #ffffff; // profile verified check icon tick
 radialBg: #00000056; // default radial loader background (like in Media Viewer when loading a photo)
 radialFg: #FF0000; // default radial loader line (like in Media Viewer when loading a photo)
 reportSpamBg: #363c42; // report spam panel background (like a non contact user writes your for the first time)
-reportSpamFg: #00FF00; // report spam panel text (when you send a report from that panel)
-scrollBarBg: #ffffff53; // default scroll bar current rectangle, the bar itself (like in chats list)
-scrollBarBgOver: #ffffff7a; // default scroll bar current rectangle with mouse over it
-scrollBg: #ffffff1a; // default scroll bar background
-scrollBgOver: #ffffff2c; // default scroll bar background with mouse over the scroll bar
+reportSpamFg: #00FF00; // report spam panel text (when you send a report from that panel)`)}
+scrollBarBg: historyScrollBarBg; // default scroll bar current rectangle, the bar itself (like in chats list)
+scrollBarBgOver: historyScrollBarBgOver; // default scroll bar current rectangle with mouse over it
+scrollBg: historyScrollBg; // default scroll bar background
+scrollBgOver: historyScrollBgOver; // default scroll bar background with mouse over the scroll bar
 searchedBarBg: ${main.upper.area.out()}; // search results bar background (in chats list, contacts box..)
 searchedBarFg: ${main.upper.text.out()}; // search results bar text (in chats list, contacts box..)
 shadowFg: ${lab::mix(main.solar_bg(), 0xFF, main.solar_bg().shadow()).out()}; // most shadows (including opacity)
@@ -602,17 +598,16 @@ sideBarTextFg: ${sidebar.lower.text.out()}; // filters side bar text
 sideBarTextFgActive: ${sidebar[accent].like.out()}; // filters side bar active item text
 
 slideFadeOutBg: #0000003F; // slide animation (chat to profile) fade out filling
-slideFadeOutShadowFg: #000000; // slide animation (chat to profile) fade out right section shadow
+slideFadeOutShadowFg: #000000; // slide animation (chat to profile) fade out right section shadow ${dev(`
 
-sliderBgActive: ${main[accent].area.out()}; // FIXME default slider active bar (like in Settings when you choose interface scale or custom notifications count)
-sliderBgInactive: ${main[accent].like.fade(0.625).out()}; // FIXME default slider not active bar (like in Settings when you choose interface scale or custom notifications count)
+sliderBgActive: ${main[accent].area.out()}; // default slider active bar (like in Settings when you choose interface scale or custom notifications count)
+sliderBgInactive: ${main[accent].like.fade(0.625).out()}; // default slider not active bar (like in Settings when you choose interface scale or custom notifications count)
 
-// FIXME
 smallCloseIconFg: #6d6d6d; // small X icon (like in Show all sessions box to the right for sessions termination)
-smallCloseIconFgOver: #a3a3a3; // small X icon with mouse over
+smallCloseIconFgOver: #a3a3a3; // small X icon with mouse over`)}
 stickerPanDeleteBg: ${luv::lighten(main.red.area, 0.75).out()}; // delete X button background for custom sent stickers in stickers panel (legacy)
-stickerPanDeleteFg: ${luv::darken(main.red.area, 0.75).out()}; // delete X button icon for custom sent stickers in stickers panel (legacy)
-stickerPreviewBg: #000000b0; // sticker and GIF preview background (when you press and hold on a sticker)
+stickerPanDeleteFg: ${luv::darken(main.red.area, 0.75).out()}; // delete X button icon for custom sent stickers in stickers panel (legacy) ${dev(`
+stickerPreviewBg: #000000b0; // sticker and GIF preview background (when you press and hold on a sticker)`)}
 
 titleBg: ${title.upper.like.out()}; // custom window title background when window is inactive
 titleBgActive: ${title.upper.like.out()}; // custom window title background when window is active
@@ -631,9 +626,9 @@ titleButtonCloseFgOver: ${title.red.text.out()}; // custom window title close bu
 titleButtonFg: ${title.lower.text.fade(0.625).out()}; // custom window title minimize/maximize/restore button icon when window is inactive (Windows only)
 titleButtonFgActive: ${title.lower.text.out()}; // custom window title minimize/maximize/restore button icon when window is active (Windows only)
 titleButtonFgActiveOver: ${title.lower.text.out()}; // custom window title minimize/maximize/restore button icon with mouse over when window is active (Windows only)
-titleButtonFgOver: ${title.lower.text.out()}; // custom window title minimize/maximize/restore button icon with mouse over when window is inactive (Windows only)
-// titleFg: #666666; // FIXME custom window title text when window is inactive (macOS only)
-// titleFgActive: #808080; // FIXME custom window title text when window is active (macOS only)
+titleButtonFgOver: ${title.lower.text.out()}; // custom window title minimize/maximize/restore button icon with mouse over when window is inactive (Windows only) ${dev(`
+// titleFg: #666666; // custom window title text when window is inactive (macOS only)
+// titleFgActive: #808080; // custom window title text when window is active (macOS only)`)}
 titleShadow: ${
 	if     !cfg::option("title-shadow") { "#00000000" }
 	else if cfg::option("title-border") { title.lower.text.fade(0.25).out() }
@@ -647,16 +642,15 @@ tooltipBg: ${main.upper.area.out()}; // tooltip background (like when you put mo
 tooltipBorderFg: ${lab::mix(main.upper.area, main.upper.text, 0.25).out()}; // tooltip border
 tooltipFg: ${main.upper.text.out()}; // tooltip text
 
-topBarBg: ${main.solar_bg().out()}; // top bar background (in chat view, media overview..)
+topBarBg: ${main.solar_bg().out()}; // top bar background (in chat view, media overview..) ${dev(`
 
-// FIXME
 trayCounterBg: #f23c34; // tray icon counter background
 trayCounterBgMacInvert: #ffffff; // tray icon counter background when tray icon is pressed or when dark theme of macOS is used (macOS only)
 trayCounterBgMute: #888888; // tray icon counter background if all unread messages are muted
 trayCounterFg: #ffffff; // tray icon counter text
 trayCounterFgMacInvert: #ffffff01; // tray icon counter text when tray icon is pressed or when dark theme of macOS is used (macOS only)
 videoPlayIconBg: #0000007f; // other video play icon background (like when a link to a vimeo video with a webpage preview is sent)
-videoPlayIconFg: #ffffff; // other video play icon arrow (like when a link to a vimeo video with a webpage preview is sent)
+videoPlayIconFg: #ffffff; // other video play icon arrow (like when a link to a vimeo video with a webpage preview is sent)`)}
 
 windowActiveTextFg: ${main[accent].like.out()}; // online blue: fallback for active text like online status
 windowBg: ${main.solar_bg().out()}; // white: fallback for background
@@ -668,14 +662,13 @@ windowBoldFgOver: ${main.lower.text.out()}; // dark gray: fallback for bold text
 windowFg: ${main.lower.text.out()}; // black: fallback for text
 windowFgActive: ${main[accent].text.out()}; // white: fallback for text on active areas
 windowFgOver: ${main.lower.text.out()}; // black: fallback for text with mouse over
-windowShadowFg: #000000; // black: fallback for shadow
-windowShadowFgFallback: #0000ff; // FIXME gray: fallback for shadow without opacity
+windowShadowFg: #000000; // black: fallback for shadow ${dev(`
+windowShadowFgFallback: #0000ff; // gray: fallback for shadow without opacity`)}
 windowSubTextFg: ${main.lower.text.fade(0.625).out()}; // gray: fallback for additional text
-windowSubTextFgOver: ${main.lower.text.out()}; // darker gray: fallback for additional text with mouse over
+windowSubTextFgOver: ${main.lower.text.out()}; // darker gray: fallback for additional text with mouse over ${dev(`
 
-// FIXME
 youtubePlayIconBg: #e83131c8; // youtube play icon background (when a link to a youtube video with a webpage preview is sent)
-youtubePlayIconFg: windowFgActive; // youtube play icon arrow (when a link to a youtube video with a webpage preview is sent)
+youtubePlayIconFg: windowFgActive; // youtube play icon arrow (when a link to a youtube video with a webpage preview is sent)`)}
 `;
 
 #{ image: image, palette: palette }

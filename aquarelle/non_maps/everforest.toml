@@ -3,10 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-# Based on https://github.com/sainnhe/everforest
-
-name  = 'Everforest'
-about = 'A green but warm-toned theme for low contrast'
+name  = 'Everforest' # xml
+about = """
+A green but warm-toned theme for low contrast. \
+<a href='https://github.com/sainnhe/everforest'>Source</a>.
+"""
 
 #     4        5     visual    red      green    blue    yellow
 # 0x4C555B 0x53605C 0x503946 0x4E3E43 0x404D44 0x394F5A 0x4A4940 hard

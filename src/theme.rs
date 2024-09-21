@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-use std::{collections::BTreeMap, rc::Rc};
+use std::{borrow::Cow, cell::OnceCell, collections::BTreeMap, rc::Rc};
 use compact_str::CompactString;
-use serde::{Serialize, Deserialize};
-use crate::{arrangement, cache, namespace, scheme};
+use annotate_snippets::{Level, Message, Snippet};
+use serde::{Serialize, Deserialize, Serializer, Deserializer};
+use crate::{arrangement, cache, namespace, scheme, Key, Src, Spanned, Value};
 
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -15,147 +16,132 @@ pub struct Theme {
 	#[serde(default, skip_serializing_if = "str::is_empty")]
 	pub   about: CompactString,
 	pub    name: CompactString,
-	pub schemes: BTreeMap<CompactString, scheme::Scheme>,
+	pub schemes: BTreeMap<Key, Scheme>,
+	
+	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+	pub presets: BTreeMap<CompactString, Value>,
+	
+	#[serde(skip)]
+	pub source: OnceCell<crate::Src>,
 }
 
-impl Theme {
-	pub fn scheme<'a>(&'a self,
-	          id: &'a str,
-	namespace_id: &'a str,
-	       cache: &'a cache::Cache,
-	      safety: arrangement::EngineSafety,
-	) -> Result<&'a Rc<scheme::Data>, Error<'a>> {
-		self.schemes.get(id).ok_or(Error::NotFound { id })?
-			.data(namespace_id, cache, &safety).map_err(|error| Error::Scheme { id, error })
+#[derive(Serialize, Deserialize)]
+pub struct Scheme {
+	#[serde(flatten)]
+	pub data: Data,
+	
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub request: Option<Request>,
+	
+	#[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+	pub options: BTreeMap<Key, Value>,
+	
+	#[serde(skip)]
+	#[cfg(feature = "gui")]
+	pub metadata: OnceCell<Box<dyn std::any::Any>>,
+}
+
+pub enum Data { Hard(Rc<scheme::Data>), Cell(OnceCell<Rc<scheme::Data>>) }
+
+impl Serialize for Data {
+	fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+		if let Data::Hard(data) = self { data.serialize(serializer) }
+		else { serializer.serialize_none() }
 	}
 }
 
-pub enum Error<'a> {
-	NotFound { id: &'a str },
-	  Scheme { id: &'a str, error: Box<scheme::Error<'a>> }
-}
-
-impl Error<'_> {
-	#[cfg(feature = "cli")]
-	pub fn show(self, out: &mut impl std::io::Write, id: &str) -> std::io::Result<i32> {
-		writeln!(out, crate::csi!("In the theme " /fg yellow; "{:?}"!), id)?;
-		match self {
-			Self::NotFound { id } => {
-				writeln!(out, crate::csi! {
-					/fg blue; "[schemes." /fg red; "{:?}" /fg blue; ']'! " not found"
-				}, id)?;
-				
-				Ok(exitcode::TEMPFAIL)
-			}
-			Self::Scheme { id, error } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[schemes." /fg yellow; "{:?}" /fg blue; ']'! " failed"
-				}, id)?;
-				
-				error.show(out)
-			}
-		}
+impl<'de> Deserialize<'de> for Data {
+	fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+		Ok(Rc::deserialize(deserializer).map(Data::Hard).unwrap_or(Data::Cell(OnceCell::new())))
 	}
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Request {
-	#[serde(default, rename = "theme")]
-	theme_id: CompactString,
-	
 	#[serde(rename = "scheme")]
-	scheme_id: CompactString,
+	pub scheme_id: Spanned,
 	
 	#[serde(default, rename = "from")]
-	namespace_id: CompactString,
-	
-	#[serde(default, skip_serializing_if = "arrangement::EngineSafety::is_default")]
-	engine: arrangement::EngineSafety,
+	pub namespace_id: Option<Spanned>,
 }
 
-pub(crate) fn list_schemes<'a>(
-	      arrangement: &'a arrangement::Arrangement,
-	       schemes_id: &'a str,
-	main_namespace_id: &'a str,
-	            cache: &'a cache::Cache,
-	           safety: & arrangement::EngineSafety,
-) -> Result<BTreeMap<&'a str, Rc<scheme::Data>>, Box<ListingError<'a>>> {
-	let requests = arrangement.schemes.get(schemes_id)
-		.ok_or(ListingError::NotFound { schemes_id })?;
-	
-	let mut schemes = BTreeMap::<&str, Rc<scheme::Data>>::new();
-	
-	for (id, request) in requests {
-		let Request { theme_id, scheme_id, namespace_id, engine } = &request;
-		let scheme = if scheme_id.is_empty() {
-			Rc::clone(schemes.get(scheme_id as &str)
-				.ok_or(ListingError::LocalNotFound { schemes_id, id, scheme_id })?)
-		} else {
-			let namespace_id = if namespace_id.is_empty()
-				{ main_namespace_id } else { namespace_id };
-			
-			let (namespace, bin) = cache.namespace(namespace_id)
-				.map_err(|error| ListingError::Cache { error, schemes_id })?;
-			
-			let theme = namespace.theme(theme_id, bin).map_err(|error|
-				ListingError::GlobalNotFound { schemes_id, id, namespace_id, error })?;
-			
-			Rc::clone(theme.scheme(scheme_id, namespace_id, cache, engine.or(safety))
-				.map_err(|error| ListingError::Theme { schemes_id, id, theme_id, error })?)
+impl Theme {
+	pub fn scheme<'a>(&'a self,
+		       id:  &'a str,
+		namespace: (&'a namespace::Namespace, &'a cache::Bin),
+		    cache:  &'a cache::Cache,
+		   safety:  &'a arrangement::EngineSafety,
+	) -> Result<&'a Rc<scheme::Data>, Error<'a>> {
+		let (scheme_id, scheme) = self.schemes.get_key_value(id).ok_or(Error::NotFound)?;
+		
+		let cell = match &scheme.data {
+			Data::Hard(data) => return Ok(data),
+			Data::Cell(cell) => cell,
 		};
-		schemes.insert(id, scheme);
+		
+		if let Some(data) = cell.get() { return Ok(data) }
+		
+		let src = self.source.get().unwrap();
+		
+		let Request { scheme_id, namespace_id } = &scheme.request.as_ref()
+			.ok_or(Error::NoRequest { src, scheme_id })?;
+		
+		let (namespace, bin) = namespace_id.as_ref().map_or(Ok(namespace),
+			|namespace_id| cache.namespace(namespace_id.get_ref())
+				.map_err(|error| Error::Cache { src, namespace_id, error }))?;
+		
+		let parametric = namespace.scheme(scheme_id.get_ref(), bin)
+			.map_err(|error| Error::Namespace { src, scheme_id, error })?;
+		
+		let data = parametric.data(
+			&scheme.options, &self.presets, src, Some(scheme_id), safety
+		).map_err(|error| Error::Scheme { src, scheme_id, error })?;
+		
+		Ok(cell.get_or_init(|| Rc::from(data)))
 	}
-	Ok(schemes)
 }
 
-pub enum ListingError<'a> {
-      NotFound { schemes_id: &'a str },
- LocalNotFound { schemes_id: &'a str, id: &'a str, scheme_id: &'a str },
-         Cache { schemes_id: &'a str, error: Box<cache::Error<'a>> },
-GlobalNotFound { schemes_id: &'a str, id: &'a str, namespace_id: &'a str, error: Box<namespace::Error<'a>> },
-         Theme { schemes_id: &'a str, id: &'a str, theme_id: &'a str, error: Error<'a> },
+pub enum Error<'a> {
+	 NotFound,
+	NoRequest { src: &'a Src, scheme_id: &'a Spanned },
+	    Cache { src: &'a Src, namespace_id: &'a Spanned, error: cache::Error<'a> },
+	Namespace { src: &'a Src, scheme_id: &'a Spanned, error: Box<namespace::Error<'a>> },
+	   Scheme { src: &'a Src, scheme_id: &'a Spanned, error: Box<scheme::Error<'a>> },
 }
 
-impl ListingError<'_> {
-	#[cfg(feature = "cli")]
-	pub fn show(self, out: &mut impl std::io::Write) -> std::io::Result<i32> {
+impl<'a, 'b> crate::Msg<'a, 'b, 4> for Error<'a> {
+	fn msg(self, [cow_0, cow_1, cow_2, cow_3]: [&'b mut Cow<'a, str>; 4]) -> Message<'b> {
 		match self {
-			Self::NotFound { schemes_id } => {
-				writeln!(out, crate::csi! {
-					/fg blue; "[schemes." /fg red; "{:?}" /fg blue; ']'! " not found"
-				}, schemes_id)?;
+			Self::NotFound => Level::Error.title("scheme not found"),
+			Self::NoRequest { src, scheme_id } => {
+				*cow_0 = src.1.to_string_lossy();
 				
-				Ok(exitcode::TEMPFAIL)
+				Level::Error.title("scheme without colors or request")
+					.snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+						.annotation(Level::Error.span(scheme_id.span()).label("this scheme")))
 			}
-			Self::LocalNotFound { schemes_id, id, scheme_id } => {
-				writeln!(out, crate::csi! {
-					/fg blue; "[schemes." /fg green; "{0:?}" /fg blue; '.' /fg yellow; "{1:?}" /fg blue; "]"! " requires "
-					/fg blue; "[schemes." /fg green; "{0:?}" /fg blue; '.' /fg red;    "{2:?}" /fg blue; "]"!
-				}, schemes_id, id, scheme_id)?;
+			Self::Cache { src, namespace_id, error } => {
+				let level = if let cache::Error::NotFound = error { Level::Error } else { Level::Warning };
+				*cow_0 = src.1.to_string_lossy();
 				
-				Ok(exitcode::CONFIG)
+				error.msg([cow_1, cow_2]).snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+					.annotation(level.span(namespace_id.span()).label("this requested namespace")))
 			}
-			Self::Cache { schemes_id, error } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[schemes." /fg yellow; "{:?}" /fg blue; "]"! " failed"
-				}, schemes_id)?;
+			Self::Namespace { src, scheme_id, error } => {
+				let level = if let namespace::Of::NotFound = error.1 { Level::Error } else { Level::Warning };
+				*cow_0 = src.1.to_string_lossy();
 				
-				error.show(out)
+				error.msg([cow_1, cow_2]).snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+					.annotation(level.span(scheme_id.span()).label("this requested scheme")))
 			}
-			Self::GlobalNotFound { schemes_id, id, namespace_id, error } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[schemes." /fg green; "{:?}" /fg blue; '.' /fg yellow; "{:?}" /fg blue; "]"! " failed"
-				}, schemes_id, id)?;
+			Self::Scheme { src, scheme_id, error } => if let scheme::Error::Types {..} = &*error {
+				error.msg([cow_0, cow_1, cow_2])
+			} else {
+				*cow_0 = src.1.to_string_lossy();
 				
-				error.show(out, namespace_id)
-			}
-			Self::Theme { schemes_id, id, theme_id, error } => {
-				writeln!(out, crate::csi! {
-					"Request for " /fg blue; "[schemes." /fg green; "{:?}" /fg blue; '.' /fg yellow; "{:?}" /fg blue; "]"! " failed"
-				}, schemes_id, id)?;
-				
-				error.show(out, theme_id)
+				error.msg([cow_1, cow_2, cow_3]).snippet(Snippet::source(&src.0).origin(cow_0).fold(true)
+					.annotation(Level::Warning.span(scheme_id.span()).label("in this requested scheme")))
 			}
 		}
 	}

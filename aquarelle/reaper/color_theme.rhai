@@ -7,7 +7,7 @@
 const pane = main.raise("lower", "like", 0.03);
 
 private fn out() {
-	let rgb = rgb::coords(this);
+	let rgb = srgb::coords(this);
 	rgb.red | rgb.green << 8 | rgb.blue << 16
 }
 

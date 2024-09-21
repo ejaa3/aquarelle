@@ -8,7 +8,6 @@ data/io.github.ejaa3.Aquarelle.gschema.xml.in
 data/shortcuts-window.ui
 
 src/bin/gui/colors.rs
-src/bin/gui/log.rs
 src/bin/gui/schemes.rs
 src/bin/gui/settings.rs
 src/bin/gui/themes.rs

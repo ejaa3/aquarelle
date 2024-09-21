@@ -7,7 +7,7 @@
 use adw::prelude::{ActionRowExt, PreferencesGroupExt};
 use aquarelle::scheme::Data;
 use declarative::{construct, view};
-use crate::{utils::rgba, i18n};
+use crate::{i18n, rgba};
 
 #[view {
 	gtk::ColorDialog dialog { }!

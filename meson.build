@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
+# SPDX-FileCopyrightText: 2024 Eduardo Javier Alvarado Aarón <eduardo.javier.alvarado.aaron@gmail.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -64,4 +64,16 @@ gnome.post_install(
 	glib_compile_schemas: true,
 	gtk_update_icon_cache: true,
 	update_desktop_database: true,
+)
+
+custom_target('update-doc-l10n',
+	output: 'messages.pot',
+	build_always_stale: true,
+	console: true,
+	env: { 'MDBOOK_OUTPUT': '{ "xgettext": { } }' },
+	command: [
+		'mdbook', 'build', '-d', meson.project_build_root(), '..', '&&',
+		'find', '../doc', '-name', '*.po', '-exec',
+			'msgmerge', '--update', '{}', '@OUTPUT@', ';'
+	],
 )

@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name = 'JDownloader'
-type = 'directory' # md
-about = '''
-[FlatLaf](https://www.formdev.com/flatlaf) based
-[JDownloader](https://jdownloader.org) theme.
-''' # rhai
+type = 'directory' # xml
+about = """
+<a href='https://www.formdev.com/flatlaf'>FlatLaf</a> based \
+<a href='https://jdownloader.org'>JDownloader</a> theme.
+""" # rhai
 
 display = 'arrangement + " – " + scheme("main")' # rhai
 nomenclature = '''
@@ -17,11 +17,12 @@ arrangement_id + if scheme.pop() == () { () } else { '.' + scheme }
 '''
 
 schemes.main.name = 'Main'
+script.path = 'jdownloader.rhai'
 default-file-type = 'svg-to-png'
 subdirectories = ['images']
 
 [options]
-accent = { name = 'Accent', default.set = 'any' }
+accent = { name = 'Accent', default.accent = 'any' }
 
 [suggested-paths]
 default = { default = 'jdownloader' }

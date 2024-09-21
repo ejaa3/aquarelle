@@ -4,7 +4,10 @@
 
 .cargo/
 .vscode/
+book/
+build/
 data/resources.gresource.xml
+doc/po/*.po~
 examples/
 po/aquarelle.pot
 src/bin/gui/icons.rs

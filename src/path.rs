@@ -6,11 +6,16 @@
 
 use std::{fmt, path::PathBuf};
 use compact_str::CompactString;
-use serde::{de, ser::SerializeMap, Serialize, Serializer, Deserialize, Deserializer};
+use serde::{de, ser::SerializeMap, Deserialize, Deserializer, Serialize, Serializer};
 
-pub(crate) fn is_bad(str: &str) -> Result<(), &'static str> {
-	if str.is_empty() || str == "." || str == ".." || str.contains('/') || str.contains('\\')
-		{ Err("strings cannot be '.', '..' or empty, nor contain '/' or '\\'") } else { Ok(()) }
+#[derive(Clone)]
+pub struct Parsed<'a> {
+	pub        id: &'a crate::Spanned,
+	pub    source: &'a crate::Src,
+	pub  location: &'a crate::Spanned<Location>,
+	pub   map_src: &'a crate::Src,
+	pub file_name: Option<&'a crate::Spanned>,
+	pub       buf: std::rc::Rc<PathBuf>,
 }
 
 pub struct Location { pub prefix: Prefix, pub path: CompactString }
@@ -21,6 +26,16 @@ pub enum Prefix {
 	Custom, Temporary, Default,
 	Cache, Config, Data, Home, LocalData, Preferences,
 	Desktop, Documents, Downloads, Music, Pictures, Public, Templates, Videos,
+}
+
+const PREFIXES: [&str; 17] = [
+	"custom", "temporary", "default",
+	"cache", "config", "data", "home", "local-data", "preferences",
+	"desktop", "documents", "downloads", "music", "pictures", "public", "templates", "videos"
+];
+
+impl From<Prefix> for &str {
+	fn from(prefix: Prefix) -> Self { PREFIXES[prefix as usize] }
 }
 
 impl Location {
@@ -45,7 +60,7 @@ impl Location {
 			Prefix::Videos      => dirs::video_dir()?,
 		};
 		
-		path.push(self.path.as_str());
+		path.push(&self.path as &str);
 		Some(path)
 	}
 }
@@ -82,69 +97,22 @@ impl<'de> Deserialize<'de> for Location {
 			}
 			
 			fn visit_map<A: de::MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
-				let (prefix, path) = map.next_entry()?.ok_or(de::Error::invalid_length(0, &self))?;
+				let (prefix, path) = map.next_entry()?.ok_or(de::Error::unknown_variant("", &PREFIXES))?; // NOTE ""
 				Ok(Location { prefix, path })
 			}
+			
+			/* fn visit_enum<A: de::EnumAccess<'de>>(self, data: A) -> Result<Self::Value, A::Error> {
+				let (prefix, access): (Prefix, _) = data.variant()?;
+				Ok(Location { prefix, path: access.newtype_variant()? })
+			} */
 		}
-		deserializer.deserialize_seq(Visitor)
+		deserializer.deserialize_map(Visitor) // deserialize_enum("Location", &PREFIXES, Visitor)
 	}
 }
 
-impl From<Prefix> for &str {
-	fn from(value: Prefix) -> Self {
-		match value {
-			Prefix::Custom      => "custom",
-			Prefix::Default     => "default",
-			Prefix::Home        => "home",
-			Prefix::Cache       => "cache",
-			Prefix::Config      => "config",
-			Prefix::Data        => "data",
-			Prefix::LocalData   => "local-data",
-			Prefix::Preferences => "preferences",
-			Prefix::Desktop     => "desktop",
-			Prefix::Documents   => "documents",
-			Prefix::Downloads   => "downloads",
-			Prefix::Music       => "music",
-			Prefix::Pictures    => "pictures",
-			Prefix::Public      => "public",
-			Prefix::Templates   => "templates",
-			Prefix::Videos      => "videos",
-			Prefix::Temporary   => "temporary",
-		}
-	}
+pub(crate) fn check_name<S: AsRef<str>, E>(name: S, error: E) -> Result<S, E> {
+	let n = name.as_ref();
+	(n != "." || n != ".." || !n.contains('/')|| !n.contains('\\')).then_some(name).ok_or(error)
 }
 
-#[derive(Clone)]
-pub struct Parsed<'c> {
-	pub suggested_id: Option<&'c str>,
-	pub     location: &'c Location,
-	pub         file: Option<File<'c>>,
-	pub          buf: PathBuf,
-}
-
-#[derive(Clone)]
-pub struct File<'a> {
-	pub file_id: &'a str,
-	pub    file: &'a crate::mapping::File,
-	pub  subdir: &'a str,
-}
-
-#[derive(Clone)]
-pub struct ParsedFrom<'a> { pub id: &'a str, pub path: Parsed<'a> }
-
-impl<'a> std::ops::Deref for ParsedFrom<'a> {
-	type Target = Parsed<'a>;
-	fn deref(&self) -> &Parsed<'a> { &self.path }
-}
-
-#[cfg(feature = "cli")]
-use {std::io, crate::csi};
-
-#[cfg(feature = "cli")]
-pub fn show_location(out: &mut impl io::Write, location: &Location) -> io::Result<()> {
-	if let Prefix::Custom = location.prefix {
-		return write!(out, csi!(/fg yellow; "{:?}"!), location.path) // FIXME show_location
-	}
-	write!(out, csi!(/fg blue; "{{ {} = " /fg yellow; "{:?}" /fg blue; " }}"!),
-	       <&str>::from(location.prefix), location.path)
-}
+pub(crate) const BAD_NAME: &str = r"the name cannot be `.` or `..`, nor contain `/` or `\`.";

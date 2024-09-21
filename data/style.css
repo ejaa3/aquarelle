@@ -11,11 +11,7 @@
 	margin: 0 3px;
 } */
 
-#handle {
-	border: 1px solid @borders;
-	border-left: none;
-	border-right: none;
-}
+vte-terminal { padding: 0 9px; }
 
 #thumbnail-grid,
 #thumbnail-grid child {

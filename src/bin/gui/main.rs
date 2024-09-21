@@ -6,7 +6,6 @@
 
 mod colors;
 mod icons;
-mod log;
 mod namespaces;
 mod scheme;
 mod schemes;
@@ -37,85 +36,54 @@ fn main() -> gtk::glib::ExitCode {
 	app.run()
 }
 
-mod utils {
-	use declarative::{construct, view};
-	use gtk::{gdk, prelude::TextTagExt};
-	
-	#[view[ gtk::ShortcutController controller {
+fn shortcut(trigger: &str, action: &str) -> gtk::ShortcutController {
+	use declarative::{construct, block as view};
+	view![ gtk::ShortcutController controller {
 		set_scope: gtk::ShortcutScope::Managed
 		add_shortcut: _ @ gtk::Shortcut {
 			set_trigger: gtk::ShortcutTrigger::parse_string(trigger)
 			set_action: gtk::ShortcutAction::parse_string(action)
 		}!
-	}! ]]
-	
-	pub fn shortcut(trigger: &str, action: &str) -> gtk::ShortcutController {
-		expand_view_here! { }
-		controller
-	}
-	
-	pub fn rgba(color: u32) -> gdk::RGBA {
-		use palette::{Srgba, rgb::channels::Rgba};
-		let color = Srgba::from_u32::<Rgba>(color).into_format();
-		gdk::RGBA::new(color.red, color.green, color.blue, color.alpha)
-	}
-	
-	#[view {
-		#[derive(Clone)]
-		pub struct Tags { }
-		
-		gtk::TextBuffer pub buffer { tag_table: &table }
-		
-		gtk::TextTagTable table {
-			add: &_ @ gtk::TextTag pub red {
-				foreground: "red"
-				'bind set_foreground_rgba: Some(&rgba(scheme.red.like))
+	}! ]; controller
+}
+
+fn rgba(color: u32) -> gtk::gdk::RGBA {
+	use palette::{Srgba, rgb::channels::Rgba};
+	let color = Srgba::from_u32::<Rgba>(color).into_format();
+	gtk::gdk::RGBA::new(color.red, color.green, color.blue, color.alpha)
+}
+
+thread_local! {
+	static TERM: vte::Terminal = vte::Terminal::new();
+	static MSG: std::cell::RefCell<String> = const { std::cell::RefCell::new(String::new()) }
+}
+
+trait Log<T, const N: usize> { fn log(self) -> Option<T>; }
+
+impl<'a, T, const N: usize, E> Log<T, N> for Result<T, E>
+where for<'b> E: aquarelle::Msg<'a, 'b, N> {
+	fn log(self) -> Option<T> {
+		self.map_err(|error| TERM.with(|term| MSG.with_borrow_mut(|msg| {
+			use {std::{array::from_fn, fmt::Write}, vte::TerminalExt};
+			msg.clear();
+			
+			writeln!(msg, "{}", annotate_snippets::Renderer::styled()
+				.term_width(term.column_count() as usize)
+				.render(error.msg(from_fn(|_| Default::default()).each_mut()))
+			).unwrap_or_else(|error| critical!("{error}"));
+			
+			for line in msg.lines() {
+				term.feed(line.as_bytes());
+				term.feed(b"\r\n")
 			}
-			add: &_ @ gtk::TextTag pub yellow {
-				foreground: "yellow"
-				'bind set_foreground_rgba: Some(&rgba(scheme.yellow.like))
-			}
-			add: &_ @ gtk::TextTag pub green {
-				foreground: "green"
-				'bind set_foreground_rgba: Some(&rgba(scheme.green.like))
-			}
-			add: &_ @ gtk::TextTag pub cyan {
-				foreground: "cyan"
-				'bind set_foreground_rgba: Some(&rgba(scheme.cyan.like))
-			}
-			add: &_ @ gtk::TextTag pub blue {
-				foreground: "blue"
-				'bind set_foreground_rgba: Some(&rgba(scheme.blue.like))
-			}
-			add: &_ @ gtk::TextTag pub magenta {
-				foreground: "magenta"
-				'bind set_foreground_rgba: Some(&rgba(scheme.magenta.like))
-			}
-			add: &_ @ gtk::TextTag pub any {
-				foreground: "purple"
-				'bind set_foreground_rgba: Some(&rgba(scheme.any.like))
-			}
-		}!
-	}]
-	
-	impl Tags {
-		pub fn new() -> Self {
-			expand_view_here! { }
-			Self { red, yellow, green, cyan, blue, magenta, any, buffer }
-		}
-		pub fn refresh(&self, scheme: &aquarelle::scheme::Data) {
-			let Self { red, yellow, green, cyan, blue, magenta, any, .. } = self;
-			bindings! { }
-		}
+		}))).ok()
 	}
 }
+
+macro_rules! critical(($($arg:expr),*) => {
+	gtk::glib::g_critical!(aquarelle::config::APP_ID, $($arg),*)
+});
 
 macro_rules! send { [$msg:expr => $tx:expr] => [$tx.send_blocking($msg).unwrap()] }
 
-macro_rules! critical {
-	($($arg:expr),*) => {
-		glib::g_critical!(aquarelle::config::APP_ID, $($arg),*)
-	}
-}
-
-pub(crate) use {send, critical};
+use {critical, send};
